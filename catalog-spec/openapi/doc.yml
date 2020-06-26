@@ -12,6 +12,9 @@ components:
       x-tags:
         - Catalog
     SockResponse:
+      type: object
+      x-tags:
+        - Catalog
       properties:
         count:
           description: Product count
@@ -21,13 +24,14 @@ components:
           description: Product description
           type: string
         id:
-          description: Product identifier
           type: string
+          description: Product identifier
+          format: uuid
         imageUrl:
           description: A list of product image URLs
+          type: array
           items:
             type: string
-          type: array
         name:
           description: Product name
           type: string
@@ -37,12 +41,9 @@ components:
           type: number
         tag:
           description: Product tags
+          type: array
           items:
             type: string
-          type: array
-      type: object
-      x-tags:
-        - Catalog
     TagsResponse:
       type: object
       properties:
