@@ -10,5 +10,5 @@
   "reactive": false,
   "serializableModel": true,
   "useGzipFeature": true,
-  "useRxJava2": true
+  "useRxJava2": false
 }
