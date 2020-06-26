@@ -85,7 +85,9 @@ paths:
         - in: query
           name: tags
           schema:
-            type: string
+            type: array
+            items:
+              type: string
       responses:
         '200':
           content:
@@ -105,7 +107,9 @@ paths:
         - in: query
           name: tags
           schema:
-            type: string
+            type: array
+            items:
+              type: string
       responses:
         '200':
           content:
