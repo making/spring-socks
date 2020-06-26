@@ -9,7 +9,7 @@ components:
         size:
           format: int64
           type: integer
-      title: ''
+      title: 'Catalog API'
       x-tags:
         - Catalog
     SockResponse:
@@ -55,7 +55,7 @@ components:
         - Catalog
 info:
   contact: {}
-  description: 'Allows users to add products they want to buy to a shopping catalog, remove them from the cart, and merge the contents of one shopping cart into another'
+  description: ''
   license:
     name: Apache 2.0
   title: 'Spring Sock Shop: Catalog API'
