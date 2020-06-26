@@ -50,6 +50,14 @@ and
 ## How to generate source code from the spec
 
 
+* Java API Spec
+
 ```
-./openapi/generate-sources.sh
+./mvnw -V clean generate-sources -f catalog-spec/pom.xml -P spec
+```
+
+* Java Client
+
+```
+./mvnw -V clean generate-sources -f catalog-spec/pom.xml -P client
 ```
