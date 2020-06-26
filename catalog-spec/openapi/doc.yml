@@ -9,7 +9,6 @@ components:
         size:
           format: int64
           type: integer
-      title: 'Catalog API'
       x-tags:
         - Catalog
     SockResponse:
@@ -55,7 +54,7 @@ components:
         - Catalog
 info:
   contact: {}
-  description: ''
+  description: Catalog API
   license:
     name: Apache 2.0
   title: 'Spring Sock Shop: Catalog API'
