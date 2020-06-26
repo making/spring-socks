@@ -1,0 +1,116 @@
+name: catalog-spec
+on:
+  push:
+    paths:
+    - 'catalog-spec/**'
+    - '!catalog-spec/README.md'
+    branches:
+    - master
+  pull_request:
+    paths:
+    - 'catalog-spec/**'
+    - '!catalog-spec/README.md'
+    branches:
+    - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '8.x'
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: generate-spec
+      run: |
+        set -ex
+        ./mvnw -V clean generate-sources -f catalog-spec/pom.xml -P spec
+        sed 's|</project>||g' catalog-spec/target/generated-sources/openapi/pom.xml > pom.txt
+        cat <<'EOF' > distributionManagement.txt
+            <distributionManagement>
+                <repository>
+                    <id>sonatype-snapshots</id>
+                    <name>sonatype-snapshots</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </repository>
+            </distributionManagement>
+        </project>
+        EOF
+        cat pom.txt distributionManagement.txt > catalog-spec/target/generated-sources/openapi/pom.xml
+    - name: deploy-spec-to-sonatype-snapshots
+      env:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      run: |
+        set -e
+        cat > settings.xml <<EOF
+        <settings>
+          <servers>
+            <server>
+               <id>sonatype-snapshots</id>
+               <username>${SONATYPE_USERNAME}</username>
+               <password>${SONATYPE_PASSWORD}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        CURRENT_VERSION=$(grep '<version>' catalog-spec/target/generated-sources/openapi/pom.xml | head -n 1 | sed -e 's|<version>||g' -e 's|</version>||g' -e 's| ||g' |  tr -d '\t')
+        if [ "${CURRENT_VERSION}" = "$(echo ${CURRENT_VERSION} | grep "\-SNAPSHOT")" ];then
+          ./mvnw -V \
+                 source:jar \
+                 javadoc:jar \
+                 deploy \
+                 -s settings.xml \
+                 -DskipTests=true \
+                 -DserverId=sonatype-snapshots \
+                 -f catalog-spec/target/generated-sources/openapi/pom.xml
+        fi
+    - name: generate-client
+      run: |
+        set -ex
+        ./mvnw -V clean generate-sources -f catalog-spec/pom.xml -P client
+        sed 's|</project>||g' catalog-spec/target/generated-sources/openapi/pom.xml > pom.txt
+        cat <<'EOF' > distributionManagement.txt
+            <distributionManagement>
+                <repository>
+                    <id>sonatype-snapshots</id>
+                    <name>sonatype-snapshots</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </repository>
+            </distributionManagement>
+        </project>
+        EOF
+        cat pom.txt distributionManagement.txt > catalog-spec/target/generated-sources/openapi/pom.xml
+    - name: deploy-client-to-sonatype-snapshots
+      env:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      run: |
+        set -e
+        cat > settings.xml <<EOF
+        <settings>
+          <servers>
+            <server>
+               <id>sonatype-snapshots</id>
+               <username>${SONATYPE_USERNAME}</username>
+               <password>${SONATYPE_PASSWORD}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        CURRENT_VERSION=$(grep '<version>' catalog-spec/target/generated-sources/openapi/pom.xml | head -n 1 | sed -e 's|<version>||g' -e 's|</version>||g' -e 's| ||g' |  tr -d '\t')
+        if [ "${CURRENT_VERSION}" = "$(echo ${CURRENT_VERSION} | grep "\-SNAPSHOT")" ];then
+          ./mvnw -V \
+                 source:jar \
+                 javadoc:jar \
+                 deploy \
+                 -s settings.xml \
+                 -DskipTests=true \
+                 -DserverId=sonatype-snapshots \
+                 -f catalog-spec/target/generated-sources/openapi/pom.xml
+        fi

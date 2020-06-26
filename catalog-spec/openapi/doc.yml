@@ -1,0 +1,153 @@
+servers:
+  - description: Local
+    url: 'http://localhost:5001'
+components:
+  schemas:
+    CountResponse:
+      type: object
+      properties:
+        size:
+          format: int64
+          type: integer
+      title: ''
+      x-tags:
+        - Catalog
+    SockResponse:
+      properties:
+        count:
+          description: Product count
+          format: int32
+          type: integer
+        description:
+          description: Product description
+          type: string
+        id:
+          description: Product identifier
+          type: string
+        imageUrl:
+          description: A list of product image URLs
+          items:
+            type: string
+          type: array
+        name:
+          description: Product name
+          type: string
+        price:
+          description: Product price
+          format: float
+          type: number
+        tag:
+          description: Product tags
+          items:
+            type: string
+          type: array
+      type: object
+      x-tags:
+        - Catalog
+    TagsResponse:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+      x-tags:
+        - Catalog
+info:
+  contact: {}
+  description: 'Allows users to add products they want to buy to a shopping catalog, remove them from the cart, and merge the contents of one shopping cart into another'
+  license:
+    name: Apache 2.0
+  title: 'Spring Sock Shop: Catalog API'
+  version: 0.1.0-SNAPSHOT
+openapi: 3.0.1
+paths:
+  /catalogue:
+    get:
+      parameters:
+        - in: query
+          name: order
+          schema:
+            default: price
+            type: string
+        - in: query
+          name: page
+          schema:
+            default: 1
+            format: int32
+            type: integer
+        - in: query
+          name: size
+          schema:
+            default: 10
+            format: int32
+            type: integer
+        - in: query
+          name: tags
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SockResponse'
+                type: array
+          description: OK
+      summary: Return socks
+      operationId: get-socks
+      tags:
+        - Catalog
+  /catalogue/size:
+    get:
+      parameters:
+        - in: query
+          name: tags
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+          description: OK
+      summary: Return sock count
+      operationId: get-sock-count
+      tags:
+        - Catalog
+  '/catalogue/{id}':
+    get:
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: if socks are found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SockResponse'
+        '404':
+          description: if socks do not exist
+      summary: Return a sock
+      operationId: get-sock
+      tags:
+        - Catalog
+  /tags:
+    get:
+      responses:
+        '200':
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TagsResponse'
+          description: OK
+      summary: Return all tags
+      operationId: get-tags
+      tags:
+        - Catalog
