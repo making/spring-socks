@@ -118,12 +118,6 @@ paths:
         - Catalog
   '/catalogue/{id}':
     get:
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: if socks are found
@@ -137,6 +131,13 @@ paths:
       operationId: get-sock
       tags:
         - Catalog
+    parameters:
+      - schema:
+          type: string
+          format: uuid
+        name: id
+        in: path
+        required: true
   /tags:
     get:
       responses:
