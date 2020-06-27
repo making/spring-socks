@@ -1,0 +1,30 @@
+name: catalog-api
+on:
+  push:
+    paths:
+    - 'catalog-api/**'
+    branches:
+    - master
+  pull_request:
+    paths:
+    - 'catalog-api/**'
+    branches:
+    - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '14.x'
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: mvn package
+      run: |
+        set -ex
+        ./mvnw -V package -f catalog-api/pom.xml -U
