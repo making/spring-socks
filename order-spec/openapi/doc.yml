@@ -82,17 +82,15 @@ components:
           format: date
     OrderResponseItem:
       type: object
+      x-tags:
+        - Order
       properties:
-        id:
-          type: string
         itemId:
           type: string
         quantity:
           type: integer
         unitPrice:
           type: number
-      x-tags:
-        - Order
     OrderResponse:
       type: object
       x-tags:
