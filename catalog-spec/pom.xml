@@ -7,7 +7,7 @@
 	<artifactId>catalog-spec</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>catalog-spec</name>
-	<description>API Spec</description>
+	<description>Catalog API Spec</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
