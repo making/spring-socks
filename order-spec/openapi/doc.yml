@@ -100,8 +100,6 @@ components:
       properties:
         id:
           type: string
-        customerId:
-          type: string
         customer:
           $ref: '#/components/schemas/OrderResponseCustomer'
         address:
@@ -150,6 +148,7 @@ paths:
           description: Not Acceptable
       summary: Place a new order
       operationId: create-order
+      parameters: []
       tags:
         - Order
   /orders/search/customerId:
