@@ -3,6 +3,8 @@ applications:
   path: target/catalog-api-0.0.1-SNAPSHOT.jar
   memory: 256m
   env:
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+    SPRING_PROFILES_ACTIVE: cloud
     SERVER_TOMCAT_THREADS_MAX: 4
     JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
     JBP_CONFIG_OPEN_JDK_JRE: '{memory_calculator: {stack_threads: 20}, jre: {version: 11.+}}'
@@ -12,3 +14,6 @@ applications:
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
     MANAGEMENT_METRICS_TAGS_INSTANCE_ID: ${management.metrics.tags.application}:${vcap.application.instance_index}
+    LOGGING_EXCEPTIONCONVERSIONWORD: \t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex
+    LOGGING_PATTERN_CONSOLE: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n'
+    LOGGING_LEVEL_IO_PIVOTAL_CFENV: DEBUG
