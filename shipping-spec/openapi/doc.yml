@@ -30,37 +30,9 @@ components:
       x-tags:
         - Shipment
       properties:
-        address:
-          allOf:
-            - $ref: '#/components/schemas/ShipmentAddress'
-        itemCount:
-          description: The number of items in the order
-          format: int32
-          type: integer
         orderId:
           description: Order ID
           type: string
-    ShipmentAddress:
-      properties:
-        city:
-          description: City name
-          type: string
-        country:
-          description: Country name
-          type: string
-        number:
-          description: Street number
-          type: string
-        postcode:
-          description: Postal code
-          type: string
-        street:
-          description: Street name
-          type: string
-      description: Shipment address
-      type: object
-      x-tags:
-        - Shipment
 externalDocs:
   description: Additional Documentation
   url: 'https://github.com/helidon-sockshop/shipping'
