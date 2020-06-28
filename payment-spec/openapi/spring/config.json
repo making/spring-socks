@@ -1,0 +1,14 @@
+{
+  "apiPackage": "lol.maki.socks.payment.spec",
+  "modelPackage": "lol.maki.socks.payment.spec",
+  "groupId": "lol.maki.socks",
+  "artifactId": "payment-spec",
+  "dateLibrary": "java8",
+  "delegatePattern": false,
+  "java8": true,
+  "skipDefaultInterface": true,
+  "reactive": false,
+  "interfaceOnly": true,
+  "serializableModel": true,
+  "performBeanValidation": true
+}

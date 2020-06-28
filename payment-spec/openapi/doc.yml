@@ -1,0 +1,60 @@
+servers:
+  - description: Local
+    url: 'http://localhost:5002'
+  - url: 'https://sock-payment.apps.pcfone.io'
+    description: PCF One
+components:
+  schemas:
+    AuthorizationRequest:
+      type: object
+      x-tags:
+        - Payment
+      properties:
+        amount:
+          description: Payment amount
+          format: float
+          type: number
+    AuthorizationResponse:
+      type: object
+      x-tags:
+        - Payment
+      properties:
+        authorization:
+          $ref: '#/components/schemas/AuthorizationResponse'
+    Authorization:
+      type: object
+      x-tags:
+        - Payment
+      properties:
+        authorised:
+          description: Flag specifying whether the payment was authorized
+          type: boolean
+        message:
+          description: Approval or rejection message
+          type: string
+info:
+  description: Payment API
+  license:
+    name: Apache 2.0
+  title: 'Spring Sock Shop: Payment API'
+  version: 0.1.0-SNAPSHOT
+openapi: 3.0.1
+paths:
+  /paymentAuth:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationResponse'
+          description: OK
+      summary: Authorize a payment
+      tags:
+        - Payment
+      operationId: authorize-payment

@@ -1,0 +1,14 @@
+{
+  "apiPackage": "lol.maki.socks.payment.client",
+  "invokerPackage": "lol.maki.socks.payment.client",
+  "modelPackage": "lol.maki.socks.payment.client",
+  "groupId": "lol.maki.socks",
+  "artifactId": "payment-client",
+  "library": "webclient",
+  "dateLibrary": "java8",
+  "java8": true,
+  "reactive": false,
+  "serializableModel": true,
+  "useGzipFeature": true,
+  "useRxJava2": false
+}
