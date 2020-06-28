@@ -28,3 +28,17 @@ jobs:
       run: |
         set -ex
         ./mvnw -V package -f catalog-api/pom.xml -U
+    - name: mvn spring-boot:build-image
+      if: github.ref == 'refs/heads/master'
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        IMAGE_NAME: making/sockshop-catalog
+      run: |
+        set -e
+        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+        set +e
+        docker pull ${IMAGE_NAME}
+        set -e
+        ./mvnw -V spring-boot:build-image -Dspring-boot.build-image.imageName=${IMAGE_NAME} -Dmaven.test.skip=true
+        docker push ${IMAGE_NAME}
