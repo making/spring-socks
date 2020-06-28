@@ -11,9 +11,8 @@ components:
         - Payment
       properties:
         amount:
-          description: Payment amount
-          format: float
           type: number
+          description: Payment amount
     AuthorizationResponse:
       type: object
       x-tags:

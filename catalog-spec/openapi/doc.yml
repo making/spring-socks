@@ -38,9 +38,8 @@ components:
           description: Product name
           type: string
         price:
-          description: Product price
-          format: float
           type: number
+          description: Product price
         tag:
           description: Product tags
           type: array
