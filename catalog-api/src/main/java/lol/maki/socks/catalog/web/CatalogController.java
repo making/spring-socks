@@ -48,7 +48,7 @@ public class CatalogController implements CatalogueApi {
 				.id(sock.sockId())
 				.name(sock.name())
 				.description(sock.description())
-				.price(sock.price().floatValue())
+				.price(sock.price())
 				.count(sock.count())
 				.imageUrl(sock.imageUrl())
 				.tag(sock.tags().stream().map(Tag::name).collect(toUnmodifiableList()));

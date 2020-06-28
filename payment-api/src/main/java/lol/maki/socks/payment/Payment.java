@@ -1,12 +1,14 @@
 package lol.maki.socks.payment;
 
+import java.math.BigDecimal;
+
 import org.immutables.value.Value.Immutable;
 
 @Immutable
 public abstract class Payment {
-	public abstract float amount();
+	public abstract BigDecimal amount();
 
-	public abstract float declineOverAmount();
+	public abstract BigDecimal declineOverAmount();
 
 	private final AuthorizationResult invalidPaymentAmount = ImmutableAuthorizationResult.builder()
 			.authorized(false)
@@ -15,10 +17,10 @@ public abstract class Payment {
 			.build();
 
 	public final AuthorizationResult authorize() {
-		if (amount() <= 0) {
+		if (amount().compareTo(BigDecimal.ZERO) <= 0) {
 			return this.invalidPaymentAmount;
 		}
-		if (amount() <= declineOverAmount()) {
+		if (amount().compareTo(declineOverAmount()) <= 0) {
 			return ImmutableAuthorizationResult.builder()
 					.authorized(true)
 					.valid(true)
