@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,7 +37,7 @@ class TagControllerTest {
 		given(this.tagMapper.findAll()).willReturn(List.of(this.tag1, this.tag2, this.tag3));
 		this.mockMvc.perform(get("/tags"))
 				.andExpect(status().isOk())
-				//.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
+				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.tags.length()").value(3))
 				.andExpect(jsonPath("$.tags[0]").value("red"))
 				.andExpect(jsonPath("$.tags[1]").value("blue"))

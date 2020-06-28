@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers;
 import lol.maki.socks.catalog.ImmutableSock;
 import lol.maki.socks.catalog.Sock;
 import lol.maki.socks.catalog.SockMapper;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,7 +56,7 @@ class CatalogControllerTest {
 		given(this.sockMapper.findOne(this.sock1.sockId())).willReturn(Optional.of(this.sock1));
 		this.mockMvc.perform(get("/catalogue/{sockId}", "57b8db2f-15fc-4164-bfaf-ad30b55ef7e8"))
 				.andExpect(status().isOk())
-				//.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
+				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value("57b8db2f-15fc-4164-bfaf-ad30b55ef7e8"))
 				.andExpect(jsonPath("$.name").value("demo1"))
 				.andExpect(jsonPath("$.description").value("Demo1"))
@@ -74,7 +76,7 @@ class CatalogControllerTest {
 		given(this.sockMapper.findSocks(List.of(Tag.valueOf("red")), "price", 1, 10)).willReturn(List.of(this.sock1, this.sock2));
 		this.mockMvc.perform(get("/catalogue").param("tags", "red"))
 				.andExpect(status().isOk())
-				//.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
+				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.length()").value(2))
 				.andExpect(jsonPath("$[0].id").value("57b8db2f-15fc-4164-bfaf-ad30b55ef7e8"))
 				.andExpect(jsonPath("$[0].name").value("demo1"))
