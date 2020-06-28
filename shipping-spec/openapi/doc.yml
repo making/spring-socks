@@ -33,9 +33,6 @@ components:
         orderId:
           description: Order ID
           type: string
-externalDocs:
-  description: Additional Documentation
-  url: 'https://github.com/helidon-sockshop/shipping'
 info:
   contact: {}
   description: Shipping API
