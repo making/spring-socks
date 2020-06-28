@@ -71,11 +71,15 @@ components:
       x-tags:
         - Order
       properties:
-        id:
+        carrier:
           type: string
           format: uuid
-        name:
+        trackingNumber:
           type: string
+          format: uuid
+        deliveryDate:
+          type: string
+          format: date
     OrderResponseItem:
       type: object
       properties:
