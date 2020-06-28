@@ -1,0 +1,14 @@
+{
+  "apiPackage": "lol.maki.socks.shipping.client",
+  "invokerPackage": "lol.maki.socks.shipping.client",
+  "modelPackage": "lol.maki.socks.shipping.client",
+  "groupId": "lol.maki.socks",
+  "artifactId": "shipping-client",
+  "library": "webclient",
+  "dateLibrary": "java8",
+  "java8": true,
+  "reactive": false,
+  "serializableModel": true,
+  "useGzipFeature": true,
+  "useRxJava2": false
+}

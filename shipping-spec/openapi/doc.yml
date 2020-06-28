@@ -1,0 +1,129 @@
+servers:
+  - description: Local
+    url: 'http://localhost:5003'
+  - description: PCF One
+    url: 'https://sock-shipping.apps.pcfone.io'
+components:
+  schemas:
+    ShipmentResponse:
+      properties:
+        carrier:
+          description: Shipping carrier
+          type: string
+        deliveryDate:
+          description: Estimated delivery date
+          format: date
+          type: string
+        orderId:
+          description: Order identifier
+          type: string
+        trackingNumber:
+          description: racking number
+          type: string
+      description: Shipment information
+      type: object
+      x-tags:
+        - Shipment
+    ShipmentRequest:
+      description: Shipment request
+      type: object
+      x-tags:
+        - Shipment
+      properties:
+        address:
+          allOf:
+            - $ref: '#/components/schemas/ShipmentAddress'
+        itemCount:
+          description: The number of items in the order
+          format: int32
+          type: integer
+        orderId:
+          description: Order identifier
+          type: string
+    ShipmentAddress:
+      properties:
+        city:
+          description: City name
+          type: string
+        country:
+          description: Country name
+          type: string
+        number:
+          description: Street number
+          type: string
+        postcode:
+          description: Postal code
+          type: string
+        street:
+          description: Street name
+          type: string
+      description: Shipment address
+      type: object
+      x-tags:
+        - Shipment
+externalDocs:
+  description: Additional Documentation
+  url: 'https://github.com/helidon-sockshop/shipping'
+info:
+  contact: {}
+  description: Shipping API
+  license:
+    name: Apache 2.0
+  title: 'Spring Sock Shop: Shipping API'
+  version: 0.1.0-SNAPSHOT
+openapi: 3.0.1
+paths:
+  /shipping:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShipmentRequest'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentResponse'
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+      summary: Ship a shipping request
+      operationId: post-shipping
+      tags:
+        - Shipment
+    get:
+      summary: Get all shipments
+      operationId: get-shippings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentResponse'
+      tags:
+        - Shipment
+  '/shipping/{orderId}':
+    get:
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentResponse'
+          description: OK
+      summary: Return a shipment
+      operationId: get-shipping-by-id
+      tags:
+        - Shipment

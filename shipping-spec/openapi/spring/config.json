@@ -1,0 +1,14 @@
+{
+  "apiPackage": "lol.maki.socks.shipping.spec",
+  "modelPackage": "lol.maki.socks.shipping.spec",
+  "groupId": "lol.maki.socks",
+  "artifactId": "shipping-spec",
+  "dateLibrary": "java8",
+  "delegatePattern": false,
+  "java8": true,
+  "skipDefaultInterface": true,
+  "reactive": false,
+  "interfaceOnly": true,
+  "serializableModel": true,
+  "performBeanValidation": true
+}
