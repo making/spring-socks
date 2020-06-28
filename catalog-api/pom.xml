@@ -154,6 +154,46 @@
 					</layers>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>gen-build-info</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo message=""
+									  file="target/classes/application.properties"
+									  append="yes"/>
+								<echo message=""
+									  file="target/classes/application.properties"
+									  append="yes"/>
+								<echo message="info.maven.versions.spring-boot=${spring-boot.version}${line.separator}"
+									  file="target/classes/application.properties"
+									  append="yes"/>
+								<echo message="info.maven.versions.spring-cloud=${spring-cloud.version}${line.separator}"
+									  file="target/classes/application.properties"
+									  append="yes"/>
+								<echo message="info.maven.versions.spring-framework=${spring-framework.version}${line.separator}"
+									  file="target/classes/application.properties"
+									  append="yes"/>
+								<echo message="info.maven.versions.spring-security=${spring-security.version}${line.separator}"
+									  file="target/classes/application.properties"
+									  append="yes"/>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
