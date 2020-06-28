@@ -54,6 +54,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthorizationResponse'
           description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationResponse'
       summary: Authorize a payment
       tags:
         - Payment
