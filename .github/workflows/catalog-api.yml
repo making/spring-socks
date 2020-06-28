@@ -40,5 +40,5 @@ jobs:
         set +e
         docker pull ${IMAGE_NAME}
         set -e
-        ./mvnw -V spring-boot:build-image -Dspring-boot.build-image.imageName=${IMAGE_NAME} -Dmaven.test.skip=true
+        ./mvnw -V spring-boot:build-image -f catalog-api/pom.xml -Dspring-boot.build-image.imageName=${IMAGE_NAME} -Dmaven.test.skip=true
         docker push ${IMAGE_NAME}
