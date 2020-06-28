@@ -1,0 +1,14 @@
+applications:
+- name: sock-catalog
+  path: target/catalog-api-0.0.1-SNAPSHOT.jar
+  memory: 256m
+  env:
+    SERVER_TOMCAT_THREADS_MAX: 4
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+    JBP_CONFIG_OPEN_JDK_JRE: '{memory_calculator: {stack_threads: 20}, jre: {version: 11.+}}'
+    INFO_JAVA_VERSION: ${java.runtime.version}
+    INFO_JAVA_VENDOR: ${java.vm.vendor}
+    MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
+    MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
+    MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
+    MANAGEMENT_METRICS_TAGS_INSTANCE_ID: ${management.metrics.tags.application}:${vcap.application.instance_index}
