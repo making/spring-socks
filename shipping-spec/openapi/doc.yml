@@ -97,6 +97,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ShipmentResponse'
           description: OK
+        '404':
+          description: Not Found
       summary: Return a shipment
       operationId: get-shipping-by-id
       tags:
