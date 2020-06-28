@@ -33,6 +33,9 @@ components:
         orderId:
           description: Order ID
           type: string
+        itemCount:
+          type: integer
+          format: int32
 info:
   contact: {}
   description: Shipping API
