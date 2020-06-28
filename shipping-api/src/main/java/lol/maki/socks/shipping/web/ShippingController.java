@@ -64,6 +64,6 @@ public class ShippingController implements ShippingApi {
 				.orderId(shipment.orderId())
 				.carrier(shipment.carrier().name())
 				.deliveryDate(shipment.carrier().deliveryDate(shipment.shipmentDate()))
-				.trackingNumber(shipment.trackingNumber().toString());
+				.trackingNumber(shipment.trackingNumber());
 	}
 }
