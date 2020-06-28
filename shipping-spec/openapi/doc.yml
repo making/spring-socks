@@ -6,6 +6,10 @@ servers:
 components:
   schemas:
     ShipmentResponse:
+      description: Shipment information
+      type: object
+      x-tags:
+        - Shipment
       properties:
         carrier:
           description: Shipping carrier
@@ -18,12 +22,9 @@ components:
           description: Order ID
           type: string
         trackingNumber:
-          description: racking number
           type: string
-      description: Shipment information
-      type: object
-      x-tags:
-        - Shipment
+          description: tracking number
+          format: uuid
     ShipmentRequest:
       description: Shipment request
       type: object
