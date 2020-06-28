@@ -73,7 +73,6 @@ components:
       properties:
         carrier:
           type: string
-          format: uuid
         trackingNumber:
           type: string
           format: uuid
