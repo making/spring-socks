@@ -23,9 +23,11 @@ import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.open
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,6 +102,7 @@ class ShippingControllerTest {
 				.characterEncoding(UTF_8.name())
 				.content("{\"orderId\": \"3\", \"itemCount\": 5}"))
 				.andExpect(status().isCreated())
+				.andExpect(header().string(LOCATION, "http://localhost/shipping/3"))
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.carrier").value("USPS"))
 				.andExpect(jsonPath("$.deliveryDate").value("2020-07-06"))
