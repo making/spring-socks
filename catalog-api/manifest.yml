@@ -17,6 +17,7 @@ applications:
     JBP_CONFIG_OPEN_JDK_JRE: '{memory_calculator: {stack_threads: 20}, jre: {version: 11.+}}'
     INFO_JAVA_VERSION: ${java.runtime.version}
     INFO_JAVA_VENDOR: ${java.vm.vendor}
+    SPRING_ZIPKIN_ENABLED: true
     SPRING_ZIPKIN_BASE_URL: ${vcap.services.zipkin.credentials.url}
     SPRING_ZIPKIN_SERVICE_NAME: ${management.metrics.tags.space}:${spring.application.name}
     SPRING_SLEUTH_WEB_ADDITIONALSKIPPATTERN: /actuator.*|/cloudfoundryapplication.*
