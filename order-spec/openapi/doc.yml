@@ -41,9 +41,9 @@ components:
           type: string
     OrderResponseAddress:
       type: object
+      x-tags:
+        - Order
       properties:
-        id:
-          type: string
         number:
           type: string
         street:
@@ -54,15 +54,11 @@ components:
           type: string
         country:
           type: string
-      x-tags:
-        - Order
     OrderResponseCard:
       type: object
       x-tags:
         - Order
       properties:
-        id:
-          type: string
         longNum:
           type: string
         expires:
