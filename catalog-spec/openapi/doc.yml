@@ -1,6 +1,8 @@
 servers:
   - description: Local
     url: 'http://localhost:5001'
+  - url: 'https://sock-catalog.apps.pcfone.io'
+    description: PCF One
 components:
   schemas:
     CountResponse:
