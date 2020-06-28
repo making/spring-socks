@@ -117,6 +117,8 @@ components:
           format: date-time
         total:
           type: number
+        status:
+          type: string
 info:
   description: Order API
   license:
