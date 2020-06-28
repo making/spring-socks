@@ -32,7 +32,7 @@ components:
         - Order
       properties:
         id:
-          nullable: true
+          type: string
         firstName:
           type: string
         lastName:
@@ -43,7 +43,7 @@ components:
       type: object
       properties:
         id:
-          nullable: true
+          type: string
         number:
           type: string
         street:
