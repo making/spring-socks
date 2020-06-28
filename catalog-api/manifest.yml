@@ -2,6 +2,8 @@ applications:
 - name: sock-catalog
   path: target/catalog-api-0.0.1-SNAPSHOT.jar
   memory: 256m
+  health-check-type: http
+  health-check-http-endpoint: /actuator/health/readiness
   env:
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_PROFILES_ACTIVE: cloud
@@ -14,6 +16,6 @@ applications:
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
     MANAGEMENT_METRICS_TAGS_INSTANCE_ID: ${management.metrics.tags.application}:${vcap.application.instance_index}
-    LOGGING_EXCEPTIONCONVERSIONWORD: \t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex
-    LOGGING_PATTERN_CONSOLE: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n'
+    LOGGING_EXCEPTIONCONVERSIONWORD: "\t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex"
+    LOGGING_PATTERN_CONSOLE: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n"
     LOGGING_LEVEL_IO_PIVOTAL_CFENV: DEBUG
