@@ -141,16 +141,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderResponse'
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
         '406':
           description: Not Acceptable
       summary: Place a new order
       operationId: create-order
-      parameters:
-        - schema:
-            type: string
-            format: uri
-          in: header
-          name: Location
       tags:
         - Order
   /orders/search/customerId:
