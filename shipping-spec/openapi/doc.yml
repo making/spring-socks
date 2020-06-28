@@ -15,7 +15,7 @@ components:
           format: date
           type: string
         orderId:
-          description: Order identifier
+          description: Order ID
           type: string
         trackingNumber:
           description: racking number
@@ -38,7 +38,7 @@ components:
           format: int32
           type: integer
         orderId:
-          description: Order identifier
+          description: Order ID
           type: string
     ShipmentAddress:
       properties:
