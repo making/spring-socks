@@ -57,4 +57,4 @@ jobs:
         tar xzf cf.tgz
         rm -f LICENSE NOTICE cf.tgz
         ./cf login -a ${CF_API} -u ${CF_USERNAME} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
-        ./cf push --strategy rolling --var push="$(date)"
+        ./cf push --strategy rolling -f catalog-api/manifest.yml
