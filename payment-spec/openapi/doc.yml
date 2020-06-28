@@ -20,7 +20,7 @@ components:
         - Payment
       properties:
         authorization:
-          $ref: '#/components/schemas/AuthorizationResponse'
+          $ref: '#/components/schemas/Authorization'
     Authorization:
       type: object
       x-tags:
