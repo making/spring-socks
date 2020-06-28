@@ -1,0 +1,185 @@
+servers:
+  - description: Local
+    url: 'http://localhost:5004'
+  - description: PCF One
+    url: 'https://sock-order.apps.pcfone.io'
+components:
+  schemas:
+    OrderRequest:
+      properties:
+        address:
+          description: The URI that should be used to fetch billing/shipping address information
+          format: uri
+          type: string
+        card:
+          description: The URI that should be used to fetch payment card information
+          format: uri
+          type: string
+        customer:
+          description: The URI that should be used to fetch customer information
+          format: uri
+          type: string
+        items:
+          description: The URI that should be used to fetch order items from the shopping cart
+          format: uri
+          type: string
+      type: object
+      x-tags:
+        - Order
+    OrderResponseCustomer:
+      type: object
+      x-tags:
+        - Order
+      properties:
+        id:
+          nullable: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        username:
+          type: string
+    OrderResponseAddress:
+      type: object
+      properties:
+        id:
+          nullable: true
+        number:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+      x-tags:
+        - Order
+    OrderResponseCard:
+      type: object
+      x-tags:
+        - Order
+      properties:
+        id:
+          type: string
+        longNum:
+          type: string
+        expires:
+          type: string
+          format: date
+        ccv:
+          type: string
+    OrderResponseShipment:
+      type: object
+      x-tags:
+        - Order
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    OrderResponseItem:
+      type: object
+      properties:
+        id:
+          type: string
+        itemId:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+      x-tags:
+        - Order
+    OrderResponse:
+      type: object
+      x-tags:
+        - Order
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        customer:
+          $ref: '#/components/schemas/OrderResponseCustomer'
+        address:
+          $ref: '#/components/schemas/OrderResponseAddress'
+        card:
+          $ref: '#/components/schemas/OrderResponseCard'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponseItem'
+        shipment:
+          $ref: '#/components/schemas/OrderResponseShipment'
+        date:
+          type: string
+          format: date-time
+        total:
+          type: number
+info:
+  description: Order API
+  license:
+    name: Apachie 2.0
+  title: 'Spring Sock Shop: Order API'
+  version: 0.1.0-SNAPSHOT
+openapi: 3.0.1
+paths:
+  /orders:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '201':
+          description: Created
+        '406':
+          description: Not Acceptable
+      summary: Place a new order
+      operationId: create-order
+      parameters:
+        - schema:
+            type: string
+            format: uri
+          in: header
+          name: Location
+      tags:
+        - Order
+  /orders/search/customerId:
+    get:
+      parameters:
+        - in: query
+          name: custId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+      summary: Search orders by customer ID
+      operationId: search-orders-by-customer-id
+      tags:
+        - Order
+  '/orders/{id}':
+    get:
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      summary: Return an order
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+      operationId: get-order
+      tags:
+        - Order

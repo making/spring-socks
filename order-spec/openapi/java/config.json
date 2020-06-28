@@ -1,0 +1,14 @@
+{
+  "apiPackage": "lol.maki.socks.order.client",
+  "invokerPackage": "lol.maki.socks.order.client",
+  "modelPackage": "lol.maki.socks.order.client",
+  "groupId": "lol.maki.socks",
+  "artifactId": "order-client",
+  "library": "webclient",
+  "dateLibrary": "java8",
+  "java8": true,
+  "reactive": false,
+  "serializableModel": true,
+  "useGzipFeature": true,
+  "useRxJava2": false
+}
