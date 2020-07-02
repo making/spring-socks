@@ -4,6 +4,7 @@ applications:
   memory: 256m
   health-check-type: http
   health-check-http-endpoint: /actuator/health/readiness
+  timeout: 180
   services:
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
