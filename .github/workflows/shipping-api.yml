@@ -3,11 +3,13 @@ on:
   push:
     paths:
     - 'shipping-api/**'
+    - '.github/workflows/shipping-api.yml'
     branches:
     - master
   pull_request:
     paths:
     - 'shipping-api/**'
+    - '.github/workflows/shipping-api.yml'
     branches:
     - master
 jobs:
@@ -57,4 +59,4 @@ jobs:
         tar xzf cf.tgz
         rm -f LICENSE NOTICE cf.tgz
         ./cf login -a ${CF_API} -u ${CF_USERNAME} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
-        ./cf push --strategy rolling -f shipping-api/manifest.yml
+        ./cf push -f shipping-api/manifest.yml
