@@ -29,6 +29,7 @@ jobs:
     - name: mvn package
       run: |
         set -ex
+        export _JAVA_OPTIONS=-Duser.timezone=Asia/Tokyo
         ./mvnw -V package -f order-api/pom.xml -U
     - name: mvn spring-boot:build-image
       if: github.ref == 'refs/heads/master'
