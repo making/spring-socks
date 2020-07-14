@@ -27,6 +27,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: mvn package
+      env:
+        _JAVA_OPTIONS: -Duser.timezone=Asia/Tokyo
       run: |
         set -ex
         ./mvnw -V package -f catalog-api/pom.xml -U

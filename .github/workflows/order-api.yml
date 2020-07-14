@@ -27,9 +27,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: mvn package
+      env:
+        _JAVA_OPTIONS: -Duser.timezone=Asia/Tokyo
       run: |
         set -ex
-        export _JAVA_OPTIONS=-Duser.timezone=Asia/Tokyo
         ./mvnw -V package -f order-api/pom.xml -U
     - name: mvn spring-boot:build-image
       if: github.ref == 'refs/heads/master'
