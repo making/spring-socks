@@ -3,6 +3,8 @@ servers:
     url: 'http://localhost:5002'
   - url: 'https://sock-payment.apps.pcfone.io'
     description: PCF One
+  - url: 'https://sock-payment.apps.cf.maki.lol'
+    description: CF for K8s
 components:
   schemas:
     AuthorizationRequest:

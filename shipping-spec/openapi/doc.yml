@@ -3,6 +3,8 @@ servers:
     url: 'http://localhost:5003'
   - description: PCF One
     url: 'https://sock-shipping.apps.pcfone.io'
+  - url: 'https://sock-shipping.apps.cf.maki.lol'
+    description: CF for K8s
 components:
   schemas:
     ShipmentResponse:

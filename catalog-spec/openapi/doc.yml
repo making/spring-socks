@@ -3,6 +3,8 @@ servers:
     url: 'http://localhost:5001'
   - url: 'https://sock-catalog.apps.pcfone.io'
     description: PCF One
+  - url: 'https://sock-catalog.apps.cf.maki.lol'
+    description: CF for K8s
 components:
   schemas:
     CountResponse:
