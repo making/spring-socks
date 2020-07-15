@@ -16,7 +16,7 @@ components:
         items:
           type: array
           items:
-            $ref: ''
+            $ref: '#/components/schemas/CartItemResponse'
     CartItemResponse:
       title: CartItemResponse
       type: object
