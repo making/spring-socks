@@ -56,7 +56,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get a cart
       tags: []
       responses:
         '200':
@@ -82,7 +82,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get cart items
       tags: []
       responses:
         '200':
@@ -96,7 +96,7 @@ paths:
       operationId: get-items-by-customerId
       description: Get cart items for the requested customer id
     post:
-      summary: ''
+      summary: Add a cart item
       operationId: post-items-by-customerId
       responses:
         '201':
@@ -105,14 +105,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CartItemResponse'
-      description: Post a cart item for the requested customer id
+      description: Add a cart item for the requested customer id
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CartItemRequest'
     patch:
-      summary: ''
+      summary: Update a cart item
       operationId: patch-items-by-customerId
       responses:
         '202':
@@ -136,7 +136,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get a cart item
       tags: []
       responses:
         '200':
@@ -148,7 +148,7 @@ paths:
       operationId: get-cartItem-by-cartId-and-ItemId
       description: Get a cart item for the requested customer id and item id
     delete:
-      summary: ''
+      summary: Delete a cart item
       operationId: delete-cartItem-by-cartId-and-ItemId
       responses:
         '202':
@@ -162,7 +162,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Merge carts
       tags: []
       responses:
         '202':
