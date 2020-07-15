@@ -1,9 +1,9 @@
 name: cart-spec
 on:
   push:
-    paths:
-    - 'cart-spec/**'
-    - '!cart-spec/README.md'
+#    paths:
+#    - 'cart-spec/**'
+#    - '!cart-spec/README.md'
     branches:
     - master
   pull_request:
