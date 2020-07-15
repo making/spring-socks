@@ -1,0 +1,147 @@
+servers:
+  - description: Local
+    url: 'http://localhost:5001'
+  - url: 'https://sock-cart.apps.pcfone.io'
+    description: PCF One
+  - url: 'https://sock-cart.apps.cf.maki.lol'
+    description: CF for K8s
+components:
+  schemas:
+    CartResponse:
+      title: CartResponse
+      type: object
+      properties:
+        customerId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: ''
+    CartItemResponse:
+      title: CartItemResponse
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        unitPrice:
+          type: number
+info:
+  contact: {}
+  description: Cart API
+  license:
+    name: Apache 2.0
+  title: 'Spring Sock Shop: Cart API'
+  version: 0.1.0-SNAPSHOT
+openapi: 3.0.1
+paths:
+  '/carts/{customerId}':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+      operationId: get-cart-by-customerId
+    delete:
+      summary: ''
+      operationId: delete-cart-by-customerId
+      responses:
+        '202':
+          description: Accepted
+  '/carts/{customerId}/items':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItemResponse'
+      operationId: get-items-by-customerId
+    post:
+      summary: ''
+      operationId: post-items-by-customerId
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItemResponse'
+    patch:
+      summary: ''
+      operationId: patch-items-by-customerId
+      responses:
+        '202':
+          description: Accepted
+  '/carts/{customerId}/items/{itemId}':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: itemId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItemResponse'
+      operationId: get-cartItem-by-cartId-and-ItemId
+    delete:
+      summary: ''
+      operationId: delete-cartItem-by-cartId-and-ItemId
+      responses:
+        '202':
+          description: Accepted
+  '/carts/{customerId}/merge':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '202':
+          description: Accepted
+      operationId: merge-carts-by-customerId
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: sessionId
