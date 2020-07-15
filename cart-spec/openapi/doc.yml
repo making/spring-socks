@@ -28,6 +28,17 @@ components:
           format: int32
         unitPrice:
           type: number
+    CartItemRequest:
+      title: CartItemRequest
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        unitPrice:
+          type: number
 info:
   contact: {}
   description: Cart API
@@ -55,12 +66,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/CartResponse'
       operationId: get-cart-by-customerId
+      description: Get a cart for the requested customer id
     delete:
       summary: ''
       operationId: delete-cart-by-customerId
       responses:
         '202':
           description: Accepted
+      description: Delete a cart for the requested customer id
   '/carts/{customerId}/items':
     parameters:
       - schema:
@@ -81,6 +94,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/CartItemResponse'
       operationId: get-items-by-customerId
+      description: Get cart items for the requested customer id
     post:
       summary: ''
       operationId: post-items-by-customerId
@@ -91,12 +105,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CartItemResponse'
+      description: Post a cart item for the requested customer id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemRequest'
     patch:
       summary: ''
       operationId: patch-items-by-customerId
       responses:
         '202':
           description: Accepted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemRequest'
+      description: Update a cart item for the requested customer id
   '/carts/{customerId}/items/{itemId}':
     parameters:
       - schema:
@@ -120,12 +146,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/CartItemResponse'
       operationId: get-cartItem-by-cartId-and-ItemId
+      description: Get a cart item for the requested customer id and item id
     delete:
       summary: ''
       operationId: delete-cartItem-by-cartId-and-ItemId
       responses:
         '202':
           description: Accepted
+      description: Delete a cart item for the requested customer id and item id
   '/carts/{customerId}/merge':
     parameters:
       - schema:
@@ -145,3 +173,4 @@ paths:
             type: string
           in: query
           name: sessionId
+      description: Merge carts on the database and on the session for the requested customer id.
