@@ -68,7 +68,7 @@ paths:
       operationId: get-cart-by-customerId
       description: Get a cart for the requested customer id
     delete:
-      summary: ''
+      summary: Delete a cart
       operationId: delete-cart-by-customerId
       responses:
         '202':
