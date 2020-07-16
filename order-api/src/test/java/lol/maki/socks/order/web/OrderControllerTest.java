@@ -1,7 +1,6 @@
 package lol.maki.socks.order.web;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -9,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import lol.maki.socks.cart.client.CartApi;
+import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.order.Address;
 import lol.maki.socks.order.Card;
 import lol.maki.socks.order.Customer;
@@ -24,13 +25,22 @@ import lol.maki.socks.order.OrderMapper;
 import lol.maki.socks.order.OrderService;
 import lol.maki.socks.order.OrderStatus;
 import lol.maki.socks.order.Shipment;
+import lol.maki.socks.payment.client.Authorization;
+import lol.maki.socks.payment.client.AuthorizationResponse;
+import lol.maki.socks.payment.client.PaymentApi;
+import lol.maki.socks.shipping.client.ShipmentApi;
+import lol.maki.socks.shipping.client.ShipmentResponse;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.IdGenerator;
 
 import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -43,18 +53,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
+@Import(OrderService.class)
 class OrderControllerTest {
 	@Autowired
 	MockMvc mockMvc;
 
 	@MockBean
-	OrderService orderService;
+	CartApi cartApi;
+
+	@MockBean
+	ShipmentApi shipmentApi;
+
+	@MockBean
+	PaymentApi paymentApi;
 
 	@MockBean
 	OrderMapper orderMapper;
 
 	@MockBean
 	Clock clock;
+
+	@MockBean
+	IdGenerator idGenerator;
 
 	String orderId1 = "11111111";
 
@@ -132,11 +152,35 @@ class OrderControllerTest {
 
 	@Test
 	void createOrder() throws Exception {
-		given(this.orderService.placeOrder(any(), any(), any(), any())).willReturn(this.order1);
+		final OffsetDateTime now = OffsetDateTime.parse("2020-07-14T00:00:00+09:00");
+		given(this.idGenerator.generateId()).willReturn(UUID.fromString(this.orderId1 + "-3a8a-42af-b86d-6d3f87241093"));
+		given(this.clock.instant()).willReturn(now.toInstant());
+		given(this.clock.getZone()).willReturn(now.getOffset());
+		given(this.cartApi.getItemsByCustomerId(this.customer1.id()))
+				.willReturn(Flux.just(
+						new CartItemResponse()
+								.itemId(this.item1.itemId())
+								.quantity(this.item1.quantity())
+								.unitPrice(this.item1.unitPrice()),
+						new CartItemResponse()
+								.itemId(this.item2.itemId())
+								.quantity(this.item2.quantity())
+								.unitPrice(this.item2.unitPrice())
+				));
+		given(this.paymentApi.authorizePayment(any()))
+				.willReturn(Mono.just(new AuthorizationResponse()
+						.authorization(new Authorization()
+								.authorised(true)
+								.message("OK"))));
+		given(this.shipmentApi.postShipping(any()))
+				.willReturn(Mono.just(new ShipmentResponse()
+						.carrier(this.shipment1.carrier())
+						.deliveryDate(this.shipment1.deliveryDate())
+						.trackingNumber(this.shipment1.trackingNumber())));
 		this.mockMvc.perform(post("/orders")
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding(UTF_8.toString())
-				.content("{\"address\":\"string\",\"card\":\"string\",\"customer\":\"string\",\"items\":\"string\"}"))
+				.content(String.format("{\"address\":\"string\",\"card\":\"string\",\"customer\":\"string\",\"items\":\"https://cart.example.com/carts/%s/items\"}", this.customer1.id())))
 				.andExpect(status().isCreated())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value(this.orderId1))
@@ -163,7 +207,7 @@ class OrderControllerTest {
 				.andExpect(jsonPath("$.shipment.trackingNumber").value(this.shipment1.trackingNumber().toString()))
 				.andExpect(jsonPath("$.shipment.deliveryDate").value(this.shipment1.deliveryDate().toString()))
 				.andExpect(jsonPath("$.date").value("2020-07-14T00:00:00+09:00"))
-				.andExpect(jsonPath("$.status").value(this.order1.status().toString()));
+				.andExpect(jsonPath("$.status").value("CREATED"));
 	}
 
 	@Test
