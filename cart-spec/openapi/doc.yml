@@ -17,6 +17,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CartItemResponse'
+      x-tags:
+        - Cart
     CartItemResponse:
       title: CartItemResponse
       type: object
@@ -28,6 +30,8 @@ components:
           format: int32
         unitPrice:
           type: number
+      x-tags:
+        - Cart
     CartItemRequest:
       title: CartItemRequest
       type: object
@@ -39,6 +43,8 @@ components:
           format: int32
         unitPrice:
           type: number
+      x-tags:
+        - Cart
 info:
   contact: {}
   description: Cart API
@@ -57,7 +63,8 @@ paths:
         required: true
     get:
       summary: Get a cart
-      tags: []
+      tags:
+        - Cart
       responses:
         '200':
           description: OK
@@ -74,6 +81,8 @@ paths:
         '202':
           description: Accepted
       description: Delete a cart for the requested customer id
+      tags:
+        - Cart
   '/carts/{customerId}/items':
     parameters:
       - schema:
@@ -83,7 +92,8 @@ paths:
         required: true
     get:
       summary: Get cart items
-      tags: []
+      tags:
+        - Cart
       responses:
         '200':
           description: OK
@@ -111,6 +121,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CartItemRequest'
+      tags:
+        - Cart
     patch:
       summary: Update a cart item
       operationId: patch-items-by-customerId
@@ -123,6 +135,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CartItemRequest'
       description: Update a cart item for the requested customer id
+      tags:
+        - Cart
   '/carts/{customerId}/items/{itemId}':
     parameters:
       - schema:
@@ -137,7 +151,8 @@ paths:
         required: true
     get:
       summary: Get a cart item
-      tags: []
+      tags:
+        - Cart
       responses:
         '200':
           description: OK
@@ -154,6 +169,8 @@ paths:
         '202':
           description: Accepted
       description: Delete a cart item for the requested customer id and item id
+      tags:
+        - Cart
   '/carts/{customerId}/merge':
     parameters:
       - schema:
@@ -163,7 +180,8 @@ paths:
         required: true
     get:
       summary: Merge carts
-      tags: []
+      tags:
+        - Cart
       responses:
         '202':
           description: Accepted
