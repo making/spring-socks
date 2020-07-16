@@ -29,32 +29,28 @@ public final class Cart {
 
 	public CartItem mergeItem(CartItem cartItem) {
 		final Optional<CartItem> item = this.findItem(cartItem.itemId());
-		final CartItem updated = item.map(i -> {
+		return item.map(i -> {
 			i
 					.incrementQuantity(cartItem.quantity())
 					.updateUnitPrice(cartItem.unitPrice());
 			return i;
 		}).orElseGet(() -> {
-			Cart.this.items().add(cartItem);
+			this.items().add(cartItem);
 			return cartItem;
 		});
-		this.removeIfQuantityIsLessThanOrEqualsZero(updated);
-		return updated;
 	}
 
 	public CartItem replaceItem(CartItem cartItem) {
 		final Optional<CartItem> item = this.findItem(cartItem.itemId());
-		final CartItem updated = item.map(i -> {
+		return item.map(i -> {
 			i
 					.updateQuantity(cartItem.quantity())
 					.updateUnitPrice(cartItem.unitPrice());
 			return i;
 		}).orElseGet(() -> {
-			Cart.this.items().add(cartItem);
+			this.items().add(cartItem);
 			return cartItem;
 		});
-		this.removeIfQuantityIsLessThanOrEqualsZero(updated);
-		return updated;
 	}
 
 	public Cart mergeCart(Cart another) {
@@ -65,12 +61,6 @@ public final class Cart {
 	public Cart removeItem(String itemId) {
 		this.items().removeIf(i -> Objects.equals(i.itemId(), itemId));
 		return this;
-	}
-
-	void removeIfQuantityIsLessThanOrEqualsZero(CartItem item) {
-		if (item.quantity() <= 0) {
-			removeItem(item.itemId());
-		}
 	}
 
 	public Optional<CartItem> findItem(String itemId) {

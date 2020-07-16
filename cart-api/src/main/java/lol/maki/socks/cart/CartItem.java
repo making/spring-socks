@@ -29,13 +29,17 @@ public final class CartItem {
 	}
 
 	public CartItem updateQuantity(int quantity) {
-		this.quantity = quantity;
+		this.quantity = atLeastZero(quantity);
 		return this;
 	}
 
 	public CartItem incrementQuantity(int increase) {
-		this.quantity += increase;
+		this.quantity = atLeastZero(this.quantity + increase);
 		return this;
+	}
+
+	static int atLeastZero(int v) {
+		return Math.max(v, 0);
 	}
 
 	public CartItem updateUnitPrice(BigDecimal unitPrice) {

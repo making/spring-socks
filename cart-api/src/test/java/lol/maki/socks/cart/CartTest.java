@@ -55,18 +55,6 @@ class CartTest {
 	}
 
 	@Test
-	void addThenRemoveItem() {
-		final Cart cart = new Cart("1234", new ArrayList<>() {
-			{
-				add(new CartItem("1", 1, BigDecimal.ONE));
-			}
-		});
-		cart.mergeItem(new CartItem("1", -1, BigDecimal.TEN));
-		final Optional<CartItem> item = cart.findItem("1");
-		assertThat(item.isPresent()).isFalse();
-	}
-
-	@Test
 	void updateExistingItem() {
 		final Cart cart = new Cart("1234", new ArrayList<>() {
 			{
@@ -96,18 +84,6 @@ class CartTest {
 		assertThat(cartItem.itemId()).isEqualTo("1");
 		assertThat(cartItem.quantity()).isEqualTo(1);
 		assertThat(cartItem.unitPrice()).isEqualTo(BigDecimal.TEN);
-	}
-
-	@Test
-	void updateThenRemoveItem() {
-		final Cart cart = new Cart("1234", new ArrayList<>() {
-			{
-				add(new CartItem("1", 1, BigDecimal.ONE));
-			}
-		});
-		cart.replaceItem(new CartItem("1", -1, BigDecimal.TEN));
-		final Optional<CartItem> item = cart.findItem("1");
-		assertThat(item.isPresent()).isFalse();
 	}
 
 	@Test
