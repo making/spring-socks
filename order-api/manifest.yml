@@ -7,10 +7,16 @@ applications:
   timeout: 180
   services:
   - order-db # cf create-service p.mysql db-small order-db
+  - cart-api # cf create-user-provided-service cart-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-cart --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
+  - payment-api # cf create-user-provided-service payment-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-payment --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
+  - shipping-api # cf create-user-provided-service shipping-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-shipping --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
   env:
+    SOCK_CARTURL: ${vcap.services.cart-api.credentials.url}
+    SOCK_PAYMENTURL: ${vcap.services.payment-api.credentials.url}
+    SOCK_SHIPPINGURL: ${vcap.services.shipping-api.credentials.url}
     SERVER_PORT: 8080
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_PROFILES_ACTIVE: cloud
