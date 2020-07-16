@@ -1,6 +1,6 @@
 servers:
   - description: Local
-    url: 'http://localhost:5001'
+    url: 'http://localhost:5005'
   - url: 'https://sock-cart.apps.pcfone.io'
     description: PCF One
   - url: 'https://sock-cart.apps.cf.maki.lol'
