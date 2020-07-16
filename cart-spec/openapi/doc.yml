@@ -173,4 +173,5 @@ paths:
             type: string
           in: query
           name: sessionId
+          required: true
       description: Merge carts on the database and on the session for the requested customer id.
