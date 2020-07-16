@@ -2,6 +2,7 @@ package lol.maki.socks.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
+import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.payment.client.PaymentApi;
 import lol.maki.socks.shipping.client.ShipmentApi;
 
@@ -15,6 +16,12 @@ public class SockConfig {
 
 	public SockConfig(SockProps props) {
 		this.props = props;
+	}
+
+	@Bean
+	public CartApi cartApi(WebClient.Builder builder, ObjectMapper objectMapper) {
+		return new CartApi(new lol.maki.socks.cart.client.ApiClient(builder.build(), objectMapper, StdDateFormat.instance)
+				.setBasePath(this.props.getCartUrl()));
 	}
 
 	@Bean

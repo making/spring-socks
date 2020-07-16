@@ -1,6 +1,5 @@
 package lol.maki.socks.order;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -8,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.payment.client.AuthorizationRequest;
 import lol.maki.socks.payment.client.PaymentApi;
 import lol.maki.socks.shipping.client.ShipmentApi;
@@ -22,6 +22,8 @@ import org.springframework.util.IdGenerator;
 
 @Service
 public class OrderService {
+	private final CartApi cartApi;
+
 	private final PaymentApi paymentApi;
 
 	private final ShipmentApi shipmentApi;
@@ -32,7 +34,8 @@ public class OrderService {
 
 	private final Clock clock;
 
-	public OrderService(PaymentApi paymentApi, ShipmentApi shipmentApi, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
+	public OrderService(CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
+		this.cartApi = cartApi;
 		this.paymentApi = paymentApi;
 		this.shipmentApi = shipmentApi;
 		this.orderMapper = orderMapper;
@@ -124,18 +127,15 @@ public class OrderService {
 	}
 
 	Flux<Item> retrieveItems(URI itemsUri, String orderId) {
-		return Flux.just(
-				ImmutableItem.builder()
-						.itemId("6d62d909-f957-430e-8689-b5129c0bb75e")
+		final String itemsPath = itemsUri.getPath();
+		// itemsPath = /carts/{customerId}/items
+		final String customerId = itemsPath.substring(7, itemsPath.length() - 6);
+		return this.cartApi.getItemsByCustomerId(customerId)
+				.map(item -> ImmutableItem.builder()
+						.itemId(item.getItemId())
 						.orderId(orderId)
-						.quantity(2)
-						.unitPrice(new BigDecimal("17.15"))
-						.build(),
-				ImmutableItem.builder()
-						.itemId("f611b671-40a3-4020-ab7f-68d56a813dc8")
-						.orderId(orderId)
-						.quantity(1)
-						.unitPrice(new BigDecimal("20.00"))
+						.quantity(item.getQuantity())
+						.unitPrice(item.getUnitPrice())
 						.build());
 	}
 }
