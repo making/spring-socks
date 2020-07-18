@@ -46,11 +46,19 @@ public class OrderService {
 	@Transactional
 	public Order placeOrder(URI customerUri, URI addressUri, URI cardUri, URI itemsUri) {
 		final String orderId = Order.newOrderId(this.idGenerator::generateId);
-		final Order preOrder = Mono.zip(
-				this.retrieveCustomer(customerUri),
-				this.retrieveAddress(addressUri),
-				this.retrieveCard(cardUri),
-				this.retrieveItems(itemsUri, orderId).collectList())
+		final String itemsPath = itemsUri.getPath();
+		final String customerId = itemsPath.substring(7, itemsPath.length() - 6);
+		final Mono<Customer> customerMono = this.retrieveCustomer(customerUri);
+		final Mono<Address> addressMono = this.retrieveAddress(addressUri);
+		final Mono<Card> cardMono = this.retrieveCard(cardUri);
+		final Flux<Item> itemFlux = this.cartApi.getItemsByCustomerId(customerId)
+				.map(item -> ImmutableItem.builder()
+						.itemId(item.getItemId())
+						.orderId(orderId)
+						.quantity(item.getQuantity())
+						.unitPrice(item.getUnitPrice())
+						.build());
+		final Order preOrder = Mono.zip(customerMono, addressMono, cardMono, itemFlux.collectList())
 				.map(result -> {
 					final Customer customer = result.getT1();
 					final Address address = result.getT2();
@@ -81,8 +89,9 @@ public class OrderService {
 				}).block();
 		final ShipmentRequest shipmentRequest = new ShipmentRequest().orderId(orderId).itemCount(preOrder.itemCount());
 		final ShipmentResponse shipmentResponse = this.shipmentApi.postShipping(shipmentRequest).block();
+		Order order;
 		try {
-			final Order order = ImmutableOrder.builder()
+			order = ImmutableOrder.builder()
 					.from(preOrder)
 					.shipment(ImmutableShipment.builder()
 							.carrier(shipmentResponse.getCarrier())
@@ -91,12 +100,19 @@ public class OrderService {
 							.build())
 					.build();
 			this.orderMapper.insert(order);
-			return order;
 		}
 		catch (RuntimeException e) {
 			// TODO cancel shipment request
 			throw e;
 		}
+		try {
+			this.cartApi.deleteCartByCustomerId(customerId)
+					.block();
+		}
+		catch (RuntimeException ignored) {
+
+		}
+		return order;
 	}
 
 	Mono<Customer> retrieveCustomer(URI customerUri) {
@@ -124,18 +140,5 @@ public class OrderService {
 				.ccv("123")
 				.expires(LocalDate.of(2024, 1, 1))
 				.build());
-	}
-
-	Flux<Item> retrieveItems(URI itemsUri, String orderId) {
-		final String itemsPath = itemsUri.getPath();
-		// itemsPath = /carts/{customerId}/items
-		final String customerId = itemsPath.substring(7, itemsPath.length() - 6);
-		return this.cartApi.getItemsByCustomerId(customerId)
-				.map(item -> ImmutableItem.builder()
-						.itemId(item.getItemId())
-						.orderId(orderId)
-						.quantity(item.getQuantity())
-						.unitPrice(item.getUnitPrice())
-						.build());
 	}
 }
