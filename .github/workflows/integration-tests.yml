@@ -26,10 +26,11 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: mvn package
+    - name: integration-tests
       env:
         _JAVA_OPTIONS: -Duser.timezone=Asia/Tokyo
       run: |
         set -ex
-        docker-compose up -f ./integration-tests/docker-compose.yml
+        docker-compose -f ./integration-tests/docker-compose.yml up -d
         ./integration-tests/run-tests-for-docker.sh
+        docker-compose -f ./integration-tests/docker-compose.yml down
