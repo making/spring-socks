@@ -32,5 +32,8 @@ jobs:
       run: |
         set -ex
         docker-compose -f ./integration-tests/docker-compose.yml up -d
+        while ! nc -z localhost 8080; do
+          sleep 1
+        done
         ./integration-tests/run-tests-for-docker.sh
         docker-compose -f ./integration-tests/docker-compose.yml down
