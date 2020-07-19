@@ -1,0 +1,35 @@
+name: integration-tests
+on:
+  push:
+    paths:
+    - 'integration-tests/**'
+    - '.github/workflows/integration-tests.yml'
+    branches:
+    - master
+  pull_request:
+    paths:
+    - 'integration-tests/**'
+    - '.github/workflows/integration-tests.yml'
+    branches:
+    - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '14.x'
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: mvn package
+      env:
+        _JAVA_OPTIONS: -Duser.timezone=Asia/Tokyo
+      run: |
+        set -ex
+        docker-compose up -f ./integration-tests/docker-compose.yml
+        ./integration-tests/run-tests-for-docker.sh
