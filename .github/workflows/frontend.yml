@@ -1,0 +1,64 @@
+name: frontend
+on:
+  push:
+    paths:
+    - 'frontend/**'
+    - '.github/workflows/frontend.yml'
+    branches:
+    - master
+  pull_request:
+    paths:
+    - 'frontend/**'
+    - '.github/workflows/frontend.yml'
+    branches:
+    - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '14.x'
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: mvn package
+      env:
+        _JAVA_OPTIONS: -Duser.timezone=Asia/Tokyo
+      run: |
+        set -ex
+        ./mvnw -V package -f frontend/pom.xml -U
+    - name: mvn spring-boot:build-image
+      if: github.ref == 'refs/heads/master'
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        IMAGE_NAME: making/sockshop-frontend
+      run: |
+        set -e
+        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+        set +e
+        docker pull ${IMAGE_NAME}
+        set -e
+        ./mvnw -V spring-boot:build-image -f frontend/pom.xml -Dspring-boot.build-image.imageName=${IMAGE_NAME} -Dmaven.test.skip=true
+        docker push ${IMAGE_NAME}
+    - uses: jvalkeal/setup-cf-cli@v0
+      if: github.ref == 'refs/heads/master'
+      with:
+        version: 6.51.0
+    - name: cf push
+      if: github.ref == 'refs/heads/master'
+      env:
+        CF_API: ${{ secrets.CF_API }}
+        CF_USERNAME: ${{ secrets.CF_USERNAME }}
+        CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+        CF_ORG: ${{ secrets.CF_ORG }}
+        CF_SPACE: ${{ secrets.CF_SPACE }}
+      run: |
+        set -e
+        cf login -a ${CF_API} -u ${CF_USERNAME} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
+        cf push -f frontend/manifest.yml
