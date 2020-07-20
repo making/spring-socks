@@ -11,7 +11,7 @@ public class ActuatorConfig {
 	public MeterFilter customMeterFilter() {
 		return MeterFilter.deny(id -> {
 			String uri = id.getTag("uri");
-			return uri != null && (uri.startsWith("/actuator") || uri.startsWith("/cloudfoundryapplication"));
+			return uri != null && (uri.startsWith("/actuator") || uri.startsWith("/management") || uri.startsWith("/cloudfoundryapplication"));
 		});
 	}
 }

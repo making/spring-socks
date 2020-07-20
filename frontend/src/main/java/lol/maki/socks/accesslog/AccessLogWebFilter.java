@@ -51,23 +51,25 @@ public class AccessLogWebFilter implements WebFilter {
 					final String address = request.getRemoteAddress().getHostString();
 					final String userAgent = headers.getFirst(HttpHeaders.USER_AGENT);
 					final String referer = headers.getFirst(REFERER);
-					final AccessLog accessLog = new AccessLogBuilder()
-							.setDate(now.toString())
-							.setMethod(Objects.toString(method, ""))
-							.setPath(path.value()).setStatus(statusCode)
-							.setHost(host).setAddress(address).setElapsed(elapsed)
-							.setUserAgent(userAgent).setReferer(referer)
-							.build();
-					final List<String> xForwardedFors = headers.get("X-Forwarded-For");
-					final String xForwardedFor = xForwardedFors == null ? null : String.join(", ", xForwardedFors);
-					final String xForwardedProto = headers.getFirst("X-Forwarded-Proto");
-					final Span span = this.tracer.currentSpan();
-					span.tag("host", host);
-					if (referer != null) {
-						span.tag("referer", referer);
+					if (!userAgent.startsWith("kube-probe")) {
+						final AccessLog accessLog = new AccessLogBuilder()
+								.setDate(now.toString())
+								.setMethod(Objects.toString(method, ""))
+								.setPath(path.value()).setStatus(statusCode)
+								.setHost(host).setAddress(address).setElapsed(elapsed)
+								.setUserAgent(userAgent).setReferer(referer)
+								.build();
+						final List<String> xForwardedFors = headers.get("X-Forwarded-For");
+						final String xForwardedFor = xForwardedFors == null ? null : String.join(", ", xForwardedFors);
+						final String xForwardedProto = headers.getFirst("X-Forwarded-Proto");
+						final Span span = this.tracer.currentSpan();
+						span.tag("host", host);
+						if (referer != null) {
+							span.tag("referer", referer);
+						}
+						span.tag("user-agent", userAgent);
+						log.info("{}", accessLog.goRouterCompliant(xForwardedFor, xForwardedProto, span));
 					}
-					span.tag("user-agent", userAgent);
-					log.info("{}", accessLog.goRouterCompliant(xForwardedFor, xForwardedProto, span));
 				});
 	}
 }
