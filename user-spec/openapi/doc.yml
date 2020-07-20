@@ -1,0 +1,241 @@
+servers:
+  - description: Local
+    url: 'http://localhost:5005'
+  - url: 'https://sock-user.apps.pcfone.io'
+    description: PCF One
+  - url: 'https://sock-user.apps.cf.maki.lol'
+    description: CF for K8s
+components:
+  schemas:
+    CustomerResponse:
+      title: CustomerResponse
+      type: object
+      properties:
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerAddressResponse'
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerCardResponse'
+      x-tags:
+        - Customer
+    CustomerAddressResponse:
+      title: CustomerAddressResponse
+      type: object
+      properties:
+        addressId:
+          type: string
+          format: uuid
+        number:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+      x-tags:
+        - Customer
+    CustomerCardResponse:
+      title: CustomerCardResponse
+      type: object
+      properties:
+        cardId:
+          type: string
+          format: uuid
+        longNum:
+          type: string
+        expires:
+          type: string
+          format: date
+        ccv:
+          type: string
+      x-tags:
+        - Customer
+    CustomerAddressCreateRequest:
+      title: CustomerAddressCreateRequest
+      type: object
+      properties:
+        number:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+      x-tags:
+        - Customer
+    CustomerCardCreateRequest:
+      title: CustomerCardCreateRequest
+      type: object
+      properties:
+        longNum:
+          type: string
+        expires:
+          type: string
+          format: date
+        ccv:
+          type: string
+      x-tags:
+        - Customer
+    CustomerCreateRequest:
+      title: CustomerCreateRequest
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+      x-tags:
+        - Customer
+info:
+  contact: {}
+  description: User API
+  license:
+    name: Apache 2.0
+  title: 'Spring Sock Shop: User API'
+  version: 0.1.0-SNAPSHOT
+openapi: 3.0.1
+paths:
+  /cards:
+    parameters: []
+    get:
+      summary: Get cards of a user
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerCardResponse'
+      operationId: get-customer-cards-by-id
+      description: Get cards of the logged-in user
+    post:
+      summary: Create a new card
+      operationId: post-cards
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCardResponse'
+      description: Create a new card
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCardCreateRequest'
+  /addresses:
+    get:
+      summary: Get
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerAddressResponse'
+      operationId: get-addresses
+      description: Get addresses of the logged-in user
+    post:
+      summary: Create a new address
+      operationId: post-addresses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerAddressResponse'
+      description: Create a new address
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerAddressCreateRequest'
+  /register:
+    post:
+      summary: Register a customer
+      operationId: register
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+      description: Register a customer (an endpoint for backward-compatibility)
+      tags:
+        - Customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreateRequest'
+  /me:
+    get:
+      summary: Get the logged-in user information
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+      operationId: get-me
+      description: Get the logged-in user information
+  /login:
+    post:
+      summary: Login
+      operationId: login
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              required: true
+      description: Login (an endpoint for backward-compatibility)
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          required: true
+      tags:
+        - Customer

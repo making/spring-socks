@@ -1,0 +1,14 @@
+{
+  "apiPackage": "lol.maki.socks.user.spec",
+  "modelPackage": "lol.maki.socks.user.spec",
+  "groupId": "lol.maki.socks",
+  "artifactId": "user-spec",
+  "dateLibrary": "java8",
+  "delegatePattern": false,
+  "java8": true,
+  "skipDefaultInterface": true,
+  "reactive": false,
+  "interfaceOnly": true,
+  "serializableModel": true,
+  "performBeanValidation": true
+}
