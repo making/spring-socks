@@ -12,6 +12,7 @@ import lol.maki.socks.order.OrderMapper;
 import lol.maki.socks.order.OrderService;
 import lol.maki.socks.order.PaymentUnauthorizedException;
 import lol.maki.socks.order.Shipment;
+import lol.maki.socks.order.spec.HypermediaLink;
 import lol.maki.socks.order.spec.OrderRequest;
 import lol.maki.socks.order.spec.OrderResponse;
 import lol.maki.socks.order.spec.OrderResponse.StatusEnum;
@@ -19,6 +20,7 @@ import lol.maki.socks.order.spec.OrderResponseAddress;
 import lol.maki.socks.order.spec.OrderResponseCard;
 import lol.maki.socks.order.spec.OrderResponseCustomer;
 import lol.maki.socks.order.spec.OrderResponseItem;
+import lol.maki.socks.order.spec.OrderResponseLinks;
 import lol.maki.socks.order.spec.OrderResponseShipment;
 import lol.maki.socks.order.spec.OrdersApi;
 
@@ -71,6 +73,10 @@ public class OrderController implements OrdersApi {
 		final Address address = order.address();
 		final Card card = order.card();
 		final Shipment shipment = order.shipment();
+		final URI selfHref = ServletUriComponentsBuilder.fromCurrentRequest()
+				.replacePath("orders/{id}")
+				.query(null)
+				.build(order.id());
 		return new OrderResponse()
 				.id(order.id())
 				.customer(new OrderResponseCustomer()
@@ -101,6 +107,9 @@ public class OrderController implements OrdersApi {
 						.deliveryDate(shipment.deliveryDate()))
 				.date(order.date())
 				.total(order.total())
-				.status(StatusEnum.valueOf(order.status().name()));
+				.status(StatusEnum.valueOf(order.status().name()))
+				.links(new OrderResponseLinks().self(new HypermediaLink()
+						.rel("self")
+						.href(selfHref)));
 	}
 }
