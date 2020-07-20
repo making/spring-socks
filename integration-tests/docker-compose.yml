@@ -1,57 +1,30 @@
 version: "2"
 services:
-  sock-gateway:
-    image: making/vanilla-gateway:latest
+  sock-frontend:
+    image: making/sockshop-frontend:latest
     ports:
     - 8080:8080
     mem_limit: 256m
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN
       LOGGING_LEVEL_WEB: DEBUG
       JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: info,health,prometheus,gateway
-      MANAGEMENT_ENDPOINTS_WEB_BASE_PATH: /management
-      MANAGEMENT_INFO_GIT_MODE: full
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
-      SPRING_SLEUTH_SAMPLER_RATE: 30
-      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: catalog
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0_NAME: Path
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0_ARGS_PATTERNS_0: /catalogue
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0_ARGS_PATTERNS_1: /catalogue/**
-      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0_ARGS_PATTERNS_2: /tags
-      SPRING_CLOUD_GATEWAY_ROUTES_0_ORDER: 0
-      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://sock-catalog:5001
-      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: cart
-      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0_NAME: Path
-      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0_ARGS_PATTERNS_0: /carts
-      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0_ARGS_PATTERNS_1: /carts/**
-      SPRING_CLOUD_GATEWAY_ROUTES_1_ORDER: 0
-      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://sock-cart:5005
-      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: order
-      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0_NAME: Path
-      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0_ARGS_PATTERNS_0: /orders
-      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0_ARGS_PATTERNS_1: /orders/**
-      SPRING_CLOUD_GATEWAY_ROUTES_2_ORDER: 0
-      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://sock-order:5004
-      SPRING_CLOUD_GATEWAY_ROUTES_3_ID: payment
-      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0_NAME: Path
-      SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0_ARGS_PATTERNS_0: /paymentAuth
-      SPRING_CLOUD_GATEWAY_ROUTES_3_ORDER: 0
-      SPRING_CLOUD_GATEWAY_ROUTES_3_URI: http://sock-payment:5002
-      SPRING_CLOUD_GATEWAY_ROUTES_4_ID: payment
-      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0_NAME: Path
-      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0_ARGS_PATTERNS_0: /shipping
-      SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0_ARGS_PATTERNS_1: /shipping/**
-      SPRING_CLOUD_GATEWAY_ROUTES_4_ORDER: 0
-      SPRING_CLOUD_GATEWAY_ROUTES_4_URI: http://sock-shipping:5003
+      SOCK_CATALOGURL: http://sock-catalog:5001
+      SOCK_CARTURL: http://sock-cart:5005
+      SOCK_ORDERURL: http://sock-order:5004
+      SOCK_PAYMENTURL: http://sock-payment:5002
+      SOCK_SHIPPINGURL: http://sock-shipping:5003
     depends_on:
     - zipkin
   sock-catalog:
     image: making/sockshop-catalog:latest
     mem_limit: 256m
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN
@@ -69,6 +42,7 @@ services:
   sock-cart:
     image: making/sockshop-cart:latest
     mem_limit: 256m
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN
@@ -86,6 +60,7 @@ services:
   sock-order:
     image: making/sockshop-order:latest
     mem_limit: 256m
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN
@@ -106,6 +81,7 @@ services:
   sock-payment:
     image: making/sockshop-payment:latest
     mem_limit: 256m
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN
@@ -123,6 +99,7 @@ services:
   sock-shipping:
     image: making/sockshop-shipping:latest
     mem_limit: 256m
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN

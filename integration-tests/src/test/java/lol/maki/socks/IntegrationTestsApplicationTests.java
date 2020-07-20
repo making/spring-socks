@@ -1,7 +1,6 @@
 package lol.maki.socks;
 
 import java.io.UncheckedIOException;
-import java.math.BigDecimal;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,9 +21,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpStatus.ACCEPTED;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 
 @SpringBootTest
 @TestConstructor(autowireMode = AutowireMode.ALL)
@@ -48,7 +44,7 @@ class IntegrationTestsApplicationTests {
 	@BeforeEach
 	void reset() {
 		this.webClient.delete()
-				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}").build(this.sockProps.getTestCustomerId()))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build())
 				.exchange()
 				.block();
 	}
@@ -57,7 +53,7 @@ class IntegrationTestsApplicationTests {
 	void contextLoads() {
 		// Get items
 		final ResponseEntity<JsonNode> catalogue = this.webClient.get()
-				.uri(this.sockProps.getCatalogUrl(), b -> b.path("catalogue").build())
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("catalogue").build())
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
@@ -65,94 +61,79 @@ class IntegrationTestsApplicationTests {
 		final JsonNode item2 = catalogue.getBody().get(1);
 		log.info("item1 = {}", prettyPrint(item1));
 		log.info("item2 = {}", prettyPrint(item2));
-		assertThat(catalogue.getStatusCode()).isEqualTo(OK);
+		assertThat(catalogue.getStatusCode().is2xxSuccessful()).isTrue();
 
 		// Add items to a cart
 		final ResponseEntity<JsonNode> cartItem1 = this.webClient.post()
-				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.sockProps.getTestCustomerId()))
-				.bodyValue(Map.of(
-						"itemId", item1.get("id").asText(),
-						"quantity", 1,
-						"unitPrice", new BigDecimal(item1.get("price").asText())
-				))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build())
+				.bodyValue(Map.of("id", item1.get("id").asText()))
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		final ResponseEntity<JsonNode> cartItem2 = this.webClient.post()
-				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.sockProps.getTestCustomerId()))
-				.bodyValue(Map.of(
-						"itemId", item2.get("id").asText(),
-						"quantity", 1,
-						"unitPrice", new BigDecimal(item2.get("price").asText())
-				))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build(this.sockProps.getTestCustomerId()))
+				.bodyValue(Map.of("id", item2.get("id").asText()))
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("cartItem1 = {}", prettyPrint(cartItem1.getBody()));
 		log.info("cartItem2 = {}", prettyPrint(cartItem2.getBody()));
-		assertThat(cartItem1.getStatusCode()).isEqualTo(CREATED);
-		assertThat(cartItem2.getStatusCode()).isEqualTo(CREATED);
+		assertThat(cartItem1.getStatusCode().is2xxSuccessful()).isTrue();
+		assertThat(cartItem2.getStatusCode().is2xxSuccessful()).isTrue();
 
 		// Increase the quantity of the cart item
-		final ResponseEntity<JsonNode> updatedCartItem2 = this.webClient.patch()
-				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.sockProps.getTestCustomerId()))
+		final ResponseEntity<JsonNode> updatedCartItem2 = this.webClient.post()
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart/update").build())
 				.bodyValue(Map.of(
-						"itemId", item2.get("id").asText(),
-						"quantity", 3,
-						"unitPrice", new BigDecimal(item2.get("price").asText())
+						"id", item2.get("id").asText(),
+						"quantity", 3
 				))
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("cartItem2 = {}", prettyPrint(updatedCartItem2.getBody()));
-		assertThat(updatedCartItem2.getStatusCode()).isEqualTo(ACCEPTED);
+		assertThat(updatedCartItem2.getStatusCode().is2xxSuccessful()).isTrue();
 
 		// Show a cart
 		final ResponseEntity<JsonNode> cart = this.webClient.get()
-				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}").build(this.sockProps.getTestCustomerId()))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build())
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("cart = {}", prettyPrint(cart.getBody()));
-		assertThat(cart.getStatusCode()).isEqualTo(OK);
-		assertThat(cart.getBody().get("items")).hasSize(2);
+		assertThat(cart.getStatusCode().is2xxSuccessful()).isTrue();
+		assertThat(cart.getBody()).hasSize(2);
 
 		// Place a new order
 		final ResponseEntity<JsonNode> order = this.webClient.post()
-				.uri(this.sockProps.getOrderUrl(), b -> b.path("orders").build())
-				.bodyValue(Map.of(
-						"address", "http://example.com",
-						"card", "http://example.com",
-						"customer", "http://example.com",
-						"items", String.format("%s/carts/%s/items", this.sockProps.getCartUrl(), this.sockProps.getTestCustomerId())
-				))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("orders").build())
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("order = {}", prettyPrint(order.getBody()));
-		assertThat(order.getStatusCode()).isEqualTo(CREATED);
+		assertThat(order.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(order.getBody().get("total").asText()).isEqualTo("40.96");
 		assertThat(order.getBody().get("status").asText()).isEqualTo("CREATED");
 		assertThat(order.getBody().get("shipment").get("carrier").asText()).isEqualTo("USPS");
 
 		// Show a shipment
 		final ResponseEntity<JsonNode> shipment = this.webClient.get()
-				.uri(this.sockProps.getShippingUrl(), b -> b.path("shipping/{orderId}").build(order.getBody().get("id").asText()))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("shipping/{orderId}").build(order.getBody().get("id").asText()))
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("shipment = {}", prettyPrint(shipment.getBody()));
-		assertThat(shipment.getStatusCode()).isEqualTo(OK);
+		assertThat(shipment.getStatusCode().is2xxSuccessful()).isTrue();
 
 		// Show a cart again
 		final ResponseEntity<JsonNode> cartAgain = this.webClient.get()
-				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}").build(this.sockProps.getTestCustomerId()))
+				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build(this.sockProps.getTestCustomerId()))
 				.exchange()
 				.flatMap(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("cart = {}", prettyPrint(cartAgain.getBody()));
-		assertThat(cartAgain.getStatusCode()).isEqualTo(OK);
-		assertThat(cartAgain.getBody().get("items")).hasSize(0);
+		assertThat(cartAgain.getStatusCode().is2xxSuccessful()).isTrue();
+		assertThat(cartAgain.getBody()).hasSize(0);
 	}
 
 	String prettyPrint(JsonNode json) {
