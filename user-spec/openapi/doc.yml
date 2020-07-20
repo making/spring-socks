@@ -1,6 +1,6 @@
 servers:
   - description: Local
-    url: 'http://localhost:5005'
+    url: 'http://localhost:5006'
   - url: 'https://sock-user.apps.pcfone.io'
     description: PCF One
   - url: 'https://sock-user.apps.cf.maki.lol'
@@ -153,6 +153,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CustomerCardCreateRequest'
+      tags:
+        - Customer
   /addresses:
     get:
       summary: Get
@@ -185,6 +187,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CustomerAddressCreateRequest'
+      tags:
+        - Customer
   /register:
     post:
       summary: Register a customer
@@ -239,3 +243,67 @@ paths:
           required: true
       tags:
         - Customer
+  '/customers/{customerId}':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+    get:
+      summary: Get a customer
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+      operationId: get-customer-by-customer-id
+      description: Get a customer (an endpoint for backward-compatibility)
+  '/customers/{customerId}/addresses':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+    get:
+      summary: "Get customer's addresses"
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerAddressResponse'
+      operationId: get-addresses-by-customer-id
+      description: "Get customer's addresses (an endpoint for backward-compatibility)"
+  '/customers/{customerId}/cards':
+    parameters:
+      - schema:
+          type: string
+        name: customerId
+        in: path
+        required: true
+    get:
+      summary: "Get customer's cards"
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerCardResponse'
+      operationId: get-cards-by-customer-id
+      description: "Get customer's cards (an endpoint for backward-compatibility)"
