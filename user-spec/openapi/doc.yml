@@ -132,9 +132,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomerCardResponse'
+                $ref: '#/components/schemas/CustomerCardResponse'
       operationId: get-customer-cards-by-id
       description: Get cards of the logged-in user
     post:
@@ -166,9 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomerAddressResponse'
+                $ref: '#/components/schemas/CustomerAddressResponse'
       operationId: get-addresses
       description: Get addresses of the logged-in user
     post:
