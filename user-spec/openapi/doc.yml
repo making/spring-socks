@@ -247,6 +247,7 @@ paths:
     parameters:
       - schema:
           type: string
+          format: uuid
         name: customerId
         in: path
         required: true
@@ -267,6 +268,7 @@ paths:
     parameters:
       - schema:
           type: string
+          format: uuid
         name: customerId
         in: path
         required: true
@@ -289,6 +291,7 @@ paths:
     parameters:
       - schema:
           type: string
+          format: uuid
         name: customerId
         in: path
         required: true
