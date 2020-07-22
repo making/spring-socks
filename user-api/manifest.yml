@@ -1,0 +1,40 @@
+applications:
+- name: sock-user
+  path: target/user-api-0.0.1-SNAPSHOT.jar
+  memory: 256m
+  health-check-type: http
+  health-check-http-endpoint: /actuator/health/readiness
+  timeout: 180
+  services:
+  - user-db # cf create-service p.mysql db-small user-db
+  - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
+  - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
+  - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
+  env:
+    SERVER_PORT: 8080
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+    SPRING_PROFILES_ACTIVE: cloud
+    SERVER_TOMCAT_THREADS_MAX: 4
+    JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+    JBP_CONFIG_OPEN_JDK_JRE: '{memory_calculator: {stack_threads: 20}, jre: {version: 11.+}}'
+    BPL_JVM_THREAD_COUNT: 20
+    INFO_JAVA_VERSION: ${java.runtime.version}
+    INFO_JAVA_VENDOR: ${java.vm.vendor}
+    SPRING_ZIPKIN_ENABLED: true
+    SPRING_ZIPKIN_BASE_URL: ${vcap.services.zipkin.credentials.url}
+    SPRING_ZIPKIN_SERVICE_NAME: ${management.metrics.tags.space}:${spring.application.name}
+    SPRING_SLEUTH_WEB_ADDITIONALSKIPPATTERN: /actuator.*|/cloudfoundryapplication.*
+    MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
+    MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
+    MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
+    MANAGEMENT_METRICS_TAGS_INSTANCE_ID: ${management.metrics.tags.application}:${vcap.application.instance_index}
+    MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST: ${vcap.services.prometheus-rsocket-proxy.credentials.host}
+    MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT: ${vcap.services.prometheus-rsocket-proxy.credentials.port}
+    LOGGING_EXCEPTIONCONVERSIONWORD: "\t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex"
+    LOGGING_PATTERN_CONSOLE: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n"
+    LOGGING_LEVEL_IO_PIVOTAL_CFENV: DEBUG
+  metadata:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"
+      prometheus.io/path: "/actuator/prometheus"
