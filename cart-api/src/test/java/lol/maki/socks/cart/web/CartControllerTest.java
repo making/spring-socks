@@ -75,6 +75,7 @@ class CartControllerTest {
 	void deleteCartItemByCartIdAndItemId() throws Exception {
 		assertThat(this.cart1.findItem("2").isPresent()).isTrue();
 		given(this.cartMapper.findCartByCustomerId("1234")).willReturn(Optional.of(this.cart1));
+		given(this.cartMapper.deleteCartByCustomerIdAndItemId("1234", "2")).willReturn(1);
 		this.mockMvc.perform(delete("/carts/{customerId}/items/{itemId}", "1234", "2"))
 				.andExpect(status().isAccepted())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))

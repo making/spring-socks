@@ -41,9 +41,8 @@ public class CartService {
 
 	@Transactional
 	public void deleteCartItem(String customerId, String itemId) {
-		final Cart cart = this.getOrCreateCart(customerId)
-				.removeItem(itemId);
-		this.cartMapper.upsertCartItems(cart);
+		this.getOrCreateCart(customerId).removeItem(itemId);
+		this.cartMapper.deleteCartByCustomerIdAndItemId(customerId, itemId);
 	}
 
 	@Transactional
