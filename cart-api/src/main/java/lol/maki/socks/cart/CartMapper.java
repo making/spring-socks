@@ -72,7 +72,7 @@ public class CartMapper {
 
 	public Optional<Cart> findCartByCustomerId(String customerId) {
 		try {
-			final Cart cart = this.jdbcTemplate.query("SELECT c.customer_id, i.item_id, i.quantity, i.unit_price FROM cart AS c LEFT JOIN cart_item AS i ON c.customer_id = i.customer_id WHERE c.customer_id = ?",
+			final Cart cart = this.jdbcTemplate.query("SELECT c.customer_id, i.item_id, i.quantity, i.unit_price FROM cart AS c LEFT JOIN cart_item AS i ON c.customer_id = i.customer_id WHERE c.customer_id = ? FOR UPDATE",
 					rs -> {
 						Cart c = null;
 						while (rs.next()) {
