@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Ogani Template">
+    <meta name="keywords" content="Ogani, unica, creative, html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" type="image/x-icon"
+          data-th-href="@{/favicon.png}">
+    <title>Spring Socks</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&display=swap"
+          rel="stylesheet">
+
+    <!-- Css Styles -->
+    <link rel="stylesheet" data-th-href="@{/css/bootstrap.min.css}"
+          href="../static/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/font-awesome.min.css}"
+          href="../static/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/elegant-icons.css}"
+          href="../static/css/elegant-icons.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/nice-select.css}"
+          href="../static/css/nice-select.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/jquery-ui.min.css}"
+          href="../static/css/jquery-ui.min.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/owl.carousel.min.css}"
+          href="../static/css/owl.carousel.min.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/slicknav.min.css}"
+          href="../static/css/slicknav.min.css" type="text/css">
+    <link rel="stylesheet" data-th-href="@{/css/style.css}" href="../static/css/style.css"
+          type="text/css">
+</head>
+
+<body>
+<!-- Page Preloder -->
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+
+<!-- Humberger Begin -->
+<div class="humberger__menu__overlay"></div>
+<div class="humberger__menu__wrapper">
+    <div class="humberger__menu__logo">
+        <a href="#"><img data-th-src="@{/img/logo.png}" src="../static/img/logo.png"
+                         alt=""></a>
+    </div>
+    <div class="humberger__menu__cart">
+        <ul>
+            <li><a href="#"><i class="fa fa-shopping-bag"></i>
+                <span>[[${itemSize}]]</span></a></li>
+        </ul>
+        <div class="header__cart__price">item: <span>$[[${total}]]</span></div>
+    </div>
+    <div class="humberger__menu__widget">
+        <div class="header__top__right__auth">
+            <a href="#"><i class="fa fa-user"></i> Login</a>
+        </div>
+    </div>
+    <nav class="humberger__menu__nav mobile-menu">
+        <ul>
+            <li class="active"><a href="./index.html" data-th-href="@{/}">Home</a></li>
+        </ul>
+    </nav>
+    <div id="mobile-menu-wrap"></div>
+    <div class="humberger__menu__contact">
+        <ul>
+            <li><i class="fa fa-envelope"></i> hello@colorlib.com</li>
+            <li>Free Shipping for all Order of $99</li>
+        </ul>
+    </div>
+</div>
+<!-- Humberger End -->
+
+<!-- Header Section Begin -->
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6">
+                    <div class="header__top__left">
+                        <ul>
+                            <li><i class="fa fa-envelope"></i> hello@colorlib.com</li>
+                            <li>Free Shipping for all Order of $99</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="header__top__right">
+                        <div class="header__top__right__auth">
+                            <a href="#"><i class="fa fa-user"></i> Login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="header__logo">
+                    <a href="./index.html"
+                       data-th-href="@{/}"><img data-th-src="@{/img/logo.png}"
+                                                src="../static/img/logo.png" alt=""></a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <nav class="header__menu">
+                    <ul>
+                        <li class="active"><a href="./index.html"
+                                              data-th-href="@{/}">Home</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-lg-3">
+                <div class="header__cart">
+                    <ul>
+                        <li><a href="./shopping-cart.html"
+                               data-th-href="@{/cart}"><i class="fa fa-shopping-bag"></i>
+                            <span>[[${itemSize}]]</span></a>
+                        </li>
+                    </ul>
+                    <div class="header__cart__price">item: <span>$[[${total}]]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="humberger__open">
+            <i class="fa fa-bars"></i>
+        </div>
+    </div>
+</header>
+<!-- Header Section End -->
+
+<!-- Checkout Section Begin -->
+<section class="checkout spad">
+    <div class="container">
+        <div class="checkout__form">
+            <h4>Billing Details</h4>
+            <form data-th-action="@{/checkout}"
+                  method="post"
+                  data-th-object="${checkoutForm}">
+                <div class="row">
+                    <div class="col-lg-8 col-md-6">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Fist Name<span>*</span></p>
+                                    <input type="text" data-th-field="*{firstName}">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Last Name<span>*</span></p>
+                                    <input type="text" data-th-field="*{lastName}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Street<span>*</span></p>
+                                    <input type="text" placeholder="Street"
+                                           class="checkout__input__add"
+                                           data-th-field="*{street}">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Number<span>*</span></p>
+                                    <input type="text"
+                                           placeholder="Number"
+                                           data-th-field="*{number}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>City<span>*</span></p>
+                                    <input type="text" data-th-field="*{city}">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Postcode<span>*</span></p>
+                                    <input type="text" data-th-field="*{postcode}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Country<span>*</span></p>
+                                    <input type="text" data-th-field="*{country}">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Email<span>*</span></p>
+                                    <input type="text" data-th-field="*{email}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="checkout__input">
+                                    <p>Card Number<span>*</span></p>
+                                    <input type="text" data-th-field="*{longNum}"
+                                           placeholder="Card Number">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="checkout__input">
+                                    <p>Expires<span>*</span></p>
+                                    <input type="text" data-th-field="*{expires}"
+                                           placeholder="MM/YY">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="checkout__input">
+                                    <p>CCV<span>*</span></p>
+                                    <input type="text" data-th-field="*{ccv}"
+                                           placeholder="CCV">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="checkout__input__checkbox">
+                                    <label for="acc">
+                                        Create an account?
+                                        <input type="checkbox" id="acc"
+                                               data-th-field="*{createAccount}">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <p>Create an account by entering the information. If you
+                                    are
+                                    a returning customer
+                                    please login at the top of the page</p>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Account Password</p>
+                                    <input type="password" data-th-field="*{password}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="checkout__order">
+                            <h4>Your Order</h4>
+                            <div class="checkout__order__products">Products
+                                <span>Total</span></div>
+                            <ul>
+                                <li data-th-each="item : ${cart.items}">[[${item.name}]]
+                                    <span>$[[${item.total}]]</span></li>
+                            </ul>
+                            <div class="checkout__order__subtotal">Subtotal
+                                <span>$[[${cart.total}]]</span></div>
+                            <div class="checkout__order__total">Total <span>$[[${cart.total}]]</span>
+                            </div>
+                            <button type="submit" class="site-btn">PLACE ORDER</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Checkout Section End -->
+
+<!-- Footer Section Begin -->
+<footer class="footer spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="footer__about">
+                    <div class="footer__about__logo">
+                        <a href="./index.html"
+                           data-th-href="@{/}"><img data-th-src="@{/img/logo.png}"
+                                                    src="../static/img/logo.png"
+                                                    alt=""></a>
+                    </div>
+                    <ul>
+                        <li>Address: Roppongi Hills Mori Tower 20F 6-10-1 Roppongi
+                            Minato-ku Tokyo 106-6120
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="footer__copyright">
+                    <div class="footer__copyright__text">
+                        <p>
+                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                            Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+                            All rights reserved | This template is made with <i
+                                class="fa fa-heart" aria-hidden="true"></i> by <a
+                                href="https://colorlib.com" target="_blank">Colorlib</a>
+                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- Footer Section End -->
+
+<!-- Js Plugins -->
+<script data-th-src="@{/js/jquery-3.3.1.min.js}"
+        src="../static/js/jquery-3.3.1.min.js"></script>
+<script data-th-src="@{/js/bootstrap.min.js}"
+        src="../static/js/bootstrap.min.js"></script>
+<script data-th-src="@{/js/jquery.nice-select.min.js}"
+        src="../static/js/jquery.nice-select.min.js"></script>
+<script data-th-src="@{/js/jquery-ui.min.js}"
+        src="../static/js/jquery-ui.min.js"></script>
+<script data-th-src="@{/js/jquery.slicknav.js}"
+        src="../static/js/jquery.slicknav.js"></script>
+<script data-th-src="@{/js/mixitup.min.js}" src="../static/js/mixitup.min.js"></script>
+<script data-th-src="@{/js/owl.carousel.min.js}"
+        src="../static/js/owl.carousel.min.js"></script>
+<script data-th-src="@{/js/main.js}" src="../static/js/main.js"></script>
+
+</body>
+
+</html>
