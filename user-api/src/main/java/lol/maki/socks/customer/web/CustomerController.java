@@ -70,10 +70,10 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 	}
 
 	@Override
-	public ResponseEntity<List<CustomerAddressResponse>> getAddresses() {
+	public ResponseEntity<CustomerAddressResponse> getAddresses() {
 		final UUID customerId = this.loggedInUser.customerId();
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
-		return ResponseEntity.of(customer.map(CustomerHelper::toResponse).map(CustomerResponse::getAddresses));
+		return ResponseEntity.of(customer.map(CustomerHelper::toResponse).map(CustomerResponse::getAddresses).map(a -> a.get(0)));
 	}
 
 	@Override
@@ -93,10 +93,10 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 	}
 
 	@Override
-	public ResponseEntity<List<CustomerCardResponse>> getCustomerCardsById() {
+	public ResponseEntity<CustomerCardResponse> getCustomerCardsById() {
 		final UUID customerId = this.loggedInUser.customerId();
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
-		return ResponseEntity.of(customer.map(CustomerHelper::toResponse).map(CustomerResponse::getCards));
+		return ResponseEntity.of(customer.map(CustomerHelper::toResponse).map(CustomerResponse::getCards).map(c -> c.get(0)));
 	}
 
 	@Override

@@ -33,12 +33,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-//				.formLogin(formLogin -> formLogin
-//						.loginPage("/loginForm")
-//						.loginProcessingUrl("/doLogin")
-//						.usernameParameter("username")
-//						.passwordParameter("password")
-//						.permitAll())
+				.formLogin(formLogin -> formLogin
+						.loginPage("/loginForm")
+						.loginProcessingUrl("/doLogin")
+						.usernameParameter("username")
+						.passwordParameter("password")
+						.permitAll())
 				.addFilterAfter(new LegacyCookieAuthenticationFilter(), LogoutFilter.class)
 				.logout(logout -> logout
 						.logoutRequestMatcher(new AntPathRequestMatcher("/logout") /* supports GET /logout */)
