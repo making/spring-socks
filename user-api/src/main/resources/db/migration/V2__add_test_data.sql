@@ -1,9 +1,12 @@
-INSERT INTO customer(customer_id, first_name, last_name, username, email, password)
+INSERT INTO customer(customer_id, first_name, last_name, username, email)
 VALUES ('5065e20d-e7e0-4dbe-9389-e1502f4563c1',
         'John',
         'Doe',
         'jdoe',
-        'jdoe@example.com',
+        'jdoe@example.com');
+
+INSERT INTO customer_password(customer_id, password)
+VALUES ('5065e20d-e7e0-4dbe-9389-e1502f4563c1',
         '{bcrypt}$2a$10$oxSJl.keBwxmsMLkcT9lPeAIxfNTPNQxpeywMrF7A3kVszwUTqfTK'); -- demo
 
 INSERT INTO customer_address(address_id, customer_id, number, street, city, postcode,

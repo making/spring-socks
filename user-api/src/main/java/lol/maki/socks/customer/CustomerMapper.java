@@ -22,7 +22,20 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class CustomerMapper {
 	private final JdbcTemplate jdbcTemplate;
 
-	private static final String BASE_SQL = "SELECT c.customer_id, c.first_name, c.last_name, c.username, c.email, c.password, a.address_id, a.number, a.street, a.city, a.country, a.postcode, d.card_id, d.long_num, d.expires,  d.ccv FROM customer AS c LEFT OUTER JOIN customer_address AS a ON c.customer_id = a.customer_id LEFT OUTER JOIN customer_card AS d ON c.customer_id = d.customer_id";
+	private static final String BASE_SQL = buildBaseSql(JoinType.LEFT_OUTER_JOIN);
+
+	private enum JoinType {
+		INNER_JOIn, LEFT_OUTER_JOIN;
+
+		@Override
+		public String toString() {
+			return name().replace("_", " ");
+		}
+	}
+
+	public static String buildBaseSql(JoinType passwordJoinType) {
+		return String.format("SELECT c.customer_id, c.first_name, c.last_name, c.username, c.email, p.password, a.address_id, a.number, a.street, a.city, a.country, a.postcode, d.card_id, d.long_num, d.expires,  d.ccv FROM customer AS c %s customer_password AS p ON c.customer_id = p.customer_id LEFT OUTER JOIN customer_address AS a ON c.customer_id = a.customer_id LEFT OUTER JOIN customer_card AS d ON c.customer_id = d.customer_id", passwordJoinType);
+	}
 
 	private final ResultSetExtractor<Customer> customerResultSetExtractor = rs -> {
 		Builder builder = null;
@@ -76,28 +89,22 @@ public class CustomerMapper {
 
 	@Transactional
 	public int[] upsert(Customer customer) {
-		int upsertCustomer;
+		int upsertCustomer = this.jdbcTemplate.update("INSERT INTO customer(customer_id, first_name, last_name, username, email) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE first_name = ?, last_name = ?, username = ?, email = ?",
+				customer.customerId().toString(),
+				customer.firstName(),
+				customer.lastName(),
+				customer.username(),
+				customer.email().address(),
+				customer.firstName(),
+				customer.lastName(),
+				customer.username(),
+				customer.email().address());
+		int updatePassword = 0;
 		if (!StringUtils.isEmpty(customer.password())) {
-			upsertCustomer = this.jdbcTemplate.update("INSERT INTO customer(customer_id, first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE first_name = ?, last_name = ?, username = ?, email = ?, password = ?",
+			updatePassword = this.jdbcTemplate.update("INSERT INTO customer_password(customer_id, password) VALUES (?, ?) ON DUPLICATE KEY UPDATE password = ?",
 					customer.customerId().toString(),
-					customer.firstName(),
-					customer.lastName(),
-					customer.username(),
-					customer.email().address(),
 					customer.password(),
-					customer.firstName(),
-					customer.lastName(),
-					customer.username(),
-					customer.email().address(),
 					customer.password());
-		}
-		else {
-			upsertCustomer = this.jdbcTemplate.update("UPDATE customer SET first_name = ?, last_name = ?, username = ?, email = ? WHERE customer_id = ?",
-					customer.firstName(),
-					customer.lastName(),
-					customer.username(),
-					customer.email().address(),
-					customer.customerId().toString());
 		}
 		int batchUpdateAddress = 0;
 		if (!CollectionUtils.isEmpty(customer.addresses())) {
@@ -115,7 +122,7 @@ public class CustomerMapper {
 							.collect(toUnmodifiableList()));
 			batchUpdateCard = Arrays.stream(updated).sum();
 		}
-		return new int[] { upsertCustomer, batchUpdateAddress, batchUpdateCard };
+		return new int[] { upsertCustomer, updatePassword, batchUpdateAddress, batchUpdateCard };
 	}
 
 	public Optional<Customer> findByUsername(String username) {
@@ -129,8 +136,9 @@ public class CustomerMapper {
 	}
 
 	public Optional<Customer> findByEmail(Email email) {
+		final String baseSql = buildBaseSql(JoinType.INNER_JOIn);
 		try {
-			final Customer customer = this.jdbcTemplate.query(BASE_SQL + " WHERE c.email = ? ORDER BY a.created_at DESC, d.created_at DESC", this.customerResultSetExtractor, email.address());
+			final Customer customer = this.jdbcTemplate.query(baseSql + " WHERE c.email = ? ORDER BY a.created_at DESC, d.created_at DESC", this.customerResultSetExtractor, email.address());
 			return Optional.ofNullable(customer);
 		}
 		catch (EmptyResultDataAccessException e) {

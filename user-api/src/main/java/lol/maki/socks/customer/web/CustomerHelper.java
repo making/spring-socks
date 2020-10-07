@@ -25,12 +25,12 @@ public class CustomerHelper {
 				.lastName(customer.lastName())
 				.email(customer.email().address())
 				.username(customer.username())
-				.addresses(customer.addresses().stream()
+				.addresses(customer.addresses() != null ? customer.addresses().stream()
 						.map(CustomerHelper::toCustomerAddressResponse)
-						.collect(toUnmodifiableList()))
-				.cards(customer.cards().stream()
+						.collect(toUnmodifiableList()) : null)
+				.cards(customer.cards() != null ? customer.cards().stream()
 						.map(CustomerHelper::toCustomerCardResponse)
-						.collect(toUnmodifiableList()));
+						.collect(toUnmodifiableList()) : null);
 	}
 
 	static CustomerAddressResponse toCustomerAddressResponse(Address address) {

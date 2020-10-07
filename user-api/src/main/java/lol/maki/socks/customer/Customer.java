@@ -5,12 +5,15 @@ import java.util.UUID;
 
 import org.immutables.value.Value.Immutable;
 
+import org.springframework.lang.Nullable;
+
 @Immutable
 public abstract class Customer {
 	public abstract UUID customerId();
 
 	public abstract String username();
 
+	@Nullable
 	public abstract String password();
 
 	public abstract String firstName();
@@ -19,7 +22,9 @@ public abstract class Customer {
 
 	public abstract Email email();
 
+	@Nullable
 	public abstract List<Address> addresses();
 
+	@Nullable
 	public abstract List<Card> cards();
 }

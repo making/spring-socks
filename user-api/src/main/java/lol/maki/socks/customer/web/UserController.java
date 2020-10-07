@@ -7,6 +7,8 @@ import java.util.UUID;
 import lol.maki.socks.LoggedInUser;
 import lol.maki.socks.customer.Customer;
 import lol.maki.socks.customer.CustomerMapper;
+import lol.maki.socks.customer.CustomerService;
+import lol.maki.socks.customer.CustomerService.CustomerDuplicatedException;
 import lol.maki.socks.user.spec.CustomerCreateRequest;
 import lol.maki.socks.user.spec.CustomerResponse;
 import lol.maki.socks.user.spec.LoginApi;
@@ -27,6 +29,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @CrossOrigin
 public class UserController implements LoginApi, RegisterApi, MeApi {
+	private final CustomerService customerService;
+
 	private final CustomerMapper customerMapper;
 
 	private final PasswordEncoder passwordEncoder;
@@ -35,7 +39,8 @@ public class UserController implements LoginApi, RegisterApi, MeApi {
 
 	private final LoggedInUser loggedInUser;
 
-	public UserController(CustomerMapper customerMapper, PasswordEncoder passwordEncoder, IdGenerator idGenerator, LoggedInUser loggedInUser) {
+	public UserController(CustomerService customerService, CustomerMapper customerMapper, PasswordEncoder passwordEncoder, IdGenerator idGenerator, LoggedInUser loggedInUser) {
+		this.customerService = customerService;
 		this.customerMapper = customerMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.idGenerator = idGenerator;
@@ -68,9 +73,14 @@ public class UserController implements LoginApi, RegisterApi, MeApi {
 	@Override
 	public ResponseEntity<CustomerResponse> register(CustomerCreateRequest request) {
 		final UUID customerId = this.idGenerator.generateId();
-		final String encodedPassword = this.passwordEncoder.encode(request.getPassword());
+		final String encodedPassword = request.getPassword() != null ? this.passwordEncoder.encode(request.getPassword()) : null;
 		final Customer customer = CustomerHelper.fromCustomerCreateRequest(customerId, encodedPassword, request);
-		this.customerMapper.upsert(customer);
+		try {
+			this.customerService.createCustomer(customer);
+		}
+		catch (CustomerDuplicatedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+		}
 		return ResponseEntity.ok(CustomerHelper.toResponse(customer));
 	}
 

@@ -4,9 +4,20 @@ CREATE TABLE IF NOT EXISTS customer
     first_name  VARCHAR(64)  NOT NULL,
     last_name   VARCHAR(64)  NOT NULL,
     username    VARCHAR(64)  NOT NULL UNIQUE,
-    email       VARCHAR(128) NOT NULL UNIQUE,
+    email       VARCHAR(128) NOT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT now(),
+    PRIMARY KEY (customer_id),
+    INDEX (created_at),
+    INDEX (email)
+);
+
+CREATE TABLE IF NOT EXISTS customer_password
+(
+    customer_id VARCHAR(40)  NOT NULL,
     password    VARCHAR(255) NOT NULL,
-    PRIMARY KEY (customer_id)
+    created_at  TIMESTAMP    NOT NULL DEFAULT now(),
+    PRIMARY KEY (customer_id),
+    FOREIGN KEY (customer_id) REFERENCES customer (customer_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS customer_address
