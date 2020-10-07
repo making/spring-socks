@@ -10,7 +10,7 @@ import lol.maki.socks.customer.Address;
 import lol.maki.socks.customer.Card;
 import lol.maki.socks.customer.Customer;
 import lol.maki.socks.customer.CustomerMapper;
-import lol.maki.socks.customer.ImmutableCustomer;
+import lol.maki.socks.customer.CustomerService;
 import lol.maki.socks.user.spec.AddressesApi;
 import lol.maki.socks.user.spec.CardsApi;
 import lol.maki.socks.user.spec.CustomerAddressCreateRequest;
@@ -30,13 +30,16 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @CrossOrigin
 public class CustomerController implements CustomersApi, AddressesApi, CardsApi {
+	private final CustomerService customerService;
+
 	private final CustomerMapper customerMapper;
 
 	private final IdGenerator idGenerator;
 
 	private final LoggedInUser loggedInUser;
 
-	public CustomerController(CustomerMapper customerMapper, IdGenerator idGenerator, LoggedInUser loggedInUser) {
+	public CustomerController(CustomerService customerService, CustomerMapper customerMapper, IdGenerator idGenerator, LoggedInUser loggedInUser) {
+		this.customerService = customerService;
 		this.customerMapper = customerMapper;
 		this.idGenerator = idGenerator;
 		this.loggedInUser = loggedInUser;
@@ -73,7 +76,10 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 	public ResponseEntity<CustomerAddressResponse> getAddresses() {
 		final UUID customerId = this.loggedInUser.customerId();
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
-		return ResponseEntity.of(customer.map(CustomerHelper::toResponse).map(CustomerResponse::getAddresses).map(a -> a.get(0)));
+		return ResponseEntity.of(customer.map(CustomerHelper::toResponse)
+				.map(CustomerResponse::getAddresses)
+				.filter(a -> !a.isEmpty())
+				.map(a -> a.get(0)));
 	}
 
 	@Override
@@ -82,21 +88,20 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
 		final UUID addressId = this.idGenerator.generateId();
 		final Address newAddress = CustomerHelper.fromCustomerAddressCreateRequest(addressId, request);
-		return ResponseEntity.of(customer.map(c -> ImmutableCustomer.builder()
-				.from(c)
-				.addAddresses(newAddress)
-				.build())
-				.map(c -> {
-					this.customerMapper.upsert(c);
-					return CustomerHelper.toCustomerAddressResponse(newAddress);
-				}));
+		return ResponseEntity.of(customer.map(c -> {
+			final Address address = this.customerService.addAddress(c, newAddress);
+			return CustomerHelper.toCustomerAddressResponse(address);
+		}));
 	}
 
 	@Override
 	public ResponseEntity<CustomerCardResponse> getCustomerCardsById() {
 		final UUID customerId = this.loggedInUser.customerId();
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
-		return ResponseEntity.of(customer.map(CustomerHelper::toResponse).map(CustomerResponse::getCards).map(c -> c.get(0)));
+		return ResponseEntity.of(customer.map(CustomerHelper::toResponse)
+				.map(CustomerResponse::getCards)
+				.filter(c -> !c.isEmpty())
+				.map(c -> c.get(0)));
 	}
 
 	@Override
@@ -105,14 +110,10 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
 		final UUID cardId = this.idGenerator.generateId();
 		final Card newCard = CustomerHelper.fromCustomerCardCreateRequest(cardId, request);
-		return ResponseEntity.of(customer.map(c -> ImmutableCustomer.builder()
-				.from(c)
-				.addCards(newCard)
-				.build())
-				.map(c -> {
-					this.customerMapper.upsert(c);
-					return CustomerHelper.toCustomerCardResponse(newCard);
-				}));
+		return ResponseEntity.of(customer.map(c -> {
+			final Card card = this.customerService.addCard(c, newCard);
+			return CustomerHelper.toCustomerCardResponse(card);
+		}));
 	}
 
 }
