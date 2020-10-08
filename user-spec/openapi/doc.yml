@@ -313,6 +313,7 @@ paths:
     parameters:
       - schema:
           type: string
+          format: uuid
         name: addressId
         in: path
         required: true
@@ -333,6 +334,7 @@ paths:
     parameters:
       - schema:
           type: string
+          format: uuid
         name: cardId
         in: path
         required: true
