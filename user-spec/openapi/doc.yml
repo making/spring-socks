@@ -97,6 +97,8 @@ components:
     CustomerCreateRequest:
       title: CustomerCreateRequest
       type: object
+      x-tags:
+        - Customer
       properties:
         username:
           type: string
@@ -109,8 +111,9 @@ components:
         email:
           type: string
           format: email
-      x-tags:
-        - Customer
+        allowDuplicateEmail:
+          type: boolean
+          default: 'false'
 info:
   contact: {}
   description: User API
@@ -124,8 +127,6 @@ paths:
     parameters: []
     get:
       summary: Get cards of a user
-      tags:
-        - Customer
       responses:
         '200':
           description: OK
@@ -135,6 +136,8 @@ paths:
                 $ref: '#/components/schemas/CustomerCardResponse'
       operationId: get-customer-cards-by-id
       description: Get cards of the logged-in user
+      tags:
+        - Card
     post:
       summary: Create a new card
       operationId: post-cards
@@ -155,9 +158,7 @@ paths:
         - Customer
   /addresses:
     get:
-      summary: Get
-      tags:
-        - Customer
+      summary: Get addresses
       responses:
         '200':
           description: OK
@@ -167,6 +168,8 @@ paths:
                 $ref: '#/components/schemas/CustomerAddressResponse'
       operationId: get-addresses
       description: Get addresses of the logged-in user
+      tags:
+        - Address
     post:
       summary: Create a new address
       operationId: post-addresses
@@ -270,8 +273,6 @@ paths:
         required: true
     get:
       summary: "Get customer's addresses"
-      tags:
-        - Customer
       responses:
         '200':
           description: OK
@@ -283,6 +284,8 @@ paths:
                   $ref: '#/components/schemas/CustomerAddressResponse'
       operationId: get-addresses-by-customer-id
       description: "Get customer's addresses (an endpoint for backward-compatibility)"
+      tags:
+        - Address
   '/customers/{customerId}/cards':
     parameters:
       - schema:
@@ -293,8 +296,6 @@ paths:
         required: true
     get:
       summary: "Get customer's cards"
-      tags:
-        - Customer
       responses:
         '200':
           description: OK
@@ -306,3 +307,44 @@ paths:
                   $ref: '#/components/schemas/CustomerCardResponse'
       operationId: get-cards-by-customer-id
       description: "Get customer's cards (an endpoint for backward-compatibility)"
+      tags:
+        - Card
+  '/addresses/{addressId}':
+    parameters:
+      - schema:
+          type: string
+        name: addressId
+        in: path
+        required: true
+    get:
+      summary: Get an address
+      tags:
+        - Address
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerAddressResponse'
+      operationId: get-addresses-by-id
+      description: Get an address of the logged-in user
+  '/cards/{cardId}':
+    parameters:
+      - schema:
+          type: string
+        name: cardId
+        in: path
+        required: true
+    get:
+      summary: Get a card
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCardResponse'
+      operationId: get-cards-by-id
+      description: Get a card of the logged-in user
