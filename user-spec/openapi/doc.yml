@@ -338,7 +338,8 @@ paths:
         required: true
     get:
       summary: Get a card
-      tags: []
+      tags:
+        - Card
       responses:
         '200':
           description: OK
