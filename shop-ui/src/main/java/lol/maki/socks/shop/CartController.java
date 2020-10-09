@@ -6,7 +6,7 @@ import java.util.UUID;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.cart.client.CartItemResponse;
-import lol.maki.socks.catalog.client.CatalogApi;
+import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
 
@@ -28,21 +28,22 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 public class CartController {
 	private final WebClient webClient;
 
-	private final CatalogApi catalogApi;
-
 	private final SockProps props;
 
-	public CartController(Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, CatalogApi catalogApi, SockProps props) {
+	public CartController(Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.build();
-		this.catalogApi = catalogApi;
 		this.props = props;
 	}
 
 	@PostMapping(path = "cart")
 	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		return this.catalogApi.getSock(cartItem.getId())
+		return this.webClient.get()
+				.uri(props.getCatalogUrl(), b -> b.path("catalogue/{id}").build(cartItem.getId()))
+				.attributes(oauth2AuthorizedClient(authorizedClient))
+				.retrieve()
+				.bodyToMono(SockResponse.class)
 				.map(item -> new CartItemRequest()
 						.itemId(item.getId().toString())
 						.quantity(cartItem.getQuantity())
@@ -68,7 +69,7 @@ public class CartController {
 
 	@PostMapping(path = "cart", params = "update")
 	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Mono<Cart> latestCart = cart.retrieveLatest(this.catalogApi);
+		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
 		final Map<UUID, Integer> cartItems = cartForm.getCartItems();
 		return latestCart.flatMapIterable(Cart::getItems)
 				.filter(item -> cartItems.containsKey(item.getItemId()))
@@ -107,8 +108,8 @@ public class CartController {
 	}
 
 	@GetMapping(path = "cart")
-	public Mono<String> viewCart(Cart cart, Model model) {
-		final Mono<Cart> latestCart = cart.retrieveLatest(this.catalogApi);
+	public Mono<String> viewCart(Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("shopping-cart");
 	}

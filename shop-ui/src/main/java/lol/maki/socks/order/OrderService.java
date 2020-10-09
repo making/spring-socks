@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.nimbusds.jwt.SignedJWT;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.config.SockProps;
-import lol.maki.socks.order.client.OrderApi;
 import lol.maki.socks.order.client.OrderRequest;
 import lol.maki.socks.order.client.OrderResponse;
 import reactor.core.publisher.Mono;
@@ -32,7 +31,7 @@ public class OrderService {
 
 	private final SockProps props;
 
-	public OrderService(OrderApi orderApi, Builder builder, SockProps props, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+	public OrderService(Builder builder, SockProps props, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.build();
