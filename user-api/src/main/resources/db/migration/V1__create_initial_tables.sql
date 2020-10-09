@@ -1,11 +1,12 @@
 CREATE TABLE IF NOT EXISTS customer
 (
-    customer_id VARCHAR(40)  NOT NULL,
-    first_name  VARCHAR(64)  NOT NULL,
-    last_name   VARCHAR(64)  NOT NULL,
-    username    VARCHAR(64)  NOT NULL UNIQUE,
-    email       VARCHAR(128) NOT NULL,
-    created_at  TIMESTAMP    NOT NULL DEFAULT now(),
+    customer_id           VARCHAR(40)  NOT NULL,
+    first_name            VARCHAR(64)  NOT NULL,
+    last_name             VARCHAR(64)  NOT NULL,
+    username              VARCHAR(64)  NOT NULL UNIQUE,
+    email                 VARCHAR(128) NOT NULL,
+    allow_duplicate_email BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at            TIMESTAMP    NOT NULL DEFAULT now(),
     PRIMARY KEY (customer_id),
     INDEX (created_at),
     INDEX (email)

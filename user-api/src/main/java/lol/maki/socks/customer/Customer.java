@@ -13,7 +13,6 @@ public abstract class Customer {
 
 	public abstract String username();
 
-	@Nullable
 	public abstract String password();
 
 	public abstract String firstName();
@@ -21,6 +20,8 @@ public abstract class Customer {
 	public abstract String lastName();
 
 	public abstract Email email();
+
+	public abstract boolean allowDuplicateEmail();
 
 	@Nullable
 	public abstract List<Address> addresses();

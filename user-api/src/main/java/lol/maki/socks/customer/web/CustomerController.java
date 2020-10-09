@@ -83,6 +83,16 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 	}
 
 	@Override
+	public ResponseEntity<CustomerAddressResponse> getAddressesById(UUID addressId) {
+		final UUID customerId = this.loggedInUser.customerId();
+		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
+		return ResponseEntity.of(customer.flatMap(c -> c.addresses().stream()
+				.filter(a -> Objects.equals(a.addressId(), addressId))
+				.map(CustomerHelper::toCustomerAddressResponse)
+				.findAny()));
+	}
+
+	@Override
 	public ResponseEntity<CustomerAddressResponse> postAddresses(CustomerAddressCreateRequest request) {
 		final UUID customerId = this.loggedInUser.customerId();
 		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
@@ -92,6 +102,16 @@ public class CustomerController implements CustomersApi, AddressesApi, CardsApi 
 			final Address address = this.customerService.addAddress(c, newAddress);
 			return CustomerHelper.toCustomerAddressResponse(address);
 		}));
+	}
+
+	@Override
+	public ResponseEntity<CustomerCardResponse> getCardsById(UUID cardId) {
+		final UUID customerId = this.loggedInUser.customerId();
+		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
+		return ResponseEntity.of(customer.flatMap(c -> c.cards().stream()
+				.filter(d -> Objects.equals(d.cardId(), cardId))
+				.map(CustomerHelper::toCustomerCardResponse)
+				.findAny()));
 	}
 
 	@Override

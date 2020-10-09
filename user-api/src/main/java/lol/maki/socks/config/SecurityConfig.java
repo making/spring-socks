@@ -44,12 +44,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						.logoutRequestMatcher(new AntPathRequestMatcher("/logout") /* supports GET /logout */)
 						.permitAll())
 				.requestMatchers(requestMatchers -> requestMatchers
-						.mvcMatchers("/", "/loginForm", "/doLogin", "/logout", "/oauth/authorize", "token_keys", "/.well-known/*", "/oauth/token/.well-known/*", "/me", "/customers/**", "/addresses", "/cards")
+						.mvcMatchers("/", "/loginForm", "/doLogin", "/logout", "/oauth/authorize", "token_keys", "/.well-known/*", "/oauth/token/.well-known/*", "/me", "/customers/**", "/addresses/**", "/cards/**")
 						.requestMatchers(EndpointRequest.toAnyEndpoint()))
 				.authorizeRequests(authorize -> authorize
 						.mvcMatchers("/oauth/authorize", "/token_keys", "/.well-known/*", "/oauth/token/.well-known/*").permitAll()
 						.mvcMatchers("/me").hasAnyAuthority("SCOPE_openid")
-						.mvcMatchers(GET, "/addresses", "/cards", "/customers/**").hasAnyAuthority("SCOPE_customer:read")
+						.mvcMatchers(GET, "/addresses/**", "/cards/**", "/customers/**").hasAnyAuthority("SCOPE_customer:read")
 						.mvcMatchers(POST, "/addresses", "/cards").hasAnyAuthority("SCOPE_customer:write")
 						.requestMatchers(EndpointRequest.to("info", "health", "prometheus")).permitAll()
 						.anyRequest().authenticated())

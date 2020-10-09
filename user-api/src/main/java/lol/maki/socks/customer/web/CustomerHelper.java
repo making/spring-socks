@@ -72,6 +72,7 @@ public class CustomerHelper {
 				.username(request.getUsername())
 				.password(encodedPassword)
 				.email(ImmutableEmail.builder().address(request.getEmail()).build())
+				.allowDuplicateEmail(request.getAllowDuplicateEmail())
 				.build();
 	}
 

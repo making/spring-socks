@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
@@ -22,20 +21,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class CustomerMapper {
 	private final JdbcTemplate jdbcTemplate;
 
-	private static final String BASE_SQL = buildBaseSql(JoinType.LEFT_OUTER_JOIN);
-
-	private enum JoinType {
-		INNER_JOIn, LEFT_OUTER_JOIN;
-
-		@Override
-		public String toString() {
-			return name().replace("_", " ");
-		}
-	}
-
-	public static String buildBaseSql(JoinType passwordJoinType) {
-		return String.format("SELECT c.customer_id, c.first_name, c.last_name, c.username, c.email, p.password, a.address_id, a.number, a.street, a.city, a.country, a.postcode, d.card_id, d.long_num, d.expires,  d.ccv FROM customer AS c %s customer_password AS p ON c.customer_id = p.customer_id LEFT OUTER JOIN customer_address AS a ON c.customer_id = a.customer_id LEFT OUTER JOIN customer_card AS d ON c.customer_id = d.customer_id", passwordJoinType);
-	}
+	private static final String BASE_SQL = "SELECT c.customer_id, c.first_name, c.last_name, c.username, c.email, c.allow_duplicate_email, p.password, a.address_id, a.number, a.street, a.city, a.country, a.postcode, d.card_id, d.long_num, d.expires,  d.ccv FROM customer AS c INNER JOIN customer_password AS p ON c.customer_id = p.customer_id LEFT OUTER JOIN customer_address AS a ON c.customer_id = a.customer_id LEFT OUTER JOIN customer_card AS d ON c.customer_id = d.customer_id";
 
 	private final ResultSetExtractor<Customer> customerResultSetExtractor = rs -> {
 		Builder builder = null;
@@ -49,7 +35,8 @@ public class CustomerMapper {
 						.lastName(rs.getString("last_name"))
 						.username(rs.getString("username"))
 						.email(ImmutableEmail.builder().address(rs.getString("email")).build())
-						.password(rs.getString("password"));
+						.password(rs.getString("password"))
+						.allowDuplicateEmail(rs.getBoolean("allow_duplicate_email"));
 			}
 			final String addressId = rs.getString("address_id");
 			if (addressId != null) {
@@ -89,23 +76,21 @@ public class CustomerMapper {
 
 	@Transactional
 	public int[] upsert(Customer customer) {
-		int upsertCustomer = this.jdbcTemplate.update("INSERT INTO customer(customer_id, first_name, last_name, username, email) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE first_name = ?, last_name = ?, username = ?, email = ?",
+		int upsertCustomer = this.jdbcTemplate.update("INSERT INTO customer(customer_id, first_name, last_name, username, email, allow_duplicate_email) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE first_name = ?, last_name = ?, username = ?, email = ?",
 				customer.customerId().toString(),
 				customer.firstName(),
 				customer.lastName(),
 				customer.username(),
 				customer.email().address(),
+				customer.allowDuplicateEmail(),
 				customer.firstName(),
 				customer.lastName(),
 				customer.username(),
 				customer.email().address());
-		int updatePassword = 0;
-		if (!StringUtils.isEmpty(customer.password())) {
-			updatePassword = this.jdbcTemplate.update("INSERT INTO customer_password(customer_id, password) VALUES (?, ?) ON DUPLICATE KEY UPDATE password = ?",
-					customer.customerId().toString(),
-					customer.password(),
-					customer.password());
-		}
+		final int updatePassword = this.jdbcTemplate.update("INSERT INTO customer_password(customer_id, password) VALUES (?, ?) ON DUPLICATE KEY UPDATE password = ?",
+				customer.customerId().toString(),
+				customer.password(),
+				customer.password());
 		int batchUpdateAddress = 0;
 		if (!CollectionUtils.isEmpty(customer.addresses())) {
 			final int[] updated = this.jdbcTemplate.batchUpdate("INSERT INTO customer_address(address_id, customer_id, number, street, city, postcode, country) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE customer_id = ?, number = ?, street = ?, city = ?, postcode = ?, country = ?",
@@ -136,9 +121,8 @@ public class CustomerMapper {
 	}
 
 	public Optional<Customer> findByEmail(Email email) {
-		final String baseSql = buildBaseSql(JoinType.INNER_JOIn);
 		try {
-			final Customer customer = this.jdbcTemplate.query(baseSql + " WHERE c.email = ? ORDER BY a.created_at DESC, d.created_at DESC", this.customerResultSetExtractor, email.address());
+			final Customer customer = this.jdbcTemplate.query(BASE_SQL + " WHERE c.email = ? AND c.allow_duplicate_email = FALSE ORDER BY a.created_at DESC, d.created_at DESC", this.customerResultSetExtractor, email.address());
 			return Optional.ofNullable(customer);
 		}
 		catch (EmptyResultDataAccessException e) {

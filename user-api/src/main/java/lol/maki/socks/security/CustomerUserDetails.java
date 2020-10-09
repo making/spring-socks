@@ -17,6 +17,9 @@ public class CustomerUserDetails implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
+		if (customer.allowDuplicateEmail()) {
+			return AuthorityUtils.createAuthorityList("ROLE_TEMPORAL");
+		}
 		return AuthorityUtils.createAuthorityList("ROLE_USER");
 	}
 

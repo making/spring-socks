@@ -18,7 +18,7 @@ public class CustomerService {
 		if (this.customerMapper.findByUsername(customer.username()).isPresent()) {
 			throw new CustomerDuplicatedException("The requested username is already registered.");
 		}
-		if (customer.password() != null && this.customerMapper.findByEmail(customer.email()).isPresent()) {
+		if (!customer.allowDuplicateEmail() && this.customerMapper.findByEmail(customer.email()).isPresent()) {
 			throw new CustomerDuplicatedException("The requested email is already registered.");
 		}
 		return this.customerMapper.upsert(customer);
