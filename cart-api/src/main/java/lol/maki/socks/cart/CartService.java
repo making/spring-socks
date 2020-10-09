@@ -47,10 +47,9 @@ public class CartService {
 
 	@Transactional
 	public Optional<Cart> mergeCart(String customerId, String sessionId) {
-		final Optional<Cart> cart = this.cartMapper.findCartByCustomerId(customerId);
+		final Cart cart = this.getOrCreateCart(customerId);
 		final Optional<Cart> sessionCart = this.cartMapper.findCartByCustomerId(sessionId);
-		return cart
-				.flatMap(c -> sessionCart.map(c::mergeCart))
+		return sessionCart.map(cart::mergeCart)
 				.map(c -> {
 					this.cartMapper.upsertCartItems(c);
 					this.cartMapper.deleteCartByCustomerId(sessionId);

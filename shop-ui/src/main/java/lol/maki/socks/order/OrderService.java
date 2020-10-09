@@ -45,8 +45,13 @@ public class OrderService {
 		final String password = UUID.randomUUID().toString();
 		return this.createUser(order, username, password, authorizedClient)
 				.then(this.retrieveToken(username, password, client.getClientId(), client.getClientSecret())
-						.flatMap(accessToken -> Mono.zip(this.createAddress(order, accessToken), this.createCard(order, accessToken))
-								.flatMap(tpl -> this.createOrder(cart, customerId(accessToken), tpl.getT1(), tpl.getT2(), accessToken))));
+						.flatMap(accessToken -> {
+							final String customerId = customerId(accessToken);
+							return Mono.zip(this.createAddress(order, accessToken), this.createCard(order, accessToken))
+									.flatMap(tpl ->
+											this.mergeCart(customerId, cart, authorizedClient)
+													.then(this.createOrder(customerId, tpl.getT1(), tpl.getT2(), accessToken)));
+						}));
 	}
 
 	Mono<?> createUser(Order order, String username, String password, OAuth2AuthorizedClient authorizedClient) {
@@ -79,6 +84,19 @@ public class OrderService {
 				.map(n -> n.get("access_token").asText());
 	}
 
+	Mono<?> mergeCart(String customerId, Cart cart, OAuth2AuthorizedClient authorizedClient) {
+		if (!cart.hasSessionId()) {
+			return Mono.empty();
+		}
+		return this.webClient.get()
+				.uri(props.getCartUrl(), b -> b.path("carts/{customerId}/merge")
+						.queryParam("sessionId", cart.getCartId())
+						.build(customerId))
+				.attributes(oauth2AuthorizedClient(authorizedClient))
+				.retrieve()
+				.toBodilessEntity();
+	}
+
 	Mono<String> createAddress(Order order, String accessToken) {
 		return this.webClient.post()
 				.uri(props.getUserUrl(), b -> b.path("addresses").build())
@@ -107,7 +125,7 @@ public class OrderService {
 				.map(n -> n.get("cardId").asText());
 	}
 
-	Mono<OrderResponse> createOrder(Cart cart, String customerId, String addressId, String cardId, String accessToken) {
+	Mono<OrderResponse> createOrder(String customerId, String addressId, String cardId, String accessToken) {
 		final URI address = UriComponentsBuilder.fromHttpUrl(this.props.getUserUrl())
 				.path("addresses/{addressId}")
 				.build(addressId);
@@ -125,8 +143,8 @@ public class OrderService {
 						.address(address)
 						.card(card)
 						.items(UriComponentsBuilder.fromHttpUrl(props.getCartUrl())
-								.pathSegment("carts/{cartId}/items")
-								.build(cart.getCartId())))
+								.pathSegment("carts/{customerId}/items")
+								.build(customerId)))
 				.retrieve()
 				.bodyToMono(OrderResponse.class);
 	}

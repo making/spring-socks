@@ -2,6 +2,8 @@ package lol.maki.socks.cart;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 import lol.maki.socks.catalog.client.CatalogApi;
 import reactor.core.publisher.Flux;
@@ -17,6 +19,14 @@ public class Cart {
 	public Cart(String cartId, List<CartItem> cartItems) {
 		this.cartId = cartId;
 		this.cartItems = cartItems;
+	}
+
+	public boolean hasSessionId() {
+		return this.cartId.startsWith("_");
+	}
+
+	public static String generateSessionId(Supplier<UUID> uuidgen) {
+		return "_" + uuidgen.get();
 	}
 
 	public String getCartId() {

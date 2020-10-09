@@ -4,48 +4,70 @@ import java.util.Map;
 import java.util.UUID;
 
 import lol.maki.socks.cart.Cart;
-import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.cart.client.CartItemRequest;
+import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.catalog.client.CatalogApi;
+import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
 
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.Builder;
+
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
 @Controller
 public class CartController {
-	private final CartApi cartApi;
+	private final WebClient webClient;
 
 	private final CatalogApi catalogApi;
 
-	public CartController(CartApi cartApi, CatalogApi catalogApi) {
-		this.cartApi = cartApi;
+	private final SockProps props;
+
+	public CartController(Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, CatalogApi catalogApi, SockProps props) {
+		this.webClient = builder
+				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.build();
 		this.catalogApi = catalogApi;
+		this.props = props;
 	}
 
 	@PostMapping(path = "cart")
-	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart) {
+	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
 		return this.catalogApi.getSock(cartItem.getId())
 				.map(item -> new CartItemRequest()
 						.itemId(item.getId().toString())
 						.quantity(cartItem.getQuantity())
 						.unitPrice(item.getPrice()))
-				.flatMap(item -> this.cartApi.postItemsByCustomerId(cart.getCartId(), item))
+				.flatMap(item -> this.webClient.post()
+						.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items").build(cart.getCartId()))
+						.attributes(oauth2AuthorizedClient(authorizedClient))
+						.bodyValue(item)
+						.retrieve()
+						.bodyToMono(CartItemResponse.class))
 				.thenReturn("redirect:/cart");
 	}
 
 	@PostMapping(path = "cart", params = "delete")
-	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart) {
-		return this.cartApi
-				.deleteCartItemByCartIdAndItemId(cart.getCartId(), cartItem.getId().toString())
+	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+		return this.webClient.delete()
+				.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items/{itemId}").build(cart.getCartId(), cartItem.getId().toString()))
+				.attributes(oauth2AuthorizedClient(authorizedClient))
+				.retrieve()
+				.toBodilessEntity()
 				.thenReturn("redirect:/cart");
 	}
 
 	@PostMapping(path = "cart", params = "update")
-	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart) {
+	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
 		final Mono<Cart> latestCart = cart.retrieveLatest(this.catalogApi);
 		final Map<UUID, Integer> cartItems = cartForm.getCartItems();
 		return latestCart.flatMapIterable(Cart::getItems)
@@ -54,7 +76,11 @@ public class CartController {
 					final Integer requested = cartItems.get(item.getItemId());
 					if (requested == 0) {
 						// DELETE
-						return this.cartApi.deleteCartItemByCartIdAndItemId(cart.getCartId(), item.getItemId().toString());
+						return this.webClient.delete()
+								.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items/{itemId}").build(cart.getCartId(), item.getItemId().toString()))
+								.attributes(oauth2AuthorizedClient(authorizedClient))
+								.retrieve()
+								.toBodilessEntity();
 					}
 					else if (!requested.equals(item.getQuantity())) {
 						// UPDATE
@@ -62,7 +88,12 @@ public class CartController {
 								.itemId(item.getItemId().toString())
 								.unitPrice(item.getUnitPrice())
 								.quantity(requested);
-						return this.cartApi.patchItemsByCustomerId(cart.getCartId(), cartItemRequest);
+						return this.webClient.patch()
+								.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items").build(cart.getCartId()))
+								.attributes(oauth2AuthorizedClient(authorizedClient))
+								.bodyValue(cartItemRequest)
+								.retrieve()
+								.toBodilessEntity();
 					}
 					return Mono.empty();
 				})
