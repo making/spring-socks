@@ -18,13 +18,16 @@ public class SockProps {
 
 	private final String shippingUrl;
 
-	public SockProps(String testCustomerId, String catalogUrl, String cartUrl, String orderUrl, String paymentUrl, String shippingUrl) {
+	private final String userUrl;
+
+	public SockProps(String testCustomerId, String catalogUrl, String cartUrl, String orderUrl, String paymentUrl, String shippingUrl, String userUrl) {
 		this.testCustomerId = testCustomerId;
 		this.catalogUrl = catalogUrl;
 		this.cartUrl = cartUrl;
 		this.orderUrl = orderUrl;
 		this.paymentUrl = paymentUrl;
 		this.shippingUrl = shippingUrl;
+		this.userUrl = userUrl;
 	}
 
 	public String getTestCustomerId() {
@@ -49,5 +52,9 @@ public class SockProps {
 
 	public String getShippingUrl() {
 		return shippingUrl;
+	}
+
+	public String getUserUrl() {
+		return userUrl;
 	}
 }
