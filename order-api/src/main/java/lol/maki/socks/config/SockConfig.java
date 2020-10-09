@@ -8,6 +8,7 @@ import lol.maki.socks.shipping.client.ShipmentApi;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.server.resource.web.reactive.function.client.ServletBearerExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -19,20 +20,27 @@ public class SockConfig {
 	}
 
 	@Bean
-	public CartApi cartApi(WebClient.Builder builder, ObjectMapper objectMapper) {
-		return new CartApi(new lol.maki.socks.cart.client.ApiClient(builder.build(), objectMapper, StdDateFormat.instance)
+	public WebClient webClient(WebClient.Builder builder) {
+		return builder
+				.filter(new ServletBearerExchangeFilterFunction())
+				.build();
+	}
+
+	@Bean
+	public CartApi cartApi(WebClient webClient, ObjectMapper objectMapper) {
+		return new CartApi(new lol.maki.socks.cart.client.ApiClient(webClient, objectMapper, StdDateFormat.instance)
 				.setBasePath(this.props.getCartUrl()));
 	}
 
 	@Bean
-	public ShipmentApi shipmentApi(WebClient.Builder builder, ObjectMapper objectMapper) {
-		return new ShipmentApi(new lol.maki.socks.shipping.client.ApiClient(builder.build(), objectMapper, StdDateFormat.instance)
+	public ShipmentApi shipmentApi(WebClient webClient, ObjectMapper objectMapper) {
+		return new ShipmentApi(new lol.maki.socks.shipping.client.ApiClient(webClient, objectMapper, StdDateFormat.instance)
 				.setBasePath(this.props.getShippingUrl()));
 	}
 
 	@Bean
-	public PaymentApi paymentApi(WebClient.Builder builder, ObjectMapper objectMapper) {
-		return new PaymentApi(new lol.maki.socks.payment.client.ApiClient(builder.build(), objectMapper, StdDateFormat.instance)
+	public PaymentApi paymentApi(WebClient webClient, ObjectMapper objectMapper) {
+		return new PaymentApi(new lol.maki.socks.payment.client.ApiClient(webClient, objectMapper, StdDateFormat.instance)
 				.setBasePath(this.props.getPaymentUrl()));
 	}
 }

@@ -28,14 +28,11 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 
 @Service
 public class OrderService {
-	private final OrderApi orderApi;
-
 	private final WebClient webClient;
 
 	private final SockProps props;
 
 	public OrderService(OrderApi orderApi, Builder builder, SockProps props, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-		this.orderApi = orderApi;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.build();
@@ -49,7 +46,7 @@ public class OrderService {
 		return this.createUser(order, username, password, authorizedClient)
 				.then(this.retrieveToken(username, password, client.getClientId(), client.getClientSecret())
 						.flatMap(accessToken -> Mono.zip(this.createAddress(order, accessToken), this.createCard(order, accessToken))
-								.flatMap(tpl -> this.createOrder(cart, customerId(accessToken), tpl.getT1(), tpl.getT2()))));
+								.flatMap(tpl -> this.createOrder(cart, customerId(accessToken), tpl.getT1(), tpl.getT2(), accessToken))));
 	}
 
 	Mono<?> createUser(Order order, String username, String password, OAuth2AuthorizedClient authorizedClient) {
@@ -110,7 +107,7 @@ public class OrderService {
 				.map(n -> n.get("cardId").asText());
 	}
 
-	Mono<OrderResponse> createOrder(Cart cart, String customerId, String addressId, String cardId) {
+	Mono<OrderResponse> createOrder(Cart cart, String customerId, String addressId, String cardId, String accessToken) {
 		final URI address = UriComponentsBuilder.fromHttpUrl(this.props.getUserUrl())
 				.path("addresses/{addressId}")
 				.build(addressId);
@@ -120,13 +117,18 @@ public class OrderService {
 		final URI customer = UriComponentsBuilder.fromHttpUrl(this.props.getUserUrl())
 				.path("customers/{customerId}")
 				.build(customerId);
-		return this.orderApi.createOrder(new OrderRequest()
-				.customer(customer)
-				.address(address)
-				.card(card)
-				.items(UriComponentsBuilder.fromHttpUrl(props.getCartUrl())
-						.pathSegment("carts/{cartId}/items")
-						.build(cart.getCartId())));
+		return this.webClient.post()
+				.uri(this.props.getOrderUrl(), b -> b.path("orders").build())
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(accessToken))
+				.bodyValue(new OrderRequest()
+						.customer(customer)
+						.address(address)
+						.card(card)
+						.items(UriComponentsBuilder.fromHttpUrl(props.getCartUrl())
+								.pathSegment("carts/{cartId}/items")
+								.build(cart.getCartId())))
+				.retrieve()
+				.bodyToMono(OrderResponse.class);
 	}
 
 	String customerId(String accessToken) {

@@ -12,10 +12,13 @@ public class SockProps {
 
 	private final String shippingUrl;
 
-	public SockProps(String cartUrl, String paymentUrl, String shippingUrl) {
+	private final String userUrl;
+
+	public SockProps(String cartUrl, String paymentUrl, String shippingUrl, String userUrl) {
 		this.cartUrl = cartUrl;
 		this.paymentUrl = paymentUrl;
 		this.shippingUrl = shippingUrl;
+		this.userUrl = userUrl;
 	}
 
 	public String getCartUrl() {
@@ -28,5 +31,9 @@ public class SockProps {
 
 	public String getShippingUrl() {
 		return shippingUrl;
+	}
+
+	public String getUserUrl() {
+		return userUrl;
 	}
 }

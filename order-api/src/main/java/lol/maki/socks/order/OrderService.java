@@ -13,15 +13,21 @@ import lol.maki.socks.payment.client.PaymentApi;
 import lol.maki.socks.shipping.client.ShipmentApi;
 import lol.maki.socks.shipping.client.ShipmentRequest;
 import lol.maki.socks.shipping.client.ShipmentResponse;
+import lol.maki.socks.user.client.CustomerAddressResponse;
+import lol.maki.socks.user.client.CustomerCardResponse;
+import lol.maki.socks.user.client.CustomerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.IdGenerator;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class OrderService {
+	private final WebClient webClient;
+
 	private final CartApi cartApi;
 
 	private final PaymentApi paymentApi;
@@ -34,7 +40,8 @@ public class OrderService {
 
 	private final Clock clock;
 
-	public OrderService(CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
+	public OrderService(WebClient webClient, CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
+		this.webClient = webClient;
 		this.cartApi = cartApi;
 		this.paymentApi = paymentApi;
 		this.shipmentApi = shipmentApi;
@@ -115,30 +122,49 @@ public class OrderService {
 		return order;
 	}
 
+
+	static String lastPathSegment(URI uri) {
+		final String[] path = uri.getPath().split("/");
+		return path[path.length - 1];
+	}
+
 	Mono<Customer> retrieveCustomer(URI customerUri) {
-		return Mono.just(ImmutableCustomer.builder()
-				.id("1234")
-				.firstName("John")
-				.lastName("Doe")
-				.username("jdoe")
-				.build());
+		final String customerId = lastPathSegment(customerUri);
+		return this.webClient.get()
+				.uri(customerUri)
+				.retrieve()
+				.bodyToMono(CustomerResponse.class)
+				.map(r -> ImmutableCustomer.builder()
+						.id(customerId)
+						.firstName("John")
+						.lastName("Doe")
+						.username("jdoe")
+						.build());
 	}
 
 	Mono<Address> retrieveAddress(URI addressUri) {
-		return Mono.just(ImmutableAddress.builder()
-				.number("123")
-				.street("Street")
-				.city("City")
-				.country("Country")
-				.postcode("1111111")
-				.build());
+		return this.webClient.get()
+				.uri(addressUri)
+				.retrieve()
+				.bodyToMono(CustomerAddressResponse.class)
+				.map(r -> ImmutableAddress.builder()
+						.number(r.getNumber())
+						.street(r.getStreet())
+						.city(r.getCity())
+						.country(r.getCountry())
+						.postcode(r.getPostcode())
+						.build());
 	}
 
 	Mono<Card> retrieveCard(URI cardUri) {
-		return Mono.just(ImmutableCard.builder()
-				.longNum("4111111111111111")
-				.ccv("123")
-				.expires(LocalDate.of(2024, 1, 1))
-				.build());
+		return this.webClient.get()
+				.uri(cardUri)
+				.retrieve()
+				.bodyToMono(CustomerCardResponse.class)
+				.map(r -> ImmutableCard.builder()
+						.longNum(r.getLongNum())
+						.ccv(r.getCcv())
+						.expires(r.getExpires())
+						.build());
 	}
 }

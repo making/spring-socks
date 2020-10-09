@@ -58,6 +58,11 @@
 			<version>0.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>lol.maki.socks</groupId>
+			<artifactId>user-client</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>swagger-ui</artifactId>
 			<version>3.27.0</version>
@@ -74,10 +79,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
-		<!--        <dependency>-->
-		<!--            <groupId>org.springframework.boot</groupId>-->
-		<!--            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>-->
-		<!--        </dependency>-->
+		        <dependency>
+		            <groupId>org.springframework.boot</groupId>
+		            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		        </dependency>
 		<!--        <dependency>-->
 		<!--            <groupId>org.springframework.boot</groupId>-->
 		<!--            <artifactId>spring-boot-starter-security</artifactId>-->
