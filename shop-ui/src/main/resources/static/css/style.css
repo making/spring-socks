@@ -100,9 +100,8 @@ a {
 
 a:hover,
 a:focus {
-    text-decoration: none;
+    text-decoration: underline;
     outline: none;
-    color: #ffffff;
 }
 
 ul,

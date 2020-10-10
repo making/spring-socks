@@ -1,8 +1,10 @@
-package lol.maki.socks.cart;
+package lol.maki.socks.cart.web;
 
 import java.time.Duration;
 import java.util.UUID;
 
+import lol.maki.socks.cart.Cart;
+import lol.maki.socks.cart.CartItem;
 import lol.maki.socks.cart.client.CartResponse;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;

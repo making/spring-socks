@@ -1,4 +1,4 @@
-package lol.maki.socks.shop;
+package lol.maki.socks.cart.web;
 
 import java.util.Map;
 import java.util.UUID;

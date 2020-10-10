@@ -2,6 +2,9 @@ package lol.maki.socks.config;
 
 import java.net.URI;
 
+import lol.maki.socks.security.RedirectToServerRedirectStrategy;
+import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
+
 import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +17,7 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.web.DefaultReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -36,11 +40,15 @@ public class SecurityConfig {
 		return http
 				.authorizeExchange(exchanges -> exchanges
 						.matchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
-						.pathMatchers("/demo").permitAll()
+						.pathMatchers("/demo").authenticated()
 						.anyExchange().permitAll()
 				)
-//				.oauth2Login(Customizer.withDefaults())
-//				.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler))
+				.oauth2Login(oauth2 -> {
+					final RedirectServerAuthenticationSuccessHandler successHandler = new RedirectServerAuthenticationSuccessHandler();
+					successHandler.setRedirectStrategy(new RedirectToServerRedirectStrategy());
+					oauth2.authenticationSuccessHandler(successHandler);
+				})
+				.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler))
 				.csrf(csrf -> csrf.disable() /* TODO */)
 				.build();
 	}
@@ -54,5 +62,10 @@ public class SecurityConfig {
 		final DefaultReactiveOAuth2AuthorizedClientManager authorizedClientManager = new DefaultReactiveOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientRepository);
 		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 		return authorizedClientManager;
+	}
+
+	@Bean
+	public SpringSecurityDialect securityDialect() {
+		return new SpringSecurityDialect();
 	}
 }

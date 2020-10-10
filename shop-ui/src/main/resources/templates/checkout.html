@@ -56,8 +56,14 @@
     </div>
     <div class="humberger__menu__widget">
         <div class="header__top__right__auth">
-            <a href="#"><i class="fa fa-user"></i> Login</a>
-        </div>
+            <a data-th-unless="${#authentication}"
+               data-th-href="@{/oauth2/authorization/ui}">
+                <i class="fa fa-user"></i> Login
+            </a>
+            <span data-th-if="${#authentication != null && #authentication.principal != null}"
+                  data-th-with="principal=${#authentication.principal}">
+                                <i class="fa fa-user"></i> [[${principal.givenName}]] [[${principal.familyName}]]
+                            </span></div>
     </div>
     <nav class="humberger__menu__nav mobile-menu">
         <ul>
@@ -67,8 +73,6 @@
     <div id="mobile-menu-wrap"></div>
     <div class="humberger__menu__contact">
         <ul>
-            <li><i class="fa fa-envelope"></i> hello@colorlib.com</li>
-            <li>Free Shipping for all Order of $99</li>
         </ul>
     </div>
 </div>
@@ -82,15 +86,20 @@
                 <div class="col-lg-6 col-md-6">
                     <div class="header__top__left">
                         <ul>
-                            <li><i class="fa fa-envelope"></i> hello@colorlib.com</li>
-                            <li>Free Shipping for all Order of $99</li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <div class="header__top__right">
                         <div class="header__top__right__auth">
-                            <a href="#"><i class="fa fa-user"></i> Login</a>
+                            <a data-th-unless="${#authentication}"
+                               data-th-href="@{/oauth2/authorization/ui}">
+                                <i class="fa fa-user"></i> Login
+                            </a>
+                            <span data-th-if="${#authentication != null && #authentication.principal != null}"
+                                  data-th-with="principal=${#authentication.principal}">
+                                <i class="fa fa-user"></i> [[${principal.givenName}]] [[${principal.familyName}]]
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -137,6 +146,10 @@
 <!-- Checkout Section Begin -->
 <section class="checkout spad">
     <div class="container">
+        <p>
+            <a data-th-unless="${#authentication}"
+               data-th-href="@{/checkout?login}">Login if you have an account.</a>
+        </p>
         <div class="checkout__form">
             <h4>Billing Details</h4>
             <form data-th-action="@{/checkout}"
@@ -228,7 +241,8 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row"
+                             data-th-unless="${#authentication}">
                             <div class="col-lg-6">
                                 <div class="checkout__input__checkbox">
                                     <label for="acc">
