@@ -63,7 +63,9 @@
             <span data-th-if="${#authentication != null && #authentication.principal != null}"
                   data-th-with="principal=${#authentication.principal}">
                                 <i class="fa fa-user"></i> [[${principal.givenName}]] [[${principal.familyName}]]
-                            </span></div>
+                            </span>
+            <a data-th-if="${#authentication}" data-th-href="@{/logout}">Logout</a>
+        </div>
     </div>
     <nav class="humberger__menu__nav mobile-menu">
         <ul>
@@ -100,6 +102,7 @@
                                   data-th-with="principal=${#authentication.principal}">
                                 <i class="fa fa-user"></i> [[${principal.givenName}]] [[${principal.familyName}]]
                             </span>
+                            <a data-th-if="${#authentication}" data-th-href="@{/logout}">Logout</a>
                         </div>
                     </div>
                 </div>
@@ -141,7 +144,7 @@
         </div>
     </div>
 </header>
-<!-- Header Section End -->s
+<!-- Header Section End -->
 
 <!-- Product Section Begin -->
 <section class="product spad">
