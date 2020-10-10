@@ -22,6 +22,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 				.authorizeRequests(authorizeRequests -> authorizeRequests
 						.requestMatchers(EndpointRequest.to("info", "health", "prometheus")).permitAll()
+						.mvcMatchers("/images/**").permitAll()
 						.mvcMatchers(HttpMethod.GET, "/**").access("hasRole('TRUSTED_CLIENT') and hasAuthority('SCOPE_catalog:read')")
 						.anyRequest().authenticated()
 				)
