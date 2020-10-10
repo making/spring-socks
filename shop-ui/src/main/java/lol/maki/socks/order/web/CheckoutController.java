@@ -4,10 +4,13 @@ import lol.maki.socks.cart.Cart;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.order.Order;
 import lol.maki.socks.order.OrderService;
+import lol.maki.socks.order.client.OrderResponse;
 import lol.maki.socks.security.ShopUser;
 import lol.maki.socks.user.client.CustomerAddressResponse;
 import lol.maki.socks.user.client.CustomerCardResponse;
 import lol.maki.socks.user.client.CustomerResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.ResponseCookie;
@@ -19,11 +22,14 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -38,6 +44,8 @@ public class CheckoutController {
 	private final WebClient webClient;
 
 	private final SockProps props;
+
+	private final Logger log = LoggerFactory.getLogger(CheckoutController.class);
 
 	public CheckoutController(OrderService orderService, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.orderService = orderService;
@@ -94,20 +102,26 @@ public class CheckoutController {
 	}
 
 	@PostMapping(path = "checkout")
-	public Mono<String> checkout(Cart cart, Model model, Order order, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient, ServerWebExchange exchange) {
-		System.out.println(order);
-		if (true) {
+	public Mono<String> checkout(@AuthenticationPrincipal ShopUser user, Cart cart, Model model, @Validated Order order, BindingResult bindingResult, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient, ServerWebExchange exchange) {
+		if (bindingResult.hasErrors()) {
 			return this.checkoutForm(cart, model, authorizedClient);
 		}
-		// TODO validation
-		// return this.checkoutForm(cart, model);
-		return this.orderService.placeOrder(cart, order, authorizedClient)
+		final Mono<OrderResponse> orderResponse = user == null ?
+				this.orderService.placeOrderWithoutLogin(cart, order, authorizedClient) :
+				this.orderService.placeOrderWithLogin(user, cart, order, authorizedClient);
+		return orderResponse
 				.doOnSuccess(__ -> /* Delete Cookie */
 						exchange.getResponse().addCookie(ResponseCookie.from(CART_ID_COOKIE_NAME, "deleted")
 								.maxAge(0)
 								.httpOnly(true)
 								.path("/")
 								.build()))
-				.thenReturn("redirect:/");
+				.thenReturn("redirect:/")
+				.onErrorResume(WebClientResponseException.class, e -> {
+					final String body = e.getResponseBodyAsString();
+					log.warn(body, e);
+					model.addAttribute("errorMessage", body);
+					return this.checkoutForm(cart, model, authorizedClient);
+				});
 	}
 }

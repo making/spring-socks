@@ -3592,3 +3592,13 @@ input[type="submit"] {
         font-size: 24px;
     }
 }
+
+/* ----------------- */
+p.error-messages {
+    color: #dd2222;
+}
+
+input.error-input {
+    border-color: #dd2222;
+    margin-left: 5px;
+}

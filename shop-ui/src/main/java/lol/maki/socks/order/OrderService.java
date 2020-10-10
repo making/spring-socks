@@ -11,6 +11,7 @@ import lol.maki.socks.cart.Cart;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.order.client.OrderRequest;
 import lol.maki.socks.order.client.OrderResponse;
+import lol.maki.socks.security.ShopUser;
 import reactor.core.publisher.Mono;
 
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -38,7 +39,16 @@ public class OrderService {
 		this.props = props;
 	}
 
-	public Mono<OrderResponse> placeOrder(Cart cart, Order order, OAuth2AuthorizedClient authorizedClient) {
+	public Mono<OrderResponse> placeOrderWithLogin(ShopUser shopUser, Cart cart, Order order, OAuth2AuthorizedClient authorizedClient) {
+		final String customerId = shopUser.getSubject();
+		final String accessToken = shopUser.getAccessToken().getTokenValue();
+		return Mono.zip(this.createAddress(order, accessToken), this.createCard(order, accessToken))
+				.flatMap(tpl ->
+						this.mergeCart(customerId, cart, authorizedClient)
+								.then(this.createOrder(customerId, tpl.getT1(), tpl.getT2(), accessToken)));
+	}
+
+	public Mono<OrderResponse> placeOrderWithoutLogin(Cart cart, Order order, OAuth2AuthorizedClient authorizedClient) {
 		final ClientRegistration client = authorizedClient.getClientRegistration();
 		final String username = UUID.randomUUID().toString();
 		final String password = UUID.randomUUID().toString();

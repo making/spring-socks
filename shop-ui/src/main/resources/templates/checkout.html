@@ -155,6 +155,9 @@
         </p>
         <div class="checkout__form">
             <h4>Billing Details</h4>
+            <p data-th-if="${errorMessage}" class="error-messages">
+                [[${errorMessage}]]
+            </p>
             <form data-th-action="@{/checkout}"
                   method="post"
                   data-th-object="${order}">
@@ -164,13 +167,21 @@
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Fist Name<span>*</span></p>
-                                    <input type="text" data-th-field="*{firstName}">
+                                    <input type="text" data-th-field="*{firstName}"
+                                           data-th-classappend="${#fields.hasErrors('firstName')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('firstName')}"
+                                       data-th-errors="*{firstName}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Last Name<span>*</span></p>
-                                    <input type="text" data-th-field="*{lastName}">
+                                    <input type="text" data-th-field="*{lastName}"
+                                           data-th-classappend="${#fields.hasErrors('lastName')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('lastName')}"
+                                       data-th-errors="*{lastName}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                         </div>
@@ -178,17 +189,21 @@
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Street<span>*</span></p>
-                                    <input type="text" placeholder="Street"
-                                           class="checkout__input__add"
-                                           data-th-field="*{street}">
+                                    <input type="text" data-th-field="*{street}"
+                                           data-th-classappend="${#fields.hasErrors('street')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('street')}"
+                                       data-th-errors="*{street}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Number<span>*</span></p>
-                                    <input type="text"
-                                           placeholder="Number"
-                                           data-th-field="*{number}">
+                                    <input type="text" data-th-field="*{number}"
+                                           data-th-classappend="${#fields.hasErrors('number')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('number')}"
+                                       data-th-errors="*{number}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                         </div>
@@ -196,13 +211,21 @@
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>City<span>*</span></p>
-                                    <input type="text" data-th-field="*{city}">
+                                    <input type="text" data-th-field="*{city}"
+                                           data-th-classappend="${#fields.hasErrors('city')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('city')}"
+                                       data-th-errors="*{city}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Postcode<span>*</span></p>
-                                    <input type="text" data-th-field="*{postcode}">
+                                    <input type="text" data-th-field="*{postcode}"
+                                           data-th-classappend="${#fields.hasErrors('postcode')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('postcode')}"
+                                       data-th-errors="*{postcode}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                         </div>
@@ -210,13 +233,21 @@
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Country<span>*</span></p>
-                                    <input type="text" data-th-field="*{country}">
+                                    <input type="text" data-th-field="*{country}"
+                                           data-th-classappend="${#fields.hasErrors('country')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('country')}"
+                                       data-th-errors="*{country}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Email<span>*</span></p>
-                                    <input type="text" data-th-field="*{email}">
+                                    <input type="text" data-th-field="*{email}"
+                                           data-th-classappend="${#fields.hasErrors('email')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('email')}"
+                                       data-th-errors="*{email}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                         </div>
@@ -225,21 +256,31 @@
                                 <div class="checkout__input">
                                     <p>Card Number<span>*</span></p>
                                     <input type="text" data-th-field="*{longNum}"
-                                           placeholder="Card Number">
+                                           data-th-classappend="${#fields.hasErrors('longNum')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('longNum')}"
+                                       data-th-errors="*{longNum}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="checkout__input">
                                     <p>Expires<span>*</span></p>
                                     <input type="text" data-th-field="*{expires}"
-                                           placeholder="MM/YY">
+                                           placeholder="MM/YY"
+                                           data-th-classappend="${#fields.hasErrors('expires')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('expires')}"
+                                       data-th-errors="*{expires}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="checkout__input">
                                     <p>CCV<span>*</span></p>
                                     <input type="text" data-th-field="*{ccv}"
-                                           placeholder="CCV">
+                                           data-th-classappend="${#fields.hasErrors('ccv')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('ccv')}"
+                                       data-th-errors="*{ccv}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                         </div>
@@ -263,7 +304,11 @@
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Account Password</p>
-                                    <input type="password" data-th-field="*{password}">
+                                    <input type="password" data-th-field="*{password}"
+                                           data-th-classappend="${#fields.hasErrors('password')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('password')}"
+                                       data-th-errors="*{password}"
+                                       class="error-messages">error!</p>
                                 </div>
                             </div>
                         </div>

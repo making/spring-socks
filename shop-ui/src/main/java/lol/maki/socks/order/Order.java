@@ -1,26 +1,45 @@
 package lol.maki.socks.order;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+
+import org.hibernate.validator.constraints.CreditCardNumber;
+
 public class Order {
+	@NotEmpty
 	private String firstName;
 
+	@NotEmpty
 	private String lastName;
 
+	@NotEmpty
 	private String street;
 
+	@NotEmpty
 	private String number;
 
+	@NotEmpty
 	private String city;
 
+	@NotEmpty
 	private String postcode;
 
+	@NotEmpty
 	private String country;
 
+	@NotEmpty
+	@Email
 	private String email;
 
+	@NotEmpty
+	@CreditCardNumber
 	private String longNum;
 
+	@NotEmpty
 	private String expires;
 
+	@NotEmpty
 	private String ccv;
 
 	private boolean createAccount = false;

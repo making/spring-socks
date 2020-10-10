@@ -7,14 +7,19 @@ import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.CartItem;
 import lol.maki.socks.cart.client.CartResponse;
 import lol.maki.socks.config.SockProps;
+import lol.maki.socks.security.ShopUser;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
@@ -48,35 +53,51 @@ public class CartHandlerMethodArgumentResolver extends HandlerMethodArgumentReso
 		return checkParameterType(parameter, Cart.class::isAssignableFrom);
 	}
 
+	Mono<String> cookieCartId(ServerWebExchange exchange) {
+		return Mono.fromCallable(() -> {
+			final MultiValueMap<String, HttpCookie> cookies = exchange.getRequest().getCookies();
+			final String cartId;
+			if (cookies.containsKey(CART_ID_COOKIE_NAME)) {
+				cartId = cookies.getFirst(CART_ID_COOKIE_NAME).getValue();
+			}
+			else {
+				cartId = Cart.generateSessionId(this.idGenerator::generateId);
+				final ResponseCookie cookie = ResponseCookie.from(CART_ID_COOKIE_NAME, cartId)
+						.maxAge(Duration.ofDays(3))
+						.httpOnly(true)
+						.path("/")
+						.build();
+				exchange.getResponse().addCookie(cookie);
+			}
+			return cartId;
+		});
+	}
+
+	Mono<String> cartId(ServerWebExchange exchange) {
+		return ReactiveSecurityContextHolder.getContext()
+				.map(SecurityContext::getAuthentication)
+				.map(Authentication::getPrincipal)
+				.cast(ShopUser.class)
+				.map(IdTokenClaimAccessor::getSubject)
+				.switchIfEmpty(this.cookieCartId(exchange))
+				.log("cartId");
+	}
+
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter methodParameter, BindingContext bindingContext, ServerWebExchange exchange) {
-		final MultiValueMap<String, HttpCookie> cookies = exchange.getRequest().getCookies();
-		final String cartId;
-		if (cookies.containsKey(CART_ID_COOKIE_NAME)) {
-			cartId = cookies.getFirst(CART_ID_COOKIE_NAME).getValue();
-		}
-		else {
-			cartId = Cart.generateSessionId(this.idGenerator::generateId);
-			// TODO or customerId from session
-			final ResponseCookie cookie = ResponseCookie.from(CART_ID_COOKIE_NAME, cartId)
-					.maxAge(Duration.ofDays(3))
-					.httpOnly(true)
-					.path("/")
-					.build();
-			exchange.getResponse().addCookie(cookie);
-		}
-		return this.webClient.get()
-				.uri("carts/{cartId}", cartId)
-				.attributes(clientRegistrationId("sock"))
-				.retrieve()
-				.bodyToMono(CartResponse.class)
-				.map(c -> new Cart(cartId, c.getItems().stream()
-						.map(i -> new CartItem(UUID.fromString(i.getItemId()), i.getQuantity(), i.getUnitPrice()))
-						.collect(toUnmodifiableList())))
-				.doOnNext(cart -> bindingContext.getModel()
-						.addAttribute("cart", cart)
-						.addAttribute("itemSize", cart.getItemSize())
-						.addAttribute("total", cart.getTotal()))
-				.cast(Object.class);
+		return this.cartId(exchange)
+				.flatMap(cartId -> this.webClient.get()
+						.uri("carts/{cartId}", cartId)
+						.attributes(clientRegistrationId("sock"))
+						.retrieve()
+						.bodyToMono(CartResponse.class)
+						.map(c -> new Cart(cartId, c.getItems().stream()
+								.map(i -> new CartItem(UUID.fromString(i.getItemId()), i.getQuantity(), i.getUnitPrice()))
+								.collect(toUnmodifiableList())))
+						.doOnNext(cart -> bindingContext.getModel()
+								.addAttribute("cart", cart)
+								.addAttribute("itemSize", cart.getItemSize())
+								.addAttribute("total", cart.getTotal()))
+						.cast(Object.class));
 	}
 }
