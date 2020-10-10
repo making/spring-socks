@@ -41,6 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						.mvcMatchers("/", "/loginForm", "/doLogin", "/logout", "/oauth/authorize", "token_keys", "/.well-known/*", "/oauth/token/.well-known/*", "/me", "/customers/**", "/addresses/**", "/cards/**")
 						.requestMatchers(EndpointRequest.toAnyEndpoint()))
 				.authorizeRequests(authorize -> authorize
+						.mvcMatchers("/").permitAll()
 						.mvcMatchers("/oauth/authorize", "/token_keys", "/.well-known/*", "/oauth/token/.well-known/*").permitAll()
 						.mvcMatchers("/me").hasAnyAuthority("SCOPE_openid")
 						.mvcMatchers(GET, "/addresses/**", "/cards/**", "/customers/**").hasAnyAuthority("SCOPE_customer:read")
