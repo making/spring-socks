@@ -95,6 +95,9 @@ public class CheckoutController {
 
 	@GetMapping(path = "checkout")
 	public Mono<String> checkoutForm(Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+		if (cart.getItems().isEmpty()) {
+			model.addAttribute("errorMessage", "Cart is empty.");
+		}
 		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("checkout");

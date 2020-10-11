@@ -336,7 +336,9 @@
                                 <span>$[[${cart.total}]]</span></div>
                             <div class="checkout__order__total">Total <span>$[[${cart.total}]]</span>
                             </div>
-                            <button type="submit" class="site-btn">PLACE ORDER</button>
+                            <button type="submit" class="site-btn"
+                                    data-th-if="${itemSize > 0}">PLACE ORDER
+                            </button>
                         </div>
                     </div>
                 </div>
