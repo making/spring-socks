@@ -304,7 +304,7 @@
                             <div class="col-lg-4">
                                 <div class="checkout__input">
                                     <p>Account Username</p>
-                                    <input type="password" data-th-field="*{username}"
+                                    <input data-th-field="*{username}"
                                            data-th-classappend="${#fields.hasErrors('username')}? 'error-input'">
                                     <p data-th-if="${#fields.hasErrors('username')}"
                                        data-th-errors="*{username}"
