@@ -231,7 +231,10 @@
                             <li>Subtotal <span>$[[${cart.total}]]</span></li>
                             <li>Total <span>$[[${cart.total}]]</span></li>
                         </ul>
-                        <a href="#" data-th-href="@{/checkout}" class="primary-btn">PROCEED
+                        <a href="#"
+                           data-th-href="@{/checkout}"
+                           data-th-if="${itemSize > 0}"
+                           class="primary-btn">PROCEED
                             TO CHECKOUT</a>
                     </div>
                 </div>

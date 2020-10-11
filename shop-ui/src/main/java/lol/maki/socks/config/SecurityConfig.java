@@ -2,6 +2,7 @@ package lol.maki.socks.config;
 
 import java.net.URI;
 
+import lol.maki.socks.cart.web.MergeCartServerAuthenticationSuccessHandler;
 import lol.maki.socks.security.RedirectToServerRedirectStrategy;
 import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
 
@@ -17,24 +18,33 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.web.DefaultReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.DelegatingServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 public class SecurityConfig {
 	private final URI authorizationServerLogoutUrl;
 
-	public SecurityConfig(OAuth2ClientProperties clientProperties) {
+	private final SockProps sockProps;
+
+	private final WebClient.Builder webClientBuilder;
+
+	public SecurityConfig(OAuth2ClientProperties clientProperties, SockProps sockProps, Builder webClientBuilder) {
 		this.authorizationServerLogoutUrl = clientProperties.getProvider().values().stream().findFirst()
 				.map(OAuth2ClientProperties.Provider::getIssuerUri)
 				.map(UriComponentsBuilder::fromHttpUrl)
 				.map(builder -> builder.replacePath("logout").build().toUri())
 				.orElseThrow();
+		this.sockProps = sockProps;
+		this.webClientBuilder = webClientBuilder;
 	}
 
 	@Bean
-	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
 		final RedirectServerLogoutSuccessHandler logoutSuccessHandler = new RedirectServerLogoutSuccessHandler();
 		logoutSuccessHandler.setLogoutSuccessUrl(this.authorizationServerLogoutUrl);
 		return http
@@ -44,9 +54,12 @@ public class SecurityConfig {
 						.anyExchange().permitAll()
 				)
 				.oauth2Login(oauth2 -> {
-					final RedirectServerAuthenticationSuccessHandler successHandler = new RedirectServerAuthenticationSuccessHandler();
-					successHandler.setRedirectStrategy(new RedirectToServerRedirectStrategy());
-					oauth2.authenticationSuccessHandler(successHandler);
+					final MergeCartServerAuthenticationSuccessHandler mergeCartServerAuthenticationSuccessHandler = new MergeCartServerAuthenticationSuccessHandler(this.webClientBuilder, authorizedClientManager, sockProps);
+					final RedirectServerAuthenticationSuccessHandler redirectServerAuthenticationSuccessHandler = new RedirectServerAuthenticationSuccessHandler();
+					redirectServerAuthenticationSuccessHandler.setRedirectStrategy(new RedirectToServerRedirectStrategy());
+					oauth2.authenticationSuccessHandler(new DelegatingServerAuthenticationSuccessHandler(
+							mergeCartServerAuthenticationSuccessHandler,
+							redirectServerAuthenticationSuccessHandler));
 				})
 				.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler))
 				.csrf(csrf -> csrf.disable() /* TODO */)

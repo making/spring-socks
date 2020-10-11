@@ -5,4 +5,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public interface ShopUser extends OidcUser {
 	OAuth2AccessToken getAccessToken();
+
+	default String customerId() {
+		return this.getSubject();
+	}
 }

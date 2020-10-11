@@ -19,7 +19,6 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.security.oauth2.core.oidc.IdTokenClaimAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
@@ -78,9 +77,8 @@ public class CartHandlerMethodArgumentResolver extends HandlerMethodArgumentReso
 				.map(SecurityContext::getAuthentication)
 				.map(Authentication::getPrincipal)
 				.cast(ShopUser.class)
-				.map(IdTokenClaimAccessor::getSubject)
-				.switchIfEmpty(this.cookieCartId(exchange))
-				.log("cartId");
+				.map(ShopUser::customerId)
+				.switchIfEmpty(this.cookieCartId(exchange));
 	}
 
 	@Override
