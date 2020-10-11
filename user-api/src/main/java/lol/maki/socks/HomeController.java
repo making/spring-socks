@@ -1,24 +1,20 @@
 package lol.maki.socks;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import lol.maki.socks.config.SockProps;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-@ConfigurationProperties(prefix = "home")
 public class HomeController {
-	private String url;
+	private final SockProps props;
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
+	public HomeController(SockProps props) {
+		this.props = props;
 	}
 
 	@GetMapping(path = "/")
 	public String home() {
-		return "redirect:" + this.url;
+		return "redirect:" + this.props.getLoginUrl();
 	}
 }
