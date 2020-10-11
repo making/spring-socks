@@ -61,8 +61,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthorizationResponse'
-        '401':
-          description: Unauthorized
+        '409':
+          description: Conflict
           content:
             application/json:
               schema:

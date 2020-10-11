@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @RestController
 @CrossOrigin
@@ -35,7 +35,7 @@ public class PaymentController implements PaymentAuthApi {
 			return ResponseEntity.badRequest().body(toResponse(result));
 		}
 		if (!result.authorized()) {
-			return ResponseEntity.status(UNAUTHORIZED).body(toResponse(result));
+			return ResponseEntity.status(CONFLICT).body(toResponse(result));
 		}
 		return ResponseEntity.ok(toResponse(result));
 	}

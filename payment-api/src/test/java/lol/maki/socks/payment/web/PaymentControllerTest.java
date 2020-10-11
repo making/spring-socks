@@ -51,7 +51,7 @@ class PaymentControllerTest {
 				.contentType(APPLICATION_JSON)
 				.characterEncoding(UTF_8.name())
 				.content("{\"amount\": 105.1}"))
-				.andExpect(status().isUnauthorized())
+				.andExpect(status().isConflict())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.authorization.authorised").value(false))
 				.andExpect(jsonPath("$.authorization.message").value("Payment declined: amount exceeds 105.00"));
