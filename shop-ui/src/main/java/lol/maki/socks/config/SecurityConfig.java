@@ -45,12 +45,9 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
-		final RedirectServerLogoutSuccessHandler logoutSuccessHandler = new RedirectServerLogoutSuccessHandler();
-		logoutSuccessHandler.setLogoutSuccessUrl(this.authorizationServerLogoutUrl);
 		return http
 				.authorizeExchange(exchanges -> exchanges
 						.matchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
-						.pathMatchers("/demo").authenticated()
 						.anyExchange().permitAll()
 				)
 				.oauth2Login(oauth2 -> {
@@ -61,7 +58,11 @@ public class SecurityConfig {
 							mergeCartServerAuthenticationSuccessHandler,
 							redirectServerAuthenticationSuccessHandler));
 				})
-				.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler))
+				.logout(logout -> {
+					final RedirectServerLogoutSuccessHandler redirectServerLogoutSuccessHandler = new RedirectServerLogoutSuccessHandler();
+					redirectServerLogoutSuccessHandler.setLogoutSuccessUrl(this.authorizationServerLogoutUrl);
+					logout.logoutSuccessHandler(redirectServerLogoutSuccessHandler);
+				})
 				.csrf(csrf -> csrf.disable() /* TODO */)
 				.build();
 	}
