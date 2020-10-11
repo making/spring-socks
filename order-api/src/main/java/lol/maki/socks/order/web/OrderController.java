@@ -47,6 +47,7 @@ public class OrderController implements OrdersApi {
 
 	@Override
 	public ResponseEntity<OrderResponse> createOrder(OrderRequest req) {
+		
 		final Order order = this.orderService.placeOrder(req.getCustomer(), req.getAddress(), req.getCard(), req.getItems());
 		final ServletUriComponentsBuilder uriComponentsBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
 		final URI location = uriComponentsBuilder.replacePath("orders/{orderId}").build(order.id());

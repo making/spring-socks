@@ -8,31 +8,28 @@ import java.util.List;
 import java.util.UUID;
 
 import lol.maki.socks.cart.client.CartApi;
+import lol.maki.socks.customer.CustomerClient;
 import lol.maki.socks.payment.client.AuthorizationRequest;
 import lol.maki.socks.payment.client.PaymentApi;
 import lol.maki.socks.shipping.client.ShipmentApi;
 import lol.maki.socks.shipping.client.ShipmentRequest;
 import lol.maki.socks.shipping.client.ShipmentResponse;
-import lol.maki.socks.user.client.CustomerAddressResponse;
-import lol.maki.socks.user.client.CustomerCardResponse;
-import lol.maki.socks.user.client.CustomerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.IdGenerator;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class OrderService {
-	private final WebClient webClient;
-
 	private final CartApi cartApi;
 
 	private final PaymentApi paymentApi;
 
 	private final ShipmentApi shipmentApi;
+
+	private final CustomerClient customerClient;
 
 	private final OrderMapper orderMapper;
 
@@ -40,11 +37,11 @@ public class OrderService {
 
 	private final Clock clock;
 
-	public OrderService(WebClient webClient, CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
-		this.webClient = webClient;
+	public OrderService(CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, CustomerClient customerClient, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
 		this.cartApi = cartApi;
 		this.paymentApi = paymentApi;
 		this.shipmentApi = shipmentApi;
+		this.customerClient = customerClient;
 		this.orderMapper = orderMapper;
 		this.idGenerator = idGenerator;
 		this.clock = clock;
@@ -130,10 +127,7 @@ public class OrderService {
 
 	Mono<Customer> retrieveCustomer(URI customerUri) {
 		final String customerId = lastPathSegment(customerUri);
-		return this.webClient.get()
-				.uri(customerUri)
-				.retrieve()
-				.bodyToMono(CustomerResponse.class)
+		return this.customerClient.retrieveCustomer(customerUri)
 				.map(r -> ImmutableCustomer.builder()
 						.id(customerId)
 						.firstName(r.getFirstName())
@@ -143,10 +137,7 @@ public class OrderService {
 	}
 
 	Mono<Address> retrieveAddress(URI addressUri) {
-		return this.webClient.get()
-				.uri(addressUri)
-				.retrieve()
-				.bodyToMono(CustomerAddressResponse.class)
+		return this.customerClient.retrieveAddress(addressUri)
 				.map(r -> ImmutableAddress.builder()
 						.number(r.getNumber())
 						.street(r.getStreet())
@@ -157,10 +148,7 @@ public class OrderService {
 	}
 
 	Mono<Card> retrieveCard(URI cardUri) {
-		return this.webClient.get()
-				.uri(cardUri)
-				.retrieve()
-				.bodyToMono(CustomerCardResponse.class)
+		return this.customerClient.retrieveCard(cardUri)
 				.map(r -> ImmutableCard.builder()
 						.longNum(r.getLongNum())
 						.ccv(r.getCcv())

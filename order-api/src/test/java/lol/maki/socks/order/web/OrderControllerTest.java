@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.cart.client.CartItemResponse;
+import lol.maki.socks.customer.CustomerClient;
 import lol.maki.socks.order.Address;
 import lol.maki.socks.order.Card;
 import lol.maki.socks.order.Customer;
@@ -30,6 +31,9 @@ import lol.maki.socks.payment.client.AuthorizationResponse;
 import lol.maki.socks.payment.client.PaymentApi;
 import lol.maki.socks.shipping.client.ShipmentApi;
 import lol.maki.socks.shipping.client.ShipmentResponse;
+import lol.maki.socks.user.client.CustomerAddressResponse;
+import lol.maki.socks.user.client.CustomerCardResponse;
+import lol.maki.socks.user.client.CustomerResponse;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,6 +43,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.IdGenerator;
 
@@ -47,12 +52,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(OrderController.class)
+@WebMvcTest(properties = "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://uaa.run.pcfone.io/oauth/token", controllers = OrderController.class)
 @Import(OrderService.class)
 class OrderControllerTest {
 	@Autowired
@@ -66,6 +72,9 @@ class OrderControllerTest {
 
 	@MockBean
 	PaymentApi paymentApi;
+
+	@MockBean
+	CustomerClient customerClient;
 
 	@MockBean
 	OrderMapper orderMapper;
@@ -177,10 +186,28 @@ class OrderControllerTest {
 						.carrier(this.shipment1.carrier())
 						.deliveryDate(this.shipment1.deliveryDate())
 						.trackingNumber(this.shipment1.trackingNumber())));
+		given(this.customerClient.retrieveCustomer(any()))
+				.willReturn(Mono.just(new CustomerResponse()
+						.username(this.customer1.username())
+						.firstName(this.customer1.firstName())
+						.lastName(this.customer1.lastName())));
+		given(this.customerClient.retrieveAddress(any()))
+				.willReturn(Mono.just(new CustomerAddressResponse()
+						.number(this.address1.number())
+						.street(this.address1.street())
+						.city(this.address1.city())
+						.postcode(this.address1.postcode())
+						.country(this.address1.country())));
+		given(this.customerClient.retrieveCard(any()))
+				.willReturn(Mono.just(new CustomerCardResponse()
+						.longNum(this.card1.longNum())
+						.expires(this.card1.expires())
+						.ccv(this.card1.ccv())));
 		this.mockMvc.perform(post("/orders")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:write")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding(UTF_8.toString())
-				.content(String.format("{\"address\":\"string\",\"card\":\"string\",\"customer\":\"string\",\"items\":\"https://cart.example.com/carts/%s/items\"}", this.customer1.id())))
+				.content(String.format("{\"address\":\"string\",\"card\":\"string\",\"customer\":\"https://customer.example.com/%s\",\"items\":\"https://cart.example.com/carts/%s/items\"}", this.customer1.id(), this.customer1.id())))
 				.andExpect(status().isCreated())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value(this.orderId1))
@@ -213,7 +240,8 @@ class OrderControllerTest {
 	@Test
 	void getOrder() throws Exception {
 		given(this.orderMapper.findOne(this.orderId1)).willReturn(Optional.of(this.order1));
-		this.mockMvc.perform(get("/orders/{orderId}", this.orderId1))
+		this.mockMvc.perform(get("/orders/{orderId}", this.orderId1)
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:read"))))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value(this.orderId1))
@@ -247,7 +275,9 @@ class OrderControllerTest {
 	@Test
 	void searchOrdersByCustomerId() throws Exception {
 		given(this.orderMapper.findByCustomerId(this.customer1.id())).willReturn(List.of(this.order2, this.order1));
-		this.mockMvc.perform(get("/orders/search/customerId").param("custId", this.customer1.id()))
+		this.mockMvc.perform(get("/orders/search/customerId")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:read")))
+				.param("custId", this.customer1.id()))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.length()").value(2))
