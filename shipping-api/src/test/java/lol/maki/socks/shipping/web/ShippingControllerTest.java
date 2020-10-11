@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.IdGenerator;
 
@@ -25,13 +26,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ShippingController.class)
+@WebMvcTest(properties = "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://uaa.run.pcfone.io/oauth/token", controllers = ShippingController.class)
 class ShippingControllerTest {
 	@Autowired
 	MockMvc mockMvc;
@@ -63,7 +65,8 @@ class ShippingControllerTest {
 	void getShippingById() throws Exception {
 		given(this.shipmentMapper.findByOrderId("1")).willReturn(Optional.of(this.shipment1));
 
-		this.mockMvc.perform(get("/shipping/{orderId}", "1"))
+		this.mockMvc.perform(get("/shipping/{orderId}", "1")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_shipping:read"))))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.carrier").value("FEDEX"))
@@ -76,7 +79,8 @@ class ShippingControllerTest {
 	void getShippings() throws Exception {
 		given(this.shipmentMapper.findAll()).willReturn(List.of(this.shipment1, this.shipment2));
 
-		this.mockMvc.perform(get("/shipping"))
+		this.mockMvc.perform(get("/shipping")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_shipping:read"))))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.length()").value(2))
@@ -98,6 +102,7 @@ class ShippingControllerTest {
 		given(this.idGenerator.generateId()).willReturn(UUID.fromString("7e8992a3-8492-482b-9432-f28428db6472"));
 
 		this.mockMvc.perform(post("/shipping")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_shipping:write")))
 				.contentType(APPLICATION_JSON)
 				.characterEncoding(UTF_8.name())
 				.content("{\"orderId\": \"3\", \"itemCount\": 5}"))
