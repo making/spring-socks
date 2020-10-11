@@ -46,19 +46,19 @@ jobs:
         set -e
         ./mvnw -V spring-boot:build-image -f cart-api/pom.xml -Dspring-boot.build-image.imageName=${IMAGE_NAME} -Dmaven.test.skip=true
         docker push ${IMAGE_NAME}
-    - uses: jvalkeal/setup-cf-cli@v0
-      if: github.ref == 'refs/heads/master'
-      with:
-        version: 6.51.0
-    - name: cf push
-      if: github.ref == 'refs/heads/master'
-      env:
-        CF_API: ${{ secrets.CF_API }}
-        CF_USERNAME: ${{ secrets.CF_USERNAME }}
-        CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
-        CF_ORG: ${{ secrets.CF_ORG }}
-        CF_SPACE: ${{ secrets.CF_SPACE }}
-      run: |
-        set -e
-        cf login -a ${CF_API} -u ${CF_USERNAME} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
-        cf push -f cart-api/manifest.yml
+#    - uses: jvalkeal/setup-cf-cli@v0
+#      if: github.ref == 'refs/heads/master'
+#      with:
+#        version: 6.51.0
+#    - name: cf push
+#      if: github.ref == 'refs/heads/master'
+#      env:
+#        CF_API: ${{ secrets.CF_API }}
+#        CF_USERNAME: ${{ secrets.CF_USERNAME }}
+#        CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+#        CF_ORG: ${{ secrets.CF_ORG }}
+#        CF_SPACE: ${{ secrets.CF_SPACE }}
+#      run: |
+#        set -e
+#        cf login -a ${CF_API} -u ${CF_USERNAME} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
+#        cf push -f cart-api/manifest.yml
