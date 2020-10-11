@@ -58,8 +58,8 @@ public class OrderService {
 
 	public Mono<OrderResponse> placeOrderWithoutLogin(Cart cart, Order order, OAuth2AuthorizedClient authorizedClient) {
 		final ClientRegistration client = authorizedClient.getClientRegistration();
-		final String username = UUID.randomUUID().toString();
-		final String password = UUID.randomUUID().toString();
+		final String username = order.isCreateAccount() ? order.getUsername() : UUID.randomUUID().toString();
+		final String password = order.isCreateAccount() ? order.getPassword() : UUID.randomUUID().toString();
 		return this.createUser(order, username, password, authorizedClient)
 				.then(this.retrieveToken(username, password, client.getClientId(), client.getClientSecret())
 						.flatMap(accessToken -> {
@@ -134,7 +134,7 @@ public class OrderService {
 				.uri(props.getUserUrl(), b -> b.path("cards").build())
 				.headers(httpHeaders -> httpHeaders.setBearerAuth(accessToken))
 				.bodyValue(Map.of("longNum", order.getLongNum(),
-						"expires", order.getExpires(),
+						"expires", order.parseExpires().toString(),
 						"ccv", order.getCcv()
 				))
 				.retrieve()

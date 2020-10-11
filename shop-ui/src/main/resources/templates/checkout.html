@@ -287,7 +287,7 @@
 
                         <div class="row"
                              data-th-unless="${#authentication}">
-                            <div class="col-lg-6">
+                            <div class="col-lg-4">
                                 <div class="checkout__input__checkbox">
                                     <label for="acc">
                                         Create an account?
@@ -301,7 +301,17 @@
                                     a returning customer
                                     please login at the top of the page</p>
                             </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-4">
+                                <div class="checkout__input">
+                                    <p>Account Username</p>
+                                    <input type="password" data-th-field="*{username}"
+                                           data-th-classappend="${#fields.hasErrors('username')}? 'error-input'">
+                                    <p data-th-if="${#fields.hasErrors('username')}"
+                                       data-th-errors="*{username}"
+                                       class="error-messages">error!</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
                                 <div class="checkout__input">
                                     <p>Account Password</p>
                                     <input type="password" data-th-field="*{password}"

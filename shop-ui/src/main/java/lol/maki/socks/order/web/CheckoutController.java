@@ -1,5 +1,6 @@
 package lol.maki.socks.order.web;
 
+import am.ik.yavi.core.ConstraintViolations;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.order.Order;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,7 +80,7 @@ public class CheckoutController {
 					if (!CollectionUtils.isEmpty(c.getCards())) {
 						final CustomerCardResponse card = c.getCards().get(0);
 						order.setLongNum(card.getLongNum());
-						order.setExpires(card.getExpires().toString());
+						order.setExpires(card.getExpires());
 						order.setCcv(card.getCcv());
 					}
 					return order;
@@ -101,8 +101,10 @@ public class CheckoutController {
 	}
 
 	@PostMapping(path = "checkout")
-	public Mono<String> checkout(@AuthenticationPrincipal ShopUser user, Cart cart, Model model, @Validated Order order, BindingResult bindingResult, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient, ServerWebExchange exchange) {
-		if (bindingResult.hasErrors()) {
+	public Mono<String> checkout(@AuthenticationPrincipal ShopUser user, Cart cart, Model model, Order order, BindingResult bindingResult, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient, ServerWebExchange exchange) {
+		final ConstraintViolations violations = order.validate();
+		if (!violations.isValid()) {
+			violations.apply(bindingResult::rejectValue);
 			return this.checkoutForm(cart, model, authorizedClient);
 		}
 		final Mono<OrderResponse> orderResponse = user == null ?

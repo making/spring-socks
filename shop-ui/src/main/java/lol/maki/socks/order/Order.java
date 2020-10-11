@@ -1,50 +1,72 @@
 package lol.maki.socks.order;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import java.time.LocalDate;
 
-import org.hibernate.validator.constraints.CreditCardNumber;
+import am.ik.yavi.builder.ValidatorBuilder;
+import am.ik.yavi.core.ConstraintViolations;
+import am.ik.yavi.core.Validator;
+import am.ik.yavi.core.ViolationMessage;
 
 public class Order {
-	@NotEmpty
+	static Validator<Order> validator = ValidatorBuilder.of(Order.class)
+			.constraint(Order::getFirstName, "firstName", c -> c.notBlank())
+			.constraint(Order::getLastName, "lastName", c -> c.notBlank())
+			.constraint(Order::getStreet, "street", c -> c.notBlank())
+			.constraint(Order::getNumber, "number", c -> c.notBlank())
+			.constraint(Order::getCity, "city", c -> c.notBlank())
+			.constraint(Order::getPostcode, "postcode", c -> c.notBlank())
+			.constraint(Order::getCountry, "country", c -> c.notBlank())
+			.constraint(Order::getEmail, "email", c -> c.notBlank()
+					.email())
+			.constraint(Order::getLongNum, "longNum", c -> c.notBlank()
+					.pattern("[0-9]*").message("\"{0}\" contains only numbers")
+					.greaterThanOrEqual(14)
+					.lessThanOrEqual(16))
+			.constraint(Order::getExpires, "expires", c -> c.notBlank()
+					.predicate(expires -> {
+						final LocalDate date = Order.parseExpires(expires);
+						return date != null && date.isAfter(LocalDate.now());
+					}, ViolationMessage.of("expires", "\"{0}\" must be a valid \"MM/YY\".")))
+			.constraint(Order::getCcv, "ccv", c -> c.notBlank()
+					.pattern("[0-9]*").message("\"{0}\" contains only numbers"))
+			.constraintOnCondition((order, group) -> order.isCreateAccount(), b -> b
+					.constraint(Order::getUsername, "username", c -> c.notBlank()
+							.greaterThanOrEqual(4))
+					.constraint(Order::getPassword, "password", c -> c.notBlank()
+							.greaterThanOrEqual(6)))
+			.build();
+
 	private String firstName;
 
-	@NotEmpty
 	private String lastName;
 
-	@NotEmpty
 	private String street;
 
-	@NotEmpty
 	private String number;
 
-	@NotEmpty
 	private String city;
 
-	@NotEmpty
 	private String postcode;
 
-	@NotEmpty
 	private String country;
 
-	@NotEmpty
-	@Email
 	private String email;
 
-	@NotEmpty
-	@CreditCardNumber
 	private String longNum;
 
-	@NotEmpty
 	private String expires;
 
-	@NotEmpty
 	private String ccv;
 
 	private boolean createAccount = false;
 
+	private String username;
+
 	private String password;
+
+	public ConstraintViolations validate() {
+		return validator.validate(this);
+	}
 
 	public String getFirstName() {
 		return firstName;
@@ -126,6 +148,31 @@ public class Order {
 		this.expires = expires;
 	}
 
+	public void setExpires(LocalDate expires) {
+		this.expires = expires.getMonthValue() + "/" + (expires.getYear() - 2000);
+	}
+
+	public LocalDate parseExpires() {
+		return parseExpires(this.expires);
+	}
+
+	static LocalDate parseExpires(String expires) {
+		if (expires == null) {
+			return null;
+		}
+		final String[] split = expires.split("\\-|/");
+		try {
+			final int year = Integer.parseInt(split[1]) + 2000;
+			final int month = Integer.parseInt(split[0]);
+			return LocalDate.of(year, month, 1)
+					.plusMonths(1)
+					.minusDays(1);
+		}
+		catch (RuntimeException e) {
+			return null;
+		}
+	}
+
 	public String getCcv() {
 		return ccv;
 	}
@@ -142,6 +189,14 @@ public class Order {
 		this.createAccount = createAccount;
 	}
 
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
 	public String getPassword() {
 		return password;
 	}
@@ -149,6 +204,7 @@ public class Order {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
 
 	@Override
 	public String toString() {
@@ -165,6 +221,7 @@ public class Order {
 				", expires='" + expires + '\'' +
 				", ccv='" + ccv + '\'' +
 				", createAccount=" + createAccount +
+				", username='" + username + '\'' +
 				", password='" + password + '\'' +
 				'}';
 	}
