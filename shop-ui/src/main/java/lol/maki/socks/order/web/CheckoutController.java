@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -117,10 +116,10 @@ public class CheckoutController {
 								.path("/")
 								.build()))
 				.thenReturn("redirect:/")
-				.onErrorResume(WebClientResponseException.class, e -> {
-					final String body = e.getResponseBodyAsString();
-					log.warn(body, e);
-					model.addAttribute("errorMessage", body);
+				.onErrorResume(RuntimeException.class, e -> {
+					final String message = e.getMessage();
+					log.warn(message, e);
+					model.addAttribute("errorMessage", message);
 					return this.checkoutForm(cart, model, authorizedClient);
 				});
 	}

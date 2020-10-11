@@ -136,9 +136,9 @@ public class OrderService {
 				.bodyToMono(CustomerResponse.class)
 				.map(r -> ImmutableCustomer.builder()
 						.id(customerId)
-						.firstName("John")
-						.lastName("Doe")
-						.username("jdoe")
+						.firstName(r.getFirstName())
+						.lastName(r.getLastName())
+						.username(r.getUsername())
 						.build());
 	}
 

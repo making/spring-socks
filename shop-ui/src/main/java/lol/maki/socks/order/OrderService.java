@@ -1,16 +1,19 @@
 package lol.maki.socks.order;
 
+import java.io.IOException;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.order.client.OrderRequest;
 import lol.maki.socks.order.client.OrderResponse;
+import lol.maki.socks.payment.client.AuthorizationResponse;
 import lol.maki.socks.security.ShopUser;
 import reactor.core.publisher.Mono;
 
@@ -22,8 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
 @Service
@@ -32,7 +37,10 @@ public class OrderService {
 
 	private final SockProps props;
 
-	public OrderService(Builder builder, SockProps props, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+	private final ObjectMapper objectMapper;
+
+	public OrderService(Builder builder, SockProps props, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.build();
@@ -155,7 +163,13 @@ public class OrderService {
 								.pathSegment("carts/{customerId}/items")
 								.build(customerId)))
 				.retrieve()
-				.bodyToMono(OrderResponse.class);
+				.bodyToMono(OrderResponse.class)
+				.onErrorMap(WebClientResponseException.class, e -> {
+					if (e.getStatusCode() == CONFLICT) {
+						throw this.convertPaymentException(e);
+					}
+					throw e;
+				});
 	}
 
 	String customerId(String accessToken) {
@@ -165,6 +179,16 @@ public class OrderService {
 		}
 		catch (ParseException e) {
 			throw new IllegalStateException(e);
+		}
+	}
+
+	RuntimeException convertPaymentException(WebClientResponseException e) {
+		try {
+			final AuthorizationResponse authorizationResponse = this.objectMapper.readValue(e.getResponseBodyAsByteArray(), AuthorizationResponse.class);
+			throw new IllegalStateException(authorizationResponse.getAuthorization().getMessage(), e);
+		}
+		catch (IOException ignored) {
+			throw e;
 		}
 	}
 }
