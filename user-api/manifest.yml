@@ -6,13 +6,13 @@ applications:
   health-check-http-endpoint: /actuator/health/readiness
   timeout: 180
   services:
-  - sockshop # cf create-user-provided-service sockshop -p "{\"url\":\"https://sockshop.cfapps.io\"}"
+  - spring-socks # cf create-user-provided-service spring-socks -p "{\"url\":\"https://spring-socks.cfapps.io\"}"
   - user-db # cf create-service p.mysql db-small user-db
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
   env:
-    SOCK_HOMEURL: ${vcap.services.sockshop.credentials.url}
+    SOCK_HOMEURL: ${vcap.services.spring-socks.credentials.url}
     SERVER_PORT: 8080
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_PROFILES_ACTIVE: cloud
