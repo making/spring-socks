@@ -32,7 +32,7 @@ jobs:
       run: |
         set -ex
         docker-compose -f ./integration-tests/docker-compose.yml up -d
-        while ! [ "$(curl -s localhost:8080/catalogue -o /dev/null -w '%{http_code}\n')" == "200" ]; do
+        while ! [ "$(curl -s localhost:8080 -o /dev/null -w '%{http_code}\n')" == "200" ]; do
           sleep 1
         done
         ./integration-tests/run-tests-for-docker.sh

@@ -1,25 +1,25 @@
 version: "2"
 services:
-  sock-frontend:
-    image: making/sockshop-frontend:latest
+  sock-user:
+    image: making/sockshop-user:latest
     ports:
-    - 8080:8080
+    - 8888:5006
     mem_limit: 256m
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
       LOGGING_LEVEL_ROOT: WARN
       LOGGING_LEVEL_WEB: DEBUG
+      LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
+      SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_user
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
-      SOCK_CATALOGURL: http://sock-catalog:5001
-      SOCK_CARTURL: http://sock-cart:5005
-      SOCK_ORDERURL: http://sock-order:5004
-      SOCK_PAYMENTURL: http://sock-payment:5002
-      SOCK_SHIPPINGURL: http://sock-shipping:5003
+      SOCK_HOMEURL: http://localhost:8080
     depends_on:
+    - mysql
     - zipkin
   sock-catalog:
     image: making/sockshop-catalog:latest
@@ -36,9 +36,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_catalog
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: http://sock-user:5006/oauth/token
     depends_on:
     - mysql
     - zipkin
+    - sock-user
   sock-cart:
     image: making/sockshop-cart:latest
     mem_limit: 256m
@@ -54,9 +56,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_cart
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: http://sock-user:5006/oauth/token
     depends_on:
     - mysql
     - zipkin
+    - sock-user
   sock-order:
     image: making/sockshop-order:latest
     mem_limit: 256m
@@ -75,9 +79,11 @@ services:
       SOCK_CARTURL: http://sock-cart:5005
       SOCK_PAYMENTURL: http://sock-payment:5002
       SOCK_SHIPPINGURL: http://sock-shipping:5003
+      SOCK_USERURL: http://sock-user:5006
     depends_on:
     - mysql
     - zipkin
+    - sock-user
   sock-payment:
     image: making/sockshop-payment:latest
     mem_limit: 256m
@@ -93,9 +99,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_payment
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: http://sock-user:5006/oauth/token
     depends_on:
     - mysql
     - zipkin
+    - sock-user
   sock-shipping:
     image: making/sockshop-shipping:latest
     mem_limit: 256m
@@ -111,9 +119,36 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_shipping
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: http://sock-user:5006/oauth/token
     depends_on:
     - mysql
     - zipkin
+    - sock-user
+  shop-ui:
+    image: making/sockshop-ui:latest
+    ports:
+    - 8080:6060
+    mem_limit: 256m
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      LOGGING_LEVEL_ROOT: WARN
+      LOGGING_LEVEL_WEB: DEBUG
+      LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
+      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      BPL_JVM_THREAD_COUNT: 20
+      SPRING_ZIPKIN_ENABLED: "true"
+      SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
+      SOCK_CATALOGURL: http://sock-catalog:5001
+      SOCK_CARTURL: http://sock-cart:5005
+      SOCK_ORDERURL: http://sock-order:5004
+      SOCK_PAYMENTURL: http://sock-payment:5002
+      SOCK_SHIPPINGURL: http://sock-shipping:5003
+      SOCK_USERURL: http://sock-user:5006
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UI_AUTHORIZATIONURI: http://localhost:8888/oauth/authorize
+    depends_on:
+    - zipkin
+    - sock-user
   mysql:
     image: mysql:8
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
