@@ -49,7 +49,7 @@ jobs:
     - uses: jvalkeal/setup-cf-cli@v0
       if: github.ref == 'refs/heads/master'
       with:
-        version: 6.51.0
+        version: 7.1.0
     - name: cf push
       if: github.ref == 'refs/heads/master'
       env:
