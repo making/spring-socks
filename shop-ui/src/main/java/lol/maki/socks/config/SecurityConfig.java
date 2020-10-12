@@ -35,7 +35,14 @@ public class SecurityConfig {
 
 	public SecurityConfig(OAuth2ClientProperties clientProperties, SockProps sockProps, Builder webClientBuilder) {
 		this.authorizationServerLogoutUrl = clientProperties.getProvider().values().stream().findFirst()
-				.map(OAuth2ClientProperties.Provider::getIssuerUri)
+				.map(provider -> {
+					if (provider.getAuthorizationUri() != null) {
+						return provider.getAuthorizationUri();
+					}
+					else {
+						return provider.getIssuerUri();
+					}
+				})
 				.map(UriComponentsBuilder::fromHttpUrl)
 				.map(builder -> builder.replacePath("logout").build().toUri())
 				.orElseThrow();
