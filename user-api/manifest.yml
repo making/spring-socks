@@ -11,6 +11,7 @@ applications:
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
+  - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
     SOCK_HOMEURL: ${vcap.services.spring-socks.credentials.url}
     SERVER_PORT: 8080
@@ -32,6 +33,12 @@ applications:
     MANAGEMENT_METRICS_TAGS_INSTANCE_ID: ${management.metrics.tags.application}:${vcap.application.instance_index}
     MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST: ${vcap.services.prometheus-rsocket-proxy.credentials.host}
     MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT: ${vcap.services.prometheus-rsocket-proxy.credentials.port}
+    MANAGEMENT_METRICS_EXPORT_WAVEFRONT_ENABLED: true
+    MANAGEMENT_METRICS_EXPORT_WAVEFRONT_APITOKEN: ${vcap.services.wavefront.credentials.api-token}
+    WAVEFRONT_APPLICATION_CLUSTER: ${vcap.application.organization_name}
+    WAVEFRONT_APPLICATION_NAME: ${vcap.application.space_name}
+    WAVEFRONT_APPLICATION_SERVICE: ${vcap.application.application_name}
+    WAVEFRONT_APPLICATION_SHARD: ${vcap.application.instance_index}
     LOGGING_EXCEPTIONCONVERSIONWORD: "\t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex"
     LOGGING_PATTERN_CONSOLE: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n"
     LOGGING_LEVEL_IO_PIVOTAL_CFENV: DEBUG
