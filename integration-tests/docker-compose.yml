@@ -1,7 +1,7 @@
 version: "2"
 services:
   sock-user:
-    image: making/sockshop-user:latest
+    image: ghcr.io/making/spring-socks-user:latest
     ports:
     - 8888:5006
     mem_limit: 256m
@@ -22,7 +22,7 @@ services:
     - mysql
     - zipkin
   sock-catalog:
-    image: making/sockshop-catalog:latest
+    image: ghcr.io/making/spring-socks-catalog:latest
     mem_limit: 256m
     restart: always
     environment:
@@ -42,7 +42,7 @@ services:
     - zipkin
     - sock-user
   sock-cart:
-    image: making/sockshop-cart:latest
+    image: ghcr.io/making/spring-socks-cart:latest
     mem_limit: 256m
     restart: always
     environment:
@@ -62,7 +62,7 @@ services:
     - zipkin
     - sock-user
   sock-order:
-    image: making/sockshop-order:latest
+    image: ghcr.io/making/spring-socks-order:latest
     mem_limit: 256m
     restart: always
     environment:
@@ -85,7 +85,7 @@ services:
     - zipkin
     - sock-user
   sock-payment:
-    image: making/sockshop-payment:latest
+    image: ghcr.io/making/spring-socks-payment:latest
     mem_limit: 256m
     restart: always
     environment:
@@ -105,7 +105,7 @@ services:
     - zipkin
     - sock-user
   sock-shipping:
-    image: making/sockshop-shipping:latest
+    image: ghcr.io/making/spring-socks-shipping:latest
     mem_limit: 256m
     restart: always
     environment:
@@ -125,7 +125,7 @@ services:
     - zipkin
     - sock-user
   shop-ui:
-    image: making/sockshop-ui:latest
+    image: ghcr.io/making/spring-socks-ui:latest
     ports:
     - 8080:6060
     mem_limit: 256m
