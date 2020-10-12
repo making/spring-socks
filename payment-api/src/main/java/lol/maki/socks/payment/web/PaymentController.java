@@ -7,25 +7,27 @@ import lol.maki.socks.payment.Payment;
 import lol.maki.socks.payment.spec.Authorization;
 import lol.maki.socks.payment.spec.AuthorizationRequest;
 import lol.maki.socks.payment.spec.AuthorizationResponse;
-import lol.maki.socks.payment.spec.PaymentAuthApi;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 
 @RestController
 @CrossOrigin
-public class PaymentController implements PaymentAuthApi {
+public class PaymentController {
 	private final PaymentProps props;
 
 	public PaymentController(PaymentProps props) {
 		this.props = props;
 	}
 
-	@Override
-	public ResponseEntity<AuthorizationResponse> authorizePayment(AuthorizationRequest req) {
+	@PostMapping(path = "/paymentAuth")
+	public ResponseEntity<AuthorizationResponse> authorizePayment(@Validated @RequestBody AuthorizationRequest req) {
 		final Payment payment = ImmutablePayment.builder()
 				.amount(req.getAmount())
 				.declineOverAmount(props.declineOverAmount())
