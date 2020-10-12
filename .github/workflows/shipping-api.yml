@@ -37,10 +37,11 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        IMAGE_NAME: making/sockshop-shipping
+        DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+        IMAGE_NAME: ghcr.io/making/spring-socks-shipping
       run: |
         set -e
-        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+        docker login ${DOCKER_REGISTRY} -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
         set +e
         docker pull ${IMAGE_NAME}
         set -e
