@@ -7,6 +7,7 @@ applications:
   timeout: 180
   services:
   - catalog-db # cf create-service p.mysql db-small catalog-db
+  - user-api # cf create-user-provided-service user-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-user --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
@@ -24,6 +25,7 @@ applications:
     SPRING_ZIPKIN_BASE_URL: ${vcap.services.zipkin.credentials.url}
     SPRING_ZIPKIN_SERVICE_NAME: ${management.metrics.tags.space}:${spring.application.name}
     SPRING_SLEUTH_WEB_ADDITIONALSKIPPATTERN: /actuator.*|/cloudfoundryapplication.*
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: ${vcap.services.user-api.credentials.url}/oauth/token
     MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}

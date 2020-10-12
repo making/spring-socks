@@ -1,17 +1,23 @@
 applications:
-- name: sock-shipping
-  path: target/shipping-api-0.0.1-SNAPSHOT.jar
+- name: sockshop
+  path: target/shop-ui-0.0.1-SNAPSHOT.jar
   memory: 256m
   health-check-type: http
-  health-check-http-endpoint: /actuator/health/readiness
+  health-check-http-endpoint: /management/health/readiness
   timeout: 180
   services:
-  - shipping-db # cf create-service p.mysql db-small shipping-db
   - user-api # cf create-user-provided-service user-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-user --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
+  - catalog-api # cf create-user-provided-service catalog-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-catalog --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
+  - cart-api # cf create-user-provided-service cart-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-cart --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
+  - order-api # cf create-user-provided-service order-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-order --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
   env:
+    SOCK_USERURL: ${vcap.services.user-api.credentials.url}
+    SOCK_CARTURL: ${vcap.services.cart-api.credentials.url}
+    SOCK_ORDERURL: ${vcap.services.order-api.credentials.url}
+    SOCK_CATALOGURL: ${vcap.services.catalog-api.credentials.url}
     SERVER_PORT: 8080
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_PROFILES_ACTIVE: cloud
@@ -25,7 +31,6 @@ applications:
     SPRING_ZIPKIN_BASE_URL: ${vcap.services.zipkin.credentials.url}
     SPRING_ZIPKIN_SERVICE_NAME: ${management.metrics.tags.space}:${spring.application.name}
     SPRING_SLEUTH_WEB_ADDITIONALSKIPPATTERN: /actuator.*|/cloudfoundryapplication.*
-    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: ${vcap.services.user-api.credentials.url}/oauth/token
     MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
@@ -39,4 +44,4 @@ applications:
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "8080"
-      prometheus.io/path: "/actuator/prometheus"
+      prometheus.io/path: "/management/prometheus"
