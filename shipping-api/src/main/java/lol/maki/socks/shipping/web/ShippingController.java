@@ -14,7 +14,12 @@ import lol.maki.socks.shipping.spec.ShippingApi;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.IdGenerator;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -35,18 +40,18 @@ public class ShippingController implements ShippingApi {
 		this.idGenerator = idGenerator;
 	}
 
-	@Override
-	public ResponseEntity<ShipmentResponse> getShippingById(String orderId) {
+	@GetMapping(path = "/shipping/{orderId}")
+	public ResponseEntity<ShipmentResponse> getShippingById(@PathVariable("orderId") String orderId) {
 		return ResponseEntity.of(this.shipmentMapper.findByOrderId(orderId).map(this::toResponse));
 	}
 
-	@Override
+	@GetMapping(path = "/shipping")
 	public ResponseEntity<List<ShipmentResponse>> getShippings() {
 		return ResponseEntity.ok(this.shipmentMapper.findAll().stream().map(this::toResponse).collect(toUnmodifiableList()));
 	}
 
-	@Override
-	public ResponseEntity<ShipmentResponse> postShipping(ShipmentRequest req) {
+	@PostMapping(path = "/shipping")
+	public ResponseEntity<ShipmentResponse> postShipping(@Validated @RequestBody ShipmentRequest req) {
 		final Shipment shipment = ImmutableShipment.builder()
 				.orderId(req.getOrderId())
 				.carrier(Carrier.chooseByItemCount(req.getItemCount()))
