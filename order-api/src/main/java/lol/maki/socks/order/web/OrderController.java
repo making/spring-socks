@@ -25,8 +25,14 @@ import lol.maki.socks.order.spec.OrderResponseShipment;
 import lol.maki.socks.order.spec.OrdersApi;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -45,22 +51,21 @@ public class OrderController implements OrdersApi {
 		this.orderService = orderService;
 	}
 
-	@Override
-	public ResponseEntity<OrderResponse> createOrder(OrderRequest req) {
-		
+	@PostMapping(path = "/orders")
+	public ResponseEntity<OrderResponse> createOrder(@Validated @RequestBody OrderRequest req) {
 		final Order order = this.orderService.placeOrder(req.getCustomer(), req.getAddress(), req.getCard(), req.getItems());
 		final ServletUriComponentsBuilder uriComponentsBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
 		final URI location = uriComponentsBuilder.replacePath("orders/{orderId}").build(order.id());
 		return ResponseEntity.created(location).body(toResponse(order));
 	}
 
-	@Override
-	public ResponseEntity<OrderResponse> getOrder(String id) {
+	@GetMapping(path = "/orders/{id}")
+	public ResponseEntity<OrderResponse> getOrder(@PathVariable("id") String id) {
 		return ResponseEntity.of(this.orderMapper.findOne(id).map(this::toResponse));
 	}
 
-	@Override
-	public ResponseEntity<List<OrderResponse>> searchOrdersByCustomerId(String custId) {
+	@GetMapping(path = "/orders/search/customerId")
+	public ResponseEntity<List<OrderResponse>> searchOrdersByCustomerId(@RequestParam(value = "custId") String custId) {
 		return ResponseEntity.ok(this.orderMapper.findByCustomerId(custId).stream().map(this::toResponse).collect(toUnmodifiableList()));
 	}
 
