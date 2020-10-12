@@ -1,5 +1,5 @@
 applications:
-- name: sockshop
+- name: spring-socks
   path: target/shop-ui-0.0.1-SNAPSHOT.jar
   memory: 256m
   health-check-type: http
