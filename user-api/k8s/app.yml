@@ -1,3 +1,4 @@
+#@ load("@ytt:data", "data")
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -25,7 +26,7 @@ spec:
         image: ghcr.io/making/spring-socks-user
         env:
         - name: SOCK_HOMEURL
-          value: http://10.213.173.52
+          value: #@ data.values.sock_ui_external_url
         - name: SPRING_PROFILES_ACTIVE
           value: kubernetes
         - name: SERVER_PORT

@@ -1,3 +1,4 @@
+#@ load("@ytt:data", "data")
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -47,7 +48,7 @@ spec:
         - name: BPL_JVM_THREAD_COUNT
           value: "20"
         - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UI_AUTHORIZATIONURI
-          value: http://10.213.173.50/oauth/authorize
+          value: #@ "{}/oauth/authorize".format(data.values.sock_user_external_url)
         - name: INFO_JAVA_VERSION
           value: ${java.runtime.version}
         - name: INFO_JAVA_VENDOR

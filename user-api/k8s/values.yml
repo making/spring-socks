@@ -6,3 +6,4 @@ mysql_username: sockshop
 mysql_password: sockshop
 mysql_database: sock_user
 use_external_mysql: False
+sock_ui_external_url: http://spring-socks.example.com
