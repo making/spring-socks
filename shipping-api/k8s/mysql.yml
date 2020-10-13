@@ -1,3 +1,5 @@
+#@ load("@ytt:data", "data")
+#@ if data.values.deploy_mysql == "yes":
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -105,3 +107,4 @@ spec:
           items:
           - key: charset.cnf
             path: charset.cnf
+#@ end

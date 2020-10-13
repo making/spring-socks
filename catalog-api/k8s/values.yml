@@ -1,0 +1,8 @@
+#@data/values
+---
+mysql_hostname: sock-catalog-mysql.sock-catalog.svc.cluster.local
+mysql_port: "3306"
+mysql_username: sockshop
+mysql_password: sockshop
+mysql_database: sock_catalog
+deploy_mysql: "yes"
