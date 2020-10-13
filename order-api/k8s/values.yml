@@ -5,4 +5,4 @@ mysql_port: "3306"
 mysql_username: sockshop
 mysql_password: sockshop
 mysql_database: sock_order
-deploy_mysql: "yes"
+use_external_mysql: False

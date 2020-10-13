@@ -1,5 +1,5 @@
 #@ load("@ytt:data", "data")
-#@ if data.values.deploy_mysql == "yes":
+#@ if str(data.values.use_external_mysql) == 'False':
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
