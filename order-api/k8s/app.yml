@@ -26,8 +26,6 @@ spec:
         env:
         - name: SOCK_CARTURL
           value: http://sock-cart.sock-cart.svc.cluster.local
-        - name: SOCK_CARTURL
-          value: http://sock-cart.sock-cart.svc.cluster.local
         - name: SOCK_PAYMENTURL
           value: http://sock-payment.sock-payment.svc.cluster.local
         - name: SOCK_SHIPPINGURL
