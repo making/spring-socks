@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sock-payment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: sock-payment
+  name: sock-payment
+  labels:
+    app: sock-payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sock-payment
+  template:
+    metadata:
+      labels:
+        app: sock-payment
+    spec:
+      containers:
+      - name: sock-payment
+        image: ghcr.io/making/spring-socks-payment
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: kubernetes
+        - name: SERVER_PORT
+          value: "8080"
+        - name: SERVER_TOMCAT_THREADS_MAX
+          value: "4"
+        - name: JAVA_TOOL_OPTIONS
+          value: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+        - name: BPL_JVM_THREAD_COUNT
+          value: "20"
+        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI
+          value: http://sock-user.sock-user.svc.cluster.local/oauth/token
+        - name: INFO_JAVA_VERSION
+          value: ${java.runtime.version}
+        - name: INFO_JAVA_VENDOR
+          value: ${java.vm.vendor}
+        - name: LOGGING_EXCEPTIONCONVERSIONWORD
+          value: "\t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex"
+        - name: LOGGING_PATTERN_CONSOLE
+          value: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n"
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 256Mi
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 180
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 3
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - sock-payment
+            topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: sock-payment
+  name: sock-payment
+  labels:
+    app: sock-payment
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: sock-payment
+  type: ClusterIP
