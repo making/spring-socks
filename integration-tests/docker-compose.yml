@@ -12,7 +12,7 @@ services:
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_user
       SPRING_ZIPKIN_ENABLED: "true"
@@ -31,7 +31,7 @@ services:
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_catalog
       SPRING_ZIPKIN_ENABLED: "true"
@@ -51,7 +51,7 @@ services:
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_cart
       SPRING_ZIPKIN_ENABLED: "true"
@@ -71,7 +71,7 @@ services:
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_order
       SPRING_ZIPKIN_ENABLED: "true"
@@ -94,7 +94,7 @@ services:
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_payment
       SPRING_ZIPKIN_ENABLED: "true"
@@ -114,7 +114,7 @@ services:
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/sock_shipping
       SPRING_ZIPKIN_ENABLED: "true"
@@ -135,7 +135,7 @@ services:
       LOGGING_LEVEL_ROOT: WARN
       LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
-      JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
+      JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411

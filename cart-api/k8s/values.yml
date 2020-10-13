@@ -1,0 +1,8 @@
+#@data/values
+---
+mysql_hostname: sock-cart-mysql.sock-cart.svc.cluster.local
+mysql_port: "3306"
+mysql_username: sockshop
+mysql_password: sockshop
+mysql_database: sock_cart
+use_external_mysql: False
