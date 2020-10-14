@@ -745,18 +745,21 @@ input[type="submit"] {
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 4px;
-    color: #539251;
+    color: #594e54;
 }
 
 .hero__text h2 {
     font-size: 46px;
-    color: #252525;
+    color: #539251;
     line-height: 52px;
     font-weight: 700;
     margin: 10px 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
 }
 
 .hero__text p {
+    color: #f0f0f0;
     margin-bottom: 35px;
 }
 

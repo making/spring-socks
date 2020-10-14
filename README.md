@@ -4,6 +4,8 @@
 
 Spring Version of https://microservices-demo.github.io
 
+<img src="https://user-images.githubusercontent.com/106908/95973135-3ab35000-0e4e-11eb-9267-00ab2bee3c5f.png" width="800px">
+
 | API | OpenAPI Spec | Code |　Docker Image |
 | --- | --- | --- | --- |
 | Catalog API | [catalog-spec](./catalog-spec) [![catalog-spec](https://github.com/making/spring-sockshop/workflows/catalog-spec/badge.svg)](https://github.com/making/spring-socks/actions?query=workflow%3Acatalog-spec) <br> [[ReDoc](https://redocly.github.io/redoc/?url=https://raw.githubusercontent.com/making/spring-sockshop/master/catalog-spec/openapi/doc.yml)] [[Swagger UI](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/making/spring-sockshop/master/catalog-spec/openapi/doc.yml)] | [catalog-api](./catalog-api) [![catalog-api](https://github.com/making/spring-sockshop/workflows/catalog-api/badge.svg)](https://github.com/making/spring-socks/actions?query=workflow%3Acatalog-api) | [`ghcr.io/making/spring-socks-catalog`](https://github.com/users/making/packages/container/package/spring-socks-catalog) |

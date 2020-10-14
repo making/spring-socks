@@ -1,5 +1,7 @@
 package lol.maki.socks.catalog.web;
 
+import java.util.List;
+
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.catalog.client.TagsResponse;
@@ -37,6 +39,7 @@ public class HomeController {
 				.uri(props.getCatalogUrl(), b -> b.path("catalogue")
 						.queryParam("page", 1)
 						.queryParam("size", 6)
+						.queryParam("tags", List.of("featured"))
 						.build())
 				.attributes(oauth2AuthorizedClient(authorizedClient))
 				.retrieve()
