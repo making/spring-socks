@@ -22,7 +22,6 @@ import lol.maki.socks.order.spec.OrderResponseCustomer;
 import lol.maki.socks.order.spec.OrderResponseItem;
 import lol.maki.socks.order.spec.OrderResponseLinks;
 import lol.maki.socks.order.spec.OrderResponseShipment;
-import lol.maki.socks.order.spec.OrdersApi;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -35,13 +34,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
 @CrossOrigin
-public class OrderController implements OrdersApi {
+public class OrderController {
 	private final OrderMapper orderMapper;
 
 	private final OrderService orderService;
@@ -52,10 +52,9 @@ public class OrderController implements OrdersApi {
 	}
 
 	@PostMapping(path = "/orders")
-	public ResponseEntity<OrderResponse> createOrder(@Validated @RequestBody OrderRequest req) {
+	public ResponseEntity<OrderResponse> createOrder(@Validated @RequestBody OrderRequest req, UriComponentsBuilder builder) {
 		final Order order = this.orderService.placeOrder(req.getCustomer(), req.getAddress(), req.getCard(), req.getItems());
-		final ServletUriComponentsBuilder uriComponentsBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
-		final URI location = uriComponentsBuilder.replacePath("orders/{orderId}").build(order.id());
+		final URI location = builder.replacePath("orders/{orderId}").build(order.id());
 		return ResponseEntity.created(location).body(toResponse(order));
 	}
 
