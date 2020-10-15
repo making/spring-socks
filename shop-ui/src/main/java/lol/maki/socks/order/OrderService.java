@@ -71,7 +71,7 @@ public class OrderService {
 
 	Mono<?> createUser(Order order, String username, String password, OAuth2AuthorizedClient authorizedClient) {
 		return this.webClient.post()
-				.uri(props.getUserUrl(), b -> b.path("register").build())
+				.uri(props.getUserUrl(), b -> b.path("customers").build())
 				.bodyValue(Map.of("username", username,
 						"password", password,
 						"firstName", order.getFirstName(),
