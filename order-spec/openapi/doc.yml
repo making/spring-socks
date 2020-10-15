@@ -116,22 +116,6 @@ components:
             - SHIPPED
             - PAYMENT_FAILED
             - SHIPMENT_FAILED
-        _links:
-          type: object
-          properties:
-            self:
-              $ref: '#/components/schemas/HypermediaLink'
-    HypermediaLink:
-      title: HypermediaLink
-      type: object
-      properties:
-        href:
-          type: string
-          format: uri
-        rel:
-          type: string
-      x-tags:
-        - Hateoas
 info:
   description: Order API
   license:
