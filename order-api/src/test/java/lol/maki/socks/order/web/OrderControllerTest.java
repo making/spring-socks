@@ -104,11 +104,15 @@ class OrderControllerTest {
 			.postcode("1111111")
 			.build();
 
+	UUID addressId1 = UUID.fromString("3b541549-1384-4c70-b507-c65431c61650");
+
 	Card card1 = ImmutableCard.builder()
 			.longNum("4111111111111111")
 			.ccv("123")
 			.expires(LocalDate.of(2024, 1, 1))
 			.build();
+
+	UUID cardId1 = UUID.fromString("e8ae2ef6-3ef3-44b8-9bb2-5390c1788040");
 
 	Item item1 = ImmutableItem.builder()
 			.itemId("6d62d909-f957-430e-8689-b5129c0bb75e")
@@ -190,24 +194,26 @@ class OrderControllerTest {
 				.willReturn(Mono.just(new CustomerResponse()
 						.username(this.customer1.username())
 						.firstName(this.customer1.firstName())
-						.lastName(this.customer1.lastName())));
-		given(this.customerClient.retrieveAddress(any()))
-				.willReturn(Mono.just(new CustomerAddressResponse()
-						.number(this.address1.number())
-						.street(this.address1.street())
-						.city(this.address1.city())
-						.postcode(this.address1.postcode())
-						.country(this.address1.country())));
-		given(this.customerClient.retrieveCard(any()))
-				.willReturn(Mono.just(new CustomerCardResponse()
-						.longNum(this.card1.longNum())
-						.expires(this.card1.expires())
-						.ccv(this.card1.ccv())));
+						.lastName(this.customer1.lastName())
+						.addAddressesItem(new CustomerAddressResponse()
+								.addressId(this.addressId1)
+								.number(this.address1.number())
+								.street(this.address1.street())
+								.city(this.address1.city())
+								.postcode(this.address1.postcode())
+								.country(this.address1.country()))
+						.addCardsItem(new CustomerCardResponse()
+								.cardId(this.cardId1)
+								.longNum(this.card1.longNum())
+								.expires(this.card1.expires())
+								.ccv(this.card1.ccv()))));
 		this.mockMvc.perform(post("/orders")
-				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:write")))
+				.with(jwt()
+						.jwt(builder -> builder.subject(this.customer1.id()))
+						.authorities(new SimpleGrantedAuthority("SCOPE_order:write")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding(UTF_8.toString())
-				.content(String.format("{\"address\":\"string\",\"card\":\"string\",\"customer\":\"https://customer.example.com/%s\",\"items\":\"https://cart.example.com/carts/%s/items\"}", this.customer1.id(), this.customer1.id())))
+				.content(String.format("{\"addressId\":\"%s\",\"cardId\":\"%s\",\"customer\":\"https://customer.example.com/%s\",\"items\":\"https://cart.example.com/carts/%s/items\"}", this.addressId1, this.cardId1, this.customer1.id(), this.customer1.id())))
 				.andExpect(status().isCreated())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value(this.orderId1))
@@ -241,7 +247,9 @@ class OrderControllerTest {
 	void getOrder() throws Exception {
 		given(this.orderMapper.findOne(this.orderId1)).willReturn(Optional.of(this.order1));
 		this.mockMvc.perform(get("/orders/{orderId}", this.orderId1)
-				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:read"))))
+				.with(jwt()
+						.jwt(builder -> builder.subject(this.customer1.id()))
+						.authorities(new SimpleGrantedAuthority("SCOPE_order:read"))))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value(this.orderId1))
