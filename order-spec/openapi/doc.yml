@@ -8,6 +8,11 @@ servers:
 components:
   schemas:
     OrderRequest:
+      type: object
+      x-tags:
+        - Order
+      x-examples:
+        example-1: {}
       properties:
         address:
           description: The URI that should be used to fetch billing/shipping address information
@@ -25,9 +30,12 @@ components:
           description: The URI that should be used to fetch order items from the shopping cart
           format: uri
           type: string
-      type: object
-      x-tags:
-        - Order
+        addressId:
+          type: string
+          format: uuid
+        cardId:
+          type: string
+          format: uuid
     OrderResponseCustomer:
       type: object
       x-tags:
@@ -172,6 +180,28 @@ paths:
       summary: Place a new order
       operationId: create-order
       parameters: []
+      tags:
+        - Order
+    get:
+      parameters:
+        - in: query
+          name: custId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Not Found
+      summary: Search orders by customer ID
+      operationId: get-orders-by-customer-id
       tags:
         - Order
   /orders/search/customerId:
