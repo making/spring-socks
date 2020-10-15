@@ -1,6 +1,5 @@
 package lol.maki.socks.customer.web;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,21 +10,17 @@ import lol.maki.socks.customer.CustomerService.CustomerDuplicatedException;
 import lol.maki.socks.user.spec.CustomerCreateRequest;
 import lol.maki.socks.user.spec.CustomerResponse;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.IdGenerator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -47,29 +42,6 @@ public class UserController {
 		this.idGenerator = idGenerator;
 	}
 
-	// Legacy Endpoint
-	@Deprecated
-	@PostMapping(path = "/login")
-	public ResponseEntity<Void> login(@RequestHeader(name = "Authorization") String authorization) {
-		final String[] userInfo = new String(Base64Utils.decodeFromString(authorization.replace("Basic ", ""))).split(":");
-		final String username = userInfo[0];
-		final String password = userInfo[1];
-		final Customer customer = this.customerMapper.findByUsername(username)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-		if (this.passwordEncoder.matches(password, customer.password())) {
-			final ResponseCookie cookie = ResponseCookie
-					.from("logged_in", customer.customerId().toString())
-					.httpOnly(false)
-					.maxAge(Duration.ofDays(1))
-					.build();
-			return ResponseEntity.ok()
-					.header(HttpHeaders.SET_COOKIE, cookie.toString())
-					.build();
-		}
-		else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-		}
-	}
 
 	@Deprecated
 	@PostMapping(path = "/register")
