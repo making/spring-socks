@@ -15,7 +15,6 @@ import lol.maki.socks.order.OrderMapper;
 import lol.maki.socks.order.OrderService;
 import lol.maki.socks.order.PaymentUnauthorizedException;
 import lol.maki.socks.order.Shipment;
-import lol.maki.socks.order.spec.HypermediaLink;
 import lol.maki.socks.order.spec.OrderRequest;
 import lol.maki.socks.order.spec.OrderResponse;
 import lol.maki.socks.order.spec.OrderResponse.StatusEnum;
@@ -23,7 +22,6 @@ import lol.maki.socks.order.spec.OrderResponseAddress;
 import lol.maki.socks.order.spec.OrderResponseCard;
 import lol.maki.socks.order.spec.OrderResponseCustomer;
 import lol.maki.socks.order.spec.OrderResponseItem;
-import lol.maki.socks.order.spec.OrderResponseLinks;
 import lol.maki.socks.order.spec.OrderResponseShipment;
 
 import org.springframework.http.ResponseEntity;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -57,16 +54,11 @@ public class OrderController {
 		this.orderService = orderService;
 	}
 
-	static String lastPathSegment(URI uri) {
-		final String[] path = uri.getPath().split("/");
-		return path[path.length - 1];
-	}
-
 	@PostMapping(path = "/orders")
 	public ResponseEntity<OrderResponse> createOrder(@AuthenticationPrincipal Jwt jwt, @Validated @RequestBody OrderRequest req, UriComponentsBuilder builder) {
 		final String customerId = jwt.getSubject();
-		final UUID addressId = req.getAddressId() != null ? req.getAddressId() : UUID.fromString(lastPathSegment(req.getAddress()));
-		final UUID cardId = req.getCardId() != null ? req.getCardId() : UUID.fromString(lastPathSegment(req.getCard()));
+		final UUID addressId = req.getAddressId();
+		final UUID cardId = req.getCardId();
 		final Order order = this.orderService.placeOrder(customerId, addressId, cardId);
 		final URI location = builder.replacePath("orders/{orderId}").build(order.id());
 		return ResponseEntity.created(location).body(toResponse(order));
@@ -88,15 +80,6 @@ public class OrderController {
 				.collect(toUnmodifiableList()));
 	}
 
-	@Deprecated
-	@GetMapping(path = "/orders/search/customerId")
-	public ResponseEntity<List<OrderResponse>> searchOrdersByCustomerId(@RequestParam(value = "custId") String custId) {
-		return ResponseEntity.ok(this.orderMapper.findByCustomerId(custId)
-				.stream()
-				.map(this::toResponse)
-				.collect(toUnmodifiableList()));
-	}
-
 	@ExceptionHandler(PaymentUnauthorizedException.class)
 	public ResponseEntity<Map<String, String>> handlePaymentUnauthorizedException(PaymentUnauthorizedException e) {
 		return ResponseEntity.status(UNAUTHORIZED).body(Map.of("message", e.getMessage()));
@@ -112,10 +95,6 @@ public class OrderController {
 		final Address address = order.address();
 		final Card card = order.card();
 		final Shipment shipment = order.shipment();
-		final URI selfHref = ServletUriComponentsBuilder.fromCurrentRequest()
-				.replacePath("orders/{id}")
-				.query(null)
-				.build(order.id());
 		return new OrderResponse()
 				.id(order.id())
 				.customer(new OrderResponseCustomer()
@@ -146,9 +125,6 @@ public class OrderController {
 						.deliveryDate(shipment.deliveryDate()))
 				.date(order.date())
 				.total(order.total())
-				.status(StatusEnum.valueOf(order.status().name()))
-				.links(new OrderResponseLinks().self(new HypermediaLink()
-						.rel("self")
-						.href(selfHref)));
+				.status(StatusEnum.valueOf(order.status().name()));
 	}
 }

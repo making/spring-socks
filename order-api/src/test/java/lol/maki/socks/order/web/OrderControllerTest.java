@@ -213,7 +213,7 @@ class OrderControllerTest {
 						.authorities(new SimpleGrantedAuthority("SCOPE_order:write")))
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding(UTF_8.toString())
-				.content(String.format("{\"addressId\":\"%s\",\"cardId\":\"%s\",\"customer\":\"https://customer.example.com/%s\",\"items\":\"https://cart.example.com/carts/%s/items\"}", this.addressId1, this.cardId1, this.customer1.id(), this.customer1.id())))
+				.content(String.format("{\"addressId\":\"%s\",\"cardId\":\"%s\"}", this.addressId1, this.cardId1)))
 				.andExpect(status().isCreated())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.id").value(this.orderId1))
@@ -283,9 +283,9 @@ class OrderControllerTest {
 	@Test
 	void searchOrdersByCustomerId() throws Exception {
 		given(this.orderMapper.findByCustomerId(this.customer1.id())).willReturn(List.of(this.order2, this.order1));
-		this.mockMvc.perform(get("/orders/search/customerId")
+		this.mockMvc.perform(get("/orders")
 				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:read")))
-				.param("custId", this.customer1.id()))
+				.param("customerId", this.customer1.id()))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
 				.andExpect(jsonPath("$.length()").value(2))
