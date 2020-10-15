@@ -284,7 +284,7 @@ class OrderControllerTest {
 	void searchOrdersByCustomerId() throws Exception {
 		given(this.orderMapper.findByCustomerId(this.customer1.id())).willReturn(List.of(this.order2, this.order1));
 		this.mockMvc.perform(get("/orders")
-				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:read")))
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_order:read"), new SimpleGrantedAuthority("ROLE_TRUSTED_CLIENT")))
 				.param("customerId", this.customer1.id()))
 				.andExpect(status().isOk())
 				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
