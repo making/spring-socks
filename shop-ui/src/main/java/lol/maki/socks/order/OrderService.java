@@ -1,7 +1,6 @@
 package lol.maki.socks.order;
 
 import java.io.IOException;
-import java.net.URI;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
@@ -26,7 +25,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
@@ -143,25 +141,12 @@ public class OrderService {
 	}
 
 	Mono<OrderResponse> createOrder(String customerId, String addressId, String cardId, String accessToken) {
-		final URI address = UriComponentsBuilder.fromHttpUrl(this.props.getUserUrl())
-				.path("addresses/{addressId}")
-				.build(addressId);
-		final URI card = UriComponentsBuilder.fromHttpUrl(this.props.getUserUrl())
-				.path("cards/{cardId}")
-				.build(cardId);
-		final URI customer = UriComponentsBuilder.fromHttpUrl(this.props.getUserUrl())
-				.path("customers/{customerId}")
-				.build(customerId);
 		return this.webClient.post()
 				.uri(this.props.getOrderUrl(), b -> b.path("orders").build())
 				.headers(httpHeaders -> httpHeaders.setBearerAuth(accessToken))
 				.bodyValue(new OrderRequest()
-						.customer(customer)
-						.address(address)
-						.card(card)
-						.items(UriComponentsBuilder.fromHttpUrl(props.getCartUrl())
-								.pathSegment("carts/{customerId}/items")
-								.build(customerId)))
+						.addressId(UUID.fromString(addressId))
+						.cardId(UUID.fromString(cardId)))
 				.retrieve()
 				.bodyToMono(OrderResponse.class)
 				.onErrorMap(WebClientResponseException.class, e -> {
