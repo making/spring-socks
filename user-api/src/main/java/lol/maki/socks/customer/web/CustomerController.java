@@ -51,6 +51,13 @@ public class CustomerController {
 		this.idGenerator = idGenerator;
 	}
 
+	@GetMapping(path = "/me")
+	public ResponseEntity<CustomerResponse> getMe(@AuthenticationPrincipal Jwt jwt) {
+		final UUID customerId = UUID.fromString(jwt.getSubject());
+		final Optional<Customer> customer = this.customerMapper.findByCustomerId(customerId);
+		return ResponseEntity.of(customer.map(CustomerHelper::toResponse));
+	}
+
 	@PostMapping(path = "/customers")
 	public ResponseEntity<CustomerResponse> register(@Validated @RequestBody CustomerCreateRequest request, UriComponentsBuilder builder) {
 		final UUID customerId = this.idGenerator.generateId();

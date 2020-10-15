@@ -162,25 +162,6 @@ paths:
               $ref: '#/components/schemas/CustomerAddressCreateRequest'
       tags:
         - Customer
-  /register:
-    post:
-      summary: Register a customer
-      operationId: register
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomerResponse'
-      description: Register a customer (Deprecated in favor of POST /customers)
-      tags:
-        - Customer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomerCreateRequest'
   /me:
     get:
       summary: Get the logged-in user information
