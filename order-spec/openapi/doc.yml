@@ -14,22 +14,6 @@ components:
       x-examples:
         example-1: {}
       properties:
-        address:
-          description: The URI that should be used to fetch billing/shipping address information
-          format: uri
-          type: string
-        card:
-          description: The URI that should be used to fetch payment card information
-          format: uri
-          type: string
-        customer:
-          description: The URI that should be used to fetch customer information
-          format: uri
-          type: string
-        items:
-          description: The URI that should be used to fetch order items from the shopping cart
-          format: uri
-          type: string
         addressId:
           type: string
           format: uuid
@@ -185,7 +169,7 @@ paths:
     get:
       parameters:
         - in: query
-          name: custId
+          name: customerId
           schema:
             type: string
           required: true
@@ -202,29 +186,6 @@ paths:
           description: Not Found
       summary: Search orders by customer ID
       operationId: get-orders-by-customer-id
-      tags:
-        - Order
-  /orders/search/customerId:
-    get:
-      parameters:
-        - in: query
-          name: custId
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/OrderResponse'
-        '404':
-          description: Not Found
-      summary: Search orders by customer ID
-      operationId: search-orders-by-customer-id
       tags:
         - Order
   '/orders/{id}':
