@@ -125,19 +125,6 @@ openapi: 3.0.1
 paths:
   /cards:
     parameters: []
-    get:
-      summary: Get cards of a user
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomerCardResponse'
-      operationId: get-customer-cards-by-id
-      description: Get cards of the logged-in user
-      tags:
-        - Card
     post:
       summary: Create a new card
       operationId: post-cards
@@ -157,19 +144,6 @@ paths:
       tags:
         - Customer
   /addresses:
-    get:
-      summary: Get addresses
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomerAddressResponse'
-      operationId: get-addresses
-      description: Get addresses of the logged-in user
-      tags:
-        - Address
     post:
       summary: Create a new address
       operationId: post-addresses
@@ -199,7 +173,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomerResponse'
-      description: Register a customer (an endpoint for backward-compatibility)
+      description: Register a customer (Deprecated in favor of POST /customers)
       tags:
         - Customer
       requestBody:
@@ -221,27 +195,31 @@ paths:
                 $ref: '#/components/schemas/CustomerResponse'
       operationId: get-me
       description: Get the logged-in user information
-  /login:
+  /customers:
     post:
-      summary: Login
-      operationId: login
+      summary: Register a customer
+      operationId: create-customer
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
           headers:
-            Set-Cookie:
+            Location:
               schema:
                 type: string
-              required: true
-      description: Login (an endpoint for backward-compatibility)
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: Authorization
-          required: true
+                format: uri
+      description: Create a customer
       tags:
         - Customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreateRequest'
+            examples: {}
   '/customers/{customerId}':
     parameters:
       - schema:
@@ -262,92 +240,4 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomerResponse'
       operationId: get-customer-by-customer-id
-      description: Get a customer (an endpoint for backward-compatibility)
-  '/customers/{customerId}/addresses':
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: customerId
-        in: path
-        required: true
-    get:
-      summary: "Get customer's addresses"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomerAddressResponse'
-      operationId: get-addresses-by-customer-id
-      description: "Get customer's addresses (an endpoint for backward-compatibility)"
-      tags:
-        - Address
-  '/customers/{customerId}/cards':
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: customerId
-        in: path
-        required: true
-    get:
-      summary: "Get customer's cards"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomerCardResponse'
-      operationId: get-cards-by-customer-id
-      description: "Get customer's cards (an endpoint for backward-compatibility)"
-      tags:
-        - Card
-  '/addresses/{addressId}':
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: addressId
-        in: path
-        required: true
-    get:
-      summary: Get an address
-      tags:
-        - Address
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomerAddressResponse'
-      operationId: get-addresses-by-id
-      description: Get an address of the logged-in user
-  '/cards/{cardId}':
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: cardId
-        in: path
-        required: true
-    get:
-      summary: Get a card
-      tags:
-        - Card
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomerCardResponse'
-      operationId: get-cards-by-id
-      description: Get a card of the logged-in user
+      description: Get a customer
