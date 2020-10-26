@@ -1,0 +1,30 @@
+version: 2
+updates:
+- package-ecosystem: "maven"
+  directory: "/cart-api"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "maven"
+  directory: "/catalog-api"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "maven"
+  directory: "/order-api"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "maven"
+  directory: "/payment-api"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "maven"
+  directory: "/shipping-api"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "maven"
+  directory: "/shop-ui"
+  schedule:
+    interval: "daily"
+- package-ecosystem: "maven"
+  directory: "/user-api"
+  schedule:
+    interval: "daily"
