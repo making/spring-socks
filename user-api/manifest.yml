@@ -33,7 +33,7 @@ applications:
     MANAGEMENT_METRICS_TAGS_INSTANCE_ID: ${management.metrics.tags.application}:${vcap.application.instance_index}
     MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST: ${vcap.services.prometheus-rsocket-proxy.credentials.host}
     MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT: ${vcap.services.prometheus-rsocket-proxy.credentials.port}
-    MANAGEMENT_METRICS_EXPORT_WAVEFRONT_ENABLED: true
+    MANAGEMENT_METRICS_EXPORT_WAVEFRONT_ENABLED: false
     MANAGEMENT_METRICS_EXPORT_WAVEFRONT_APITOKEN: ${vcap.services.wavefront.credentials.api-token}
     MANAGEMENT_METRICS_EXPORT_WAVEFRONT_SOURCE: ${vcap.application.organization_name}:${vcap.application.space_name}:${vcap.application.application_name}:${vcap.application.instance_index}
     WAVEFRONT_APPLICATION_CLUSTER: ${vcap.application.organization_name}
