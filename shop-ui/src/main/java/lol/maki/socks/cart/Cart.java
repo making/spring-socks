@@ -1,6 +1,7 @@
 package lol.maki.socks.cart;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -27,6 +28,10 @@ public class Cart {
 
 	public boolean hasSessionId() {
 		return this.cartId.startsWith("_");
+	}
+
+	public static Cart empty(String cartId) {
+		return new Cart(cartId, new ArrayList<>());
 	}
 
 	public static String generateSessionId(Supplier<UUID> uuidgen) {
@@ -61,7 +66,8 @@ public class Cart {
 						.bodyToMono(SockResponse.class)
 						.map(s -> i.setNameAndImageUrl(s.getName(), s.getImageUrl().get(0))))
 				.collectList()
-				.map(items -> new Cart(this.getCartId(), items));
+				.map(items -> new Cart(this.getCartId(), items))
+				.onErrorReturn(Cart.empty(cartId));
 	}
 
 	@Override

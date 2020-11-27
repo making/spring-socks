@@ -2,6 +2,7 @@ package lol.maki.socks.config;
 
 import java.net.URI;
 
+import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.cart.web.MergeCartServerAuthenticationSuccessHandler;
 import lol.maki.socks.security.RedirectToServerRedirectStrategy;
 import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
@@ -10,6 +11,7 @@ import org.springframework.boot.actuate.autoconfigure.security.reactive.Endpoint
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
@@ -21,19 +23,15 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.DelegatingServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 public class SecurityConfig {
 	private final URI authorizationServerLogoutUrl;
 
-	private final SockProps sockProps;
+	private final CartClient cartClient;
 
-	private final WebClient.Builder webClientBuilder;
-
-	public SecurityConfig(OAuth2ClientProperties clientProperties, SockProps sockProps, Builder webClientBuilder) {
+	public SecurityConfig(OAuth2ClientProperties clientProperties, @Lazy CartClient cartClient) {
 		this.authorizationServerLogoutUrl = clientProperties.getProvider().values().stream().findFirst()
 				.map(provider -> {
 					if (provider.getAuthorizationUri() != null) {
@@ -46,19 +44,18 @@ public class SecurityConfig {
 				.map(UriComponentsBuilder::fromHttpUrl)
 				.map(builder -> builder.replacePath("logout").build().toUri())
 				.orElseThrow();
-		this.sockProps = sockProps;
-		this.webClientBuilder = webClientBuilder;
+		this.cartClient = cartClient;
 	}
 
 	@Bean
-	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 		return http
 				.authorizeExchange(exchanges -> exchanges
 						.matchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
 						.anyExchange().permitAll()
 				)
 				.oauth2Login(oauth2 -> {
-					final MergeCartServerAuthenticationSuccessHandler mergeCartServerAuthenticationSuccessHandler = new MergeCartServerAuthenticationSuccessHandler(this.webClientBuilder, authorizedClientManager, sockProps);
+					final MergeCartServerAuthenticationSuccessHandler mergeCartServerAuthenticationSuccessHandler = new MergeCartServerAuthenticationSuccessHandler(this.cartClient);
 					final RedirectServerAuthenticationSuccessHandler redirectServerAuthenticationSuccessHandler = new RedirectServerAuthenticationSuccessHandler();
 					redirectServerAuthenticationSuccessHandler.setRedirectStrategy(new RedirectToServerRedirectStrategy());
 					oauth2.authenticationSuccessHandler(new DelegatingServerAuthenticationSuccessHandler(

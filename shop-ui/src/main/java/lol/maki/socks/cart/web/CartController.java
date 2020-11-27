@@ -6,7 +6,7 @@ import java.util.UUID;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.cart.client.CartItemResponse;
-import lol.maki.socks.catalog.client.SockResponse;
+import lol.maki.socks.catalog.CatalogClient;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
 
@@ -26,11 +26,14 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 
 @Controller
 public class CartController {
+	private final CatalogClient catalogClient;
+
 	private final WebClient webClient;
 
 	private final SockProps props;
 
-	public CartController(Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CartController(CatalogClient catalogClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+		this.catalogClient = catalogClient;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.build();
@@ -39,11 +42,7 @@ public class CartController {
 
 	@PostMapping(path = "cart")
 	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		return this.webClient.get()
-				.uri(props.getCatalogUrl(), b -> b.path("catalogue/{id}").build(cartItem.getId()))
-				.attributes(oauth2AuthorizedClient(authorizedClient))
-				.retrieve()
-				.bodyToMono(SockResponse.class)
+		return this.catalogClient.getSock(cartItem.getId(), authorizedClient)
 				.map(item -> new CartItemRequest()
 						.itemId(item.getId().toString())
 						.quantity(cartItem.getQuantity())

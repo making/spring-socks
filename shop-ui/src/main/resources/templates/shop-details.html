@@ -198,7 +198,8 @@
                     <h3>[[${sock.name}]]</h3>
                     <div class="product__details__price">$[[${sock.price}]]</div>
                     <p>[[${sock.description}]]</p>
-                    <form data-th-action="@{/cart}" method="post">
+                    <form data-th-action="@{/cart}" method="post"
+                          data-th-if="${sock.count > 0}">
                         <div class="product__details__quantity">
                             <div class="quantity">
                                 <div class="pro-qty">

@@ -1,12 +1,9 @@
 package lol.maki.socks.cart.web;
 
 import java.time.Duration;
-import java.util.UUID;
 
 import lol.maki.socks.cart.Cart;
-import lol.maki.socks.cart.CartItem;
-import lol.maki.socks.cart.client.CartResponse;
-import lol.maki.socks.config.SockProps;
+import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.security.ShopUser;
 import reactor.core.publisher.Mono;
 
@@ -17,34 +14,25 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
 public class CartHandlerMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
 	public static String CART_ID_COOKIE_NAME = "X-CartId-Id";
 
-	private final WebClient webClient;
+	private final CartClient cartClient;
 
 	private final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
-	protected CartHandlerMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	protected CartHandlerMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry, CartClient cartClient) {
 		super(adapterRegistry);
-		this.webClient = builder.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
-				.baseUrl(props.getCartUrl())
-				.build();
+		this.cartClient = cartClient;
 	}
 
 	@Override
@@ -84,14 +72,7 @@ public class CartHandlerMethodArgumentResolver extends HandlerMethodArgumentReso
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter methodParameter, BindingContext bindingContext, ServerWebExchange exchange) {
 		return this.cartId(exchange)
-				.flatMap(cartId -> this.webClient.get()
-						.uri("carts/{cartId}", cartId)
-						.attributes(clientRegistrationId("sock"))
-						.retrieve()
-						.bodyToMono(CartResponse.class)
-						.map(c -> new Cart(cartId, c.getItems().stream()
-								.map(i -> new CartItem(UUID.fromString(i.getItemId()), i.getQuantity(), i.getUnitPrice()))
-								.collect(toUnmodifiableList())))
+				.flatMap(cartId -> this.cartClient.findOneWithFallback(cartId)
 						.doOnNext(cart -> bindingContext.getModel()
 								.addAttribute("cart", cart)
 								.addAttribute("itemSize", cart.getItemSize())
