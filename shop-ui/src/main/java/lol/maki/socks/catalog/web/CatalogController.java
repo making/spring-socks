@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.catalog.CatalogClient;
+import lol.maki.socks.catalog.CatalogOrder;
 import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.catalog.client.TagsResponse;
 import reactor.core.publisher.Flux;
@@ -20,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
@@ -35,7 +37,7 @@ public class CatalogController {
 	@GetMapping(path = "details/{id}")
 	public String details(@PathVariable("id") UUID id, Model model, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
 		final Mono<SockResponse> sock = this.catalogClient.getSockWithFallback(id, authorizedClient);
-		final Flux<SockResponse> relatedProducts = sock.flatMapMany(s -> this.catalogClient.getSocksWithFallback(1, 4, s.getTag(), authorizedClient));
+		final Flux<SockResponse> relatedProducts = sock.flatMapMany(s -> this.catalogClient.getSocksWithFallback(CatalogOrder.PRICE, 1, 4, s.getTag(), authorizedClient));
 		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback(authorizedClient);
 		model.addAttribute("sock", sock);
 		model.addAttribute("relatedProducts", relatedProducts);
@@ -44,11 +46,12 @@ public class CatalogController {
 	}
 
 	@GetMapping(path = "tags/{tag}")
-	public String tag(@PathVariable("tag") List<String> tag, Model model, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(1, 10, tag, authorizedClient);
+	public String tag(@PathVariable("tag") List<String> tag, @RequestParam(name = "order", defaultValue = "price") CatalogOrder order, Model model, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(order, 1, 10, tag, authorizedClient);
 		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback(authorizedClient);
 		model.addAttribute("socks", socks);
 		model.addAttribute("tags", tags);
+		model.addAttribute("order", order.toString());
 		return "shop-grid";
 	}
 

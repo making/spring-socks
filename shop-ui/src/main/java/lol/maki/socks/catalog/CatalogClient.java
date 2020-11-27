@@ -58,9 +58,10 @@ public class CatalogClient {
 				.onErrorReturn(fallbackSock);
 	}
 
-	public Flux<SockResponse> getSocksWithFallback(int page, int size, List<String> tags, OAuth2AuthorizedClient authorizedClient) {
+	public Flux<SockResponse> getSocksWithFallback(CatalogOrder order, int page, int size, List<String> tags, OAuth2AuthorizedClient authorizedClient) {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("catalogue")
+						.queryParam("order", order)
 						.queryParam("page", page)
 						.queryParam("size", size)
 						.queryParam("tags", tags)

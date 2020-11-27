@@ -4,6 +4,7 @@ import java.util.List;
 
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.catalog.CatalogClient;
+import lol.maki.socks.catalog.CatalogOrder;
 import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.catalog.client.TagsResponse;
 import reactor.core.publisher.Flux;
@@ -25,7 +26,7 @@ public class HomeController {
 
 	@GetMapping(path = "/")
 	public String home(Model model, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(1, 6, List.of("featured"), authorizedClient);
+		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(CatalogOrder.PRICE, 1, 6, List.of("featured"), authorizedClient);
 		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback(authorizedClient);
 		model.addAttribute("socks", socks);
 		model.addAttribute("tags", tags);

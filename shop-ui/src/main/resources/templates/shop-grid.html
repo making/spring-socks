@@ -168,9 +168,9 @@
                         <div class="col-lg-4 col-md-5">
                             <div class="filter__sort">
                                 <span>Sort By</span>
-                                <select>
-                                    <option value="price">Price</option>
-                                    <option value="name">Name</option>
+                                <select onchange="sortCatalog(this)">
+                                    <option value="price" data-th-selected="${order == 'price'}">Price</option>
+                                    <option value="name" data-th-selected="${order == 'name'}">Name</option>
                                 </select>
                             </div>
                         </div>
@@ -273,6 +273,14 @@
         src="../static/js/owl.carousel.min.js"></script>
 <script data-th-src="@{/js/main.js}" src="../static/js/main.js"></script>
 
+<script>
+    function sortCatalog(order) {
+        console.log(order.value);
+        const url = new URL(document.location);
+        url.searchParams.set("order", order.value);
+        document.location = url;
+    }
+</script>
 </body>
 
 </html>
