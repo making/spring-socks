@@ -17,9 +17,8 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<spring-cloud.version>Hoxton.SR9</spring-cloud.version>
-		<wavefront.version>2.0.2</wavefront.version>
-
+		<spring-cloud.version>2020.0.0-M5</spring-cloud.version>
+		<wavefront.version>2.1.0-SNAPSHOT</wavefront.version>
 	</properties>
 
 	<dependencies>
@@ -103,7 +102,11 @@
 		<!--        </dependency>-->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-zipkin</artifactId>
+			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.wavefront</groupId>
@@ -248,6 +251,19 @@
 	</build>
 
 	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+		</repository>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>		
 		<repository>
 			<id>sonatype-snapshots</id>
 			<name>Sonatype Snapshots</name>
