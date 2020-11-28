@@ -3,7 +3,7 @@ services:
   sock-user:
     image: ghcr.io/making/spring-socks-user:latest
     ports:
-    - 8888:5006
+    - 15006:5006
     mem_limit: 256m
     restart: always
     environment:
@@ -23,6 +23,8 @@ services:
     - zipkin
   sock-catalog:
     image: ghcr.io/making/spring-socks-catalog:latest
+    ports:
+    - 15001:5001
     mem_limit: 256m
     restart: always
     environment:
@@ -43,6 +45,8 @@ services:
     - sock-user
   sock-cart:
     image: ghcr.io/making/spring-socks-cart:latest
+    ports:
+    - 15005:5005
     mem_limit: 256m
     restart: always
     environment:
@@ -63,6 +67,8 @@ services:
     - sock-user
   sock-order:
     image: ghcr.io/making/spring-socks-order:latest
+    ports:
+    - 15004:5004
     mem_limit: 256m
     restart: always
     environment:
@@ -86,6 +92,8 @@ services:
     - sock-user
   sock-payment:
     image: ghcr.io/making/spring-socks-payment:latest
+    ports:
+    - 15002:5002
     mem_limit: 256m
     restart: always
     environment:
@@ -106,6 +114,8 @@ services:
     - sock-user
   sock-shipping:
     image: ghcr.io/making/spring-socks-shipping:latest
+    ports:
+    - 15003:5003
     mem_limit: 256m
     restart: always
     environment:
@@ -145,7 +155,7 @@ services:
       SOCK_PAYMENTURL: http://sock-payment:5002
       SOCK_SHIPPINGURL: http://sock-shipping:5003
       SOCK_USERURL: http://sock-user:5006
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UI_AUTHORIZATIONURI: http://localhost:8888/oauth/authorize
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UI_AUTHORIZATIONURI: http://localhost:15006/oauth/authorize
     depends_on:
     - zipkin
     - sock-user
@@ -158,6 +168,6 @@ services:
       MYSQL_USER: root
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
   zipkin:
-    image: openzipkin/zipkin-slim
+    image: ghcr.io/openzipkin/zipkin-slim
     ports:
     - 9411:9411

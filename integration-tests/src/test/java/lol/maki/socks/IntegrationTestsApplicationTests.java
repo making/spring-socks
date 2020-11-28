@@ -17,9 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
+import org.springframework.util.Base64Utils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +36,13 @@ class IntegrationTestsApplicationTests {
 
 	final ObjectMapper objectMapper;
 
-	IntegrationTestsApplicationTests(Builder builder, SockProps sockProps, ObjectMapper objectMapper) {
+	String userAccessToken;
+
+	JsonNode userInfo;
+
+	String clientAccessToken;
+
+	IntegrationTestsApplicationTests(SockProps sockProps, ObjectMapper objectMapper) {
 		this.webClient = WebClient.builder()
 				.exchangeStrategies(ExchangeStrategies.builder().codecs(c -> c.defaultCodecs().enableLoggingRequestDetails(true)).build())
 				.build();
@@ -43,115 +51,140 @@ class IntegrationTestsApplicationTests {
 	}
 
 	@BeforeEach
-	void reset() {
-		if (true) {
-			// skip
-			// TODO
-			return;
-		}
-		this.webClient.delete()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build())
-				.exchange()
+	void reset() throws Exception {
+		this.userAccessToken = this.webClient.post()
+				.uri(this.sockProps.getUserUrl(), b -> b.path("oauth/token").build())
+				.headers(httpHeaders -> httpHeaders.setBasicAuth(this.sockProps.getClientId(), this.sockProps.getClientSecret()))
+				.bodyValue(new LinkedMultiValueMap<>() {
+					{
+						add("grant_type", "password");
+						add("username", sockProps.getUsername());
+						add("password", sockProps.getPassword());
+					}
+				})
+				.retrieve()
+				.bodyToMono(JsonNode.class)
+				.map(n -> n.get("access_token").asText())
 				.block();
+		this.clientAccessToken = this.webClient.post()
+				.uri(this.sockProps.getUserUrl(), b -> b.path("oauth/token").build())
+				.headers(httpHeaders -> httpHeaders.setBasicAuth(this.sockProps.getClientId(), this.sockProps.getClientSecret()))
+				.bodyValue(new LinkedMultiValueMap<>() {
+					{
+						add("grant_type", "client_credentials");
+					}
+				})
+				.retrieve()
+				.bodyToMono(JsonNode.class)
+				.map(n -> n.get("access_token").asText())
+				.block();
+		this.userInfo = this.objectMapper.readValue(Base64Utils.decodeFromString(this.userAccessToken.split("\\.")[1]), JsonNode.class);
+		final ResponseEntity<Void> response = this.webClient.delete()
+				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}").build(this.userInfo.get("sub").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.clientAccessToken))
+				.exchangeToMono(ClientResponse::toBodilessEntity)
+				.block();
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 	}
 
 	@Test
 	void contextLoads() {
-		final ResponseEntity<String> home = this.webClient.get()
-				.uri(this.sockProps.getFrontendUrl())
-				.exchange()
-				.flatMap(x -> x.toEntity(String.class))
-				.block();
-		assertThat(home.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-		if (true) {
-			// skip
-			// TODO
-			return;
-		}
 		// Get items
 		final ResponseEntity<JsonNode> catalogue = this.webClient.get()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("catalogue").build())
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getCatalogUrl(), b -> b.path("catalogue").build())
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.userAccessToken))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
+		assertThat(catalogue.getStatusCode()).isEqualTo(HttpStatus.OK);
 		final JsonNode item1 = catalogue.getBody().get(0);
 		final JsonNode item2 = catalogue.getBody().get(1);
 		log.info("item1 = {}", prettyPrint(item1));
 		log.info("item2 = {}", prettyPrint(item2));
-		assertThat(catalogue.getStatusCode().is2xxSuccessful()).isTrue();
-
 		// Add items to a cart
 		final ResponseEntity<JsonNode> cartItem1 = this.webClient.post()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build())
-				.bodyValue(Map.of("id", item1.get("id").asText()))
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.userInfo.get("sub").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.clientAccessToken))
+				.bodyValue(Map.of("itemId", item1.get("id").asText(),
+						"quantity", 1,
+						"unitPrice", item1.get("price").asInt()))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
 		final ResponseEntity<JsonNode> cartItem2 = this.webClient.post()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build(this.sockProps.getTestCustomerId()))
-				.bodyValue(Map.of("id", item2.get("id").asText()))
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.userInfo.get("sub").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.clientAccessToken))
+				.bodyValue(Map.of("itemId", item2.get("id").asText(),
+						"quantity", 1,
+						"unitPrice", item2.get("price").asInt())).exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
+		assertThat(cartItem1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(cartItem2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		log.info("cartItem1 = {}", prettyPrint(cartItem1.getBody()));
 		log.info("cartItem2 = {}", prettyPrint(cartItem2.getBody()));
-		assertThat(cartItem1.getStatusCode().is2xxSuccessful()).isTrue();
-		assertThat(cartItem2.getStatusCode().is2xxSuccessful()).isTrue();
-
 		// Increase the quantity of the cart item
-		final ResponseEntity<JsonNode> updatedCartItem2 = this.webClient.post()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart/update").build())
+		final ResponseEntity<JsonNode> updatedCartItem2 = this.webClient.patch()
+				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.userInfo.get("sub").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.clientAccessToken))
 				.bodyValue(Map.of(
-						"id", item2.get("id").asText(),
-						"quantity", 3
+						"itemId", item2.get("id").asText(),
+						"quantity", 3,
+						"unitPrice", item2.get("price").asInt()
 				))
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
-		log.info("cartItem2 = {}", prettyPrint(updatedCartItem2.getBody()));
-		assertThat(updatedCartItem2.getStatusCode().is2xxSuccessful()).isTrue();
-
+		assertThat(updatedCartItem2.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 		// Show a cart
 		final ResponseEntity<JsonNode> cart = this.webClient.get()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build())
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}").build(this.userInfo.get("sub").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.clientAccessToken))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
+		assertThat(cart.getStatusCode()).isEqualTo(HttpStatus.OK);
 		log.info("cart = {}", prettyPrint(cart.getBody()));
-		assertThat(cart.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(cart.getBody()).hasSize(2);
-
+		assertThat(cart.getBody().get("items").get(0).get("quantity").asInt()).isEqualTo(1);
+		assertThat(cart.getBody().get("items").get(1).get("quantity").asInt()).isEqualTo(3);
+		// Get me
+		final ResponseEntity<JsonNode> me = this.webClient.get()
+				.uri(this.sockProps.getUserUrl(), b -> b.path("me").build())
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.userAccessToken))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
+				.block();
+		assertThat(me.getStatusCode()).isEqualTo(HttpStatus.OK);
+		final String addressId = me.getBody().get("addresses").get(0).get("addressId").asText();
+		final String cartId = me.getBody().get("cards").get(0).get("cardId").asText();
 		// Place a new order
 		final ResponseEntity<JsonNode> order = this.webClient.post()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("orders").build())
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getOrderUrl(), b -> b.path("orders").build())
+				.bodyValue(Map.of(
+						"addressId", addressId,
+						"cardId", cartId))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.userAccessToken))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
+		assertThat(order.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		log.info("order = {}", prettyPrint(order.getBody()));
-		assertThat(order.getStatusCode().is2xxSuccessful()).isTrue();
-		assertThat(order.getBody().get("total").asText()).isEqualTo("40.96");
+		assertThat(order.getBody().get("total").asText()).isEqualTo("37.0");
 		assertThat(order.getBody().get("status").asText()).isEqualTo("CREATED");
 		assertThat(order.getBody().get("shipment").get("carrier").asText()).isEqualTo("USPS");
 
 		// Show a shipment
 		final ResponseEntity<JsonNode> shipment = this.webClient.get()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("shipping/{orderId}").build(order.getBody().get("id").asText()))
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getShippingUrl(), b -> b.path("shipping/{orderId}").build(order.getBody().get("id").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.userAccessToken))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
 		log.info("shipment = {}", prettyPrint(shipment.getBody()));
-		assertThat(shipment.getStatusCode().is2xxSuccessful()).isTrue();
+		assertThat(shipment.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 		// Show a cart again
 		final ResponseEntity<JsonNode> cartAgain = this.webClient.get()
-				.uri(this.sockProps.getFrontendUrl(), b -> b.path("cart").build(this.sockProps.getTestCustomerId()))
-				.exchange()
-				.flatMap(x -> x.toEntity(JsonNode.class))
+				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}").build(this.userInfo.get("sub").asText()))
+				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.clientAccessToken))
+				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
+		assertThat(cartAgain.getStatusCode()).isEqualTo(HttpStatus.OK);
 		log.info("cart = {}", prettyPrint(cartAgain.getBody()));
-		assertThat(cartAgain.getStatusCode().is2xxSuccessful()).isTrue();
-		assertThat(cartAgain.getBody()).hasSize(0);
+		assertThat(cartAgain.getBody().get("items")).hasSize(0);
 	}
 
 	String prettyPrint(JsonNode json) {
