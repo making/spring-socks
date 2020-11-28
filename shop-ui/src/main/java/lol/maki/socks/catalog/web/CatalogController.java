@@ -6,6 +6,7 @@ import java.util.UUID;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.catalog.CatalogClient;
 import lol.maki.socks.catalog.CatalogOrder;
+import lol.maki.socks.catalog.SockNotFoundException;
 import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.catalog.client.TagsResponse;
 import reactor.core.publisher.Flux;
@@ -13,16 +14,19 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.reactive.result.view.Rendering;
 
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 
@@ -68,5 +72,16 @@ public class CatalogController {
 	@RequestMapping(method = HEAD, path = "images/{fileName:.+}")
 	public Mono<ResponseEntity<Resource>> headImage(@PathVariable String fileName) {
 		return this.catalogClient.headImageWithFallback(fileName);
+	}
+
+	@ExceptionHandler(SockNotFoundException.class)
+	public Rendering sockNotFound(SockNotFoundException e) {
+		return Rendering
+				.view("shop-details")
+				.status(HttpStatus.NOT_FOUND)
+				.modelAttribute("sock", e.notFound())
+				.modelAttribute("relatedProducts", List.of())
+				.modelAttribute("tags", new TagsResponse())
+				.build();
 	}
 }
