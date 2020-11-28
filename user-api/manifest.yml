@@ -10,7 +10,6 @@ applications:
   - user-db # cf create-service p.mysql db-small user-db
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
-  - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
     SOCK_HOMEURL: ${vcap.services.spring-socks.credentials.url}

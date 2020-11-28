@@ -9,7 +9,6 @@ applications:
   - user-api # cf create-user-provided-service user-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-user --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
-  - syslog-to-datadog # cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
     SERVER_PORT: 8080

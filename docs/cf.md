@@ -7,7 +7,6 @@ Dummy values should work.
 ```
 cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
 cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
-cf create-user-provided-service syslog-to-datadog -l syslog://example.com:514
 cf create-user-provided-service wavefront -p '{"api-token": "****"}'
 ```
 
