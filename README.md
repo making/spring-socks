@@ -2,6 +2,8 @@
 
 ![Spring Socks](shop-ui/src/main/resources/static/img/logo.png)
 
+ [![integration-tests](https://github.com/making/spring-socks/workflows/integration-tests/badge.svg)](https://github.com/making/spring-socks/actions?query=workflow%3Aintegration-tests)
+
 Spring Version of https://microservices-demo.github.io
 
 <img src="https://user-images.githubusercontent.com/106908/95973135-3ab35000-0e4e-11eb-9267-00ab2bee3c5f.png" width="800px">
