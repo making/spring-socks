@@ -18,6 +18,7 @@ services:
       SPRING_ZIPKIN_ENABLED: "true"
       SPRING_ZIPKIN_BASE_URL: http://zipkin:9411
       SOCK_HOMEURL: http://localhost:8080
+      SOCK_ISSUERURL: http://sock-user:5006/oauth/token
     depends_on:
     - mysql
     - zipkin
