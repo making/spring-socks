@@ -4,10 +4,12 @@ import java.security.KeyPair;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import lol.maki.socks.config.JwtProperties;
+import lol.maki.socks.config.SockProps;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +20,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class WellKnownEndpoint {
 	private final KeyPair keyPair;
 
-	public WellKnownEndpoint(JwtProperties props) {
-		this.keyPair = props.getKeyPair();
+	private final SockProps sockProps;
+
+	public WellKnownEndpoint(JwtProperties jwtProps, SockProps sockProps) {
+		this.keyPair = jwtProps.getKeyPair();
+		this.sockProps = sockProps;
 	}
 
 	/**
@@ -27,7 +32,9 @@ public class WellKnownEndpoint {
 	 */
 	@GetMapping(path = { ".well-known/openid-configuration", "oauth/token/.well-known/openid-configuration" })
 	public Map<String, Object> openIdConfiguration(UriComponentsBuilder builder) {
-		return Map.of("issuer", builder.replacePath("oauth/token").build().toString(),
+		final String issuerUrl = Optional.ofNullable(this.sockProps.getIssuerUrl())
+				.orElseGet(() -> builder.replacePath("oauth/token").build().toString());
+		return Map.of("issuer", issuerUrl,
 				"authorization_endpoint", builder.replacePath("oauth/authorize").build().toString(),
 				"token_endpoint", builder.replacePath("oauth/token").build().toString(),
 				"jwks_uri", builder.replacePath("token_keys").build().toString(),

@@ -10,6 +10,8 @@ public class SockProps {
 
 	private String loginUrl;
 
+	private String issuerUrl;
+
 	public void setHomeUrl(String homeUrl) {
 		this.homeUrl = homeUrl;
 	}
@@ -24,5 +26,13 @@ public class SockProps {
 
 	public String getLoginUrl() {
 		return loginUrl;
+	}
+
+	public String getIssuerUrl() {
+		return issuerUrl;
+	}
+
+	public void setIssuerUrl(String issuerUrl) {
+		this.issuerUrl = issuerUrl;
 	}
 }

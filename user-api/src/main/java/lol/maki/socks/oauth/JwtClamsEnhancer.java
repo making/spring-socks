@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import lol.maki.socks.config.SockProps;
 import lol.maki.socks.customer.Customer;
 import lol.maki.socks.security.CustomerUserDetails;
 
@@ -25,13 +27,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class JwtClamsEnhancer implements TokenEnhancer {
 	private final ClientDetailsService clientDetailsService;
 
-	public JwtClamsEnhancer(ClientDetailsService clientDetailsService) {
+	private final SockProps sockProps;
+
+	public JwtClamsEnhancer(ClientDetailsService clientDetailsService, SockProps sockProps) {
 		this.clientDetailsService = clientDetailsService;
+		this.sockProps = sockProps;
 	}
 
 	@Override
 	public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-		final String issuer = ServletUriComponentsBuilder.fromCurrentRequest().build().toString();
+		final String issuer = Optional.ofNullable(this.sockProps.getIssuerUrl())
+				.orElseGet(() -> ServletUriComponentsBuilder.fromCurrentRequest().build().toString());
 		final Map<String, Object> additionalInformation = new LinkedHashMap<>();
 		final Instant expiration = accessToken.getExpiration().toInstant();
 
