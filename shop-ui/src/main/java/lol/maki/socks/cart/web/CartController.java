@@ -2,30 +2,29 @@ package lol.maki.socks.cart.web;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.CartClient;
+import lol.maki.socks.cart.CartUnavailableException;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.catalog.CatalogClient;
 import lol.maki.socks.config.SockProps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.reactive.result.view.Rendering;
 
 @Controller
 public class CartController {
@@ -36,8 +35,6 @@ public class CartController {
 	private final WebClient webClient;
 
 	private final SockProps props;
-
-	private final Logger log = LoggerFactory.getLogger(CartController.class);
 
 	public CartController(CatalogClient catalogClient, CartClient cartClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.catalogClient = catalogClient;
@@ -56,15 +53,13 @@ public class CartController {
 						.quantity(cartItem.getQuantity())
 						.unitPrice(item.getPrice()))
 				.flatMap(item -> this.cartClient.addCartItem(cart.getCartId(), item))
-				.thenReturn("redirect:/cart")
-				.onErrorResume(this.handleException(model));
+				.thenReturn("redirect:/cart");
 	}
 
 	@PostMapping(path = "cart", params = "delete")
 	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
 		return this.cartClient.deleteCartItem(cart.getCartId(), cartItem.getId())
-				.thenReturn("redirect:/cart")
-				.onErrorResume(this.handleException(model));
+				.thenReturn("redirect:/cart");
 	}
 
 	@PostMapping(path = "cart", params = "update")
@@ -90,14 +85,12 @@ public class CartController {
 					return Mono.empty();
 				})
 				.collectList()
-				.thenReturn("redirect:/cart")
-				.onErrorResume(this.handleException(model));
+				.thenReturn("redirect:/cart");
 	}
 
 	@PostMapping(path = "cart", params = "coupon")
 	public Mono<String> applyCoupon(Model model) {
-		return Mono.just("redirect:/cart")
-				.onErrorResume(this.handleException(model));
+		return Mono.just("redirect:/cart");
 	}
 
 	@GetMapping(path = "cart")
@@ -107,17 +100,13 @@ public class CartController {
 		return Mono.just("shopping-cart");
 	}
 
-	Function<Throwable, Mono<? extends String>> handleException(Model model) {
-		return throwable -> {
-			log.warn("Failed to call cart-api.", throwable);
-			if (throwable instanceof WebClientRequestException || (throwable instanceof WebClientResponseException && ((WebClientResponseException) throwable).getStatusCode().is5xxServerError())) {
-				model.addAttribute("error", "Cart is currently unavailable. Retry later. Sorry for the inconvenience.");
-				return Mono.just("shopping-cart");
-			}
-			else {
-				return Mono.error(throwable);
-			}
-		};
+	@ExceptionHandler(CartUnavailableException.class)
+	Rendering handleException(CartUnavailableException e, Cart cart) {
+		return Rendering
+				.view("shopping-cart")
+				.status(HttpStatus.SERVICE_UNAVAILABLE)
+				.modelAttribute("error", e.getMessage())
+				.build();
 	}
 
 
