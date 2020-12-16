@@ -2,12 +2,15 @@ package lol.maki.socks.cart.web;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import lol.maki.socks.cart.Cart;
+import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.cart.client.CartItemRequest;
-import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.catalog.CatalogClient;
 import lol.maki.socks.config.SockProps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -21,19 +24,24 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
-
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Controller
 public class CartController {
 	private final CatalogClient catalogClient;
 
+	private final CartClient cartClient;
+
 	private final WebClient webClient;
 
 	private final SockProps props;
 
-	public CartController(CatalogClient catalogClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	private final Logger log = LoggerFactory.getLogger(CartController.class);
+
+	public CartController(CatalogClient catalogClient, CartClient cartClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.catalogClient = catalogClient;
+		this.cartClient = cartClient;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.build();
@@ -41,33 +49,26 @@ public class CartController {
 	}
 
 	@PostMapping(path = "cart")
-	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
 		return this.catalogClient.getSock(cartItem.getId(), authorizedClient)
 				.map(item -> new CartItemRequest()
 						.itemId(item.getId().toString())
 						.quantity(cartItem.getQuantity())
 						.unitPrice(item.getPrice()))
-				.flatMap(item -> this.webClient.post()
-						.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items").build(cart.getCartId()))
-						.attributes(oauth2AuthorizedClient(authorizedClient))
-						.bodyValue(item)
-						.retrieve()
-						.bodyToMono(CartItemResponse.class))
-				.thenReturn("redirect:/cart");
+				.flatMap(item -> this.cartClient.addCartItem(cart.getCartId(), item))
+				.thenReturn("redirect:/cart")
+				.onErrorResume(this.handleException(model));
 	}
 
 	@PostMapping(path = "cart", params = "delete")
-	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		return this.webClient.delete()
-				.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items/{itemId}").build(cart.getCartId(), cartItem.getId().toString()))
-				.attributes(oauth2AuthorizedClient(authorizedClient))
-				.retrieve()
-				.toBodilessEntity()
-				.thenReturn("redirect:/cart");
+	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+		return this.cartClient.deleteCartItem(cart.getCartId(), cartItem.getId())
+				.thenReturn("redirect:/cart")
+				.onErrorResume(this.handleException(model));
 	}
 
 	@PostMapping(path = "cart", params = "update")
-	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
 		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
 		final Map<UUID, Integer> cartItems = cartForm.getCartItems();
 		return latestCart.flatMapIterable(Cart::getItems)
@@ -76,11 +77,7 @@ public class CartController {
 					final Integer requested = cartItems.get(item.getItemId());
 					if (requested == 0) {
 						// DELETE
-						return this.webClient.delete()
-								.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items/{itemId}").build(cart.getCartId(), item.getItemId().toString()))
-								.attributes(oauth2AuthorizedClient(authorizedClient))
-								.retrieve()
-								.toBodilessEntity();
+						return this.cartClient.deleteCartItem(cart.getCartId(), item.getItemId());
 					}
 					else if (!requested.equals(item.getQuantity())) {
 						// UPDATE
@@ -88,22 +85,19 @@ public class CartController {
 								.itemId(item.getItemId().toString())
 								.unitPrice(item.getUnitPrice())
 								.quantity(requested);
-						return this.webClient.patch()
-								.uri(this.props.getCartUrl(), b -> b.path("carts/{cartId}/items").build(cart.getCartId()))
-								.attributes(oauth2AuthorizedClient(authorizedClient))
-								.bodyValue(cartItemRequest)
-								.retrieve()
-								.toBodilessEntity();
+						return this.cartClient.patchCartItem(cart.getCartId(), cartItemRequest);
 					}
 					return Mono.empty();
 				})
 				.collectList()
-				.thenReturn("redirect:/cart");
+				.thenReturn("redirect:/cart")
+				.onErrorResume(this.handleException(model));
 	}
 
 	@PostMapping(path = "cart", params = "coupon")
-	public Mono<String> applyCoupon() {
-		return Mono.just("redirect:/cart");
+	public Mono<String> applyCoupon(Model model) {
+		return Mono.just("redirect:/cart")
+				.onErrorResume(this.handleException(model));
 	}
 
 	@GetMapping(path = "cart")
@@ -111,6 +105,19 @@ public class CartController {
 		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("shopping-cart");
+	}
+
+	Function<Throwable, Mono<? extends String>> handleException(Model model) {
+		return throwable -> {
+			log.warn("Failed to call cart-api.", throwable);
+			if (throwable instanceof WebClientRequestException || (throwable instanceof WebClientResponseException && ((WebClientResponseException) throwable).getStatusCode().is5xxServerError())) {
+				model.addAttribute("error", "Cart is currently unavailable. Retry later. Sorry for the inconvenience.");
+				return Mono.just("shopping-cart");
+			}
+			else {
+				return Mono.error(throwable);
+			}
+		};
 	}
 
 

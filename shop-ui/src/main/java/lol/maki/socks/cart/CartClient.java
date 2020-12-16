@@ -2,6 +2,8 @@ package lol.maki.socks.cart;
 
 import java.util.UUID;
 
+import lol.maki.socks.cart.client.CartItemRequest;
+import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.cart.client.CartResponse;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
@@ -24,6 +26,34 @@ public class CartClient {
 		this.webClient = builder.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.baseUrl(props.getCartUrl())
 				.build();
+	}
+
+	public Mono<CartItemResponse> addCartItem(String cartId, CartItemRequest item) {
+		return this.webClient.post()
+				.uri("carts/{cartId}/items", cartId)
+				.attributes(clientRegistrationId("sock"))
+				.bodyValue(item)
+				.retrieve()
+				.bodyToMono(CartItemResponse.class);
+	}
+
+	public Mono<Void> deleteCartItem(String cartId, UUID itemId) {
+		return this.webClient.delete()
+				.uri("carts/{cartId}/items/{itemId}", cartId, itemId.toString())
+				.attributes(clientRegistrationId("sock"))
+				.retrieve()
+				.toBodilessEntity()
+				.then();
+	}
+
+	public Mono<Void> patchCartItem(String cartId, CartItemRequest item) {
+		return this.webClient.patch()
+				.uri("carts/{cartId}/items", cartId)
+				.attributes(clientRegistrationId("sock"))
+				.bodyValue(item)
+				.retrieve()
+				.toBodilessEntity()
+				.then();
 	}
 
 	public Mono<Cart> findOneWithFallback(String cartId) {
