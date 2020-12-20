@@ -14,5 +14,5 @@ set -x
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 kapp deploy -a ${APP} \
-  -f <(ytt -f ${SCRIPT_DIR}/../${APP}/k8s --data-values-env YTT) \
+  -f <(ytt -f ${SCRIPT_DIR}/../${APP}/k8s --data-values-env YTT | kbld -f -) \
   -c $@

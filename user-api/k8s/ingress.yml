@@ -1,0 +1,29 @@
+#@ load("@ytt:data", "data")
+#@ if str(data.values.use_ingress) != 'False':
+#@ domain_name = data.values.sock_user_external_url.replace("http://", "").replace("https://", "")
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sock-user
+  namespace: sock-user
+  annotations:
+    cert-manager.io/cluster-issuer: #@ data.values.cluster_issuer_name
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: #@ "{}-tls".format(domain_name.replace(".", "-"))
+    hosts:
+    - #@ domain_name
+  rules:
+  - host: #@ domain_name
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sock-user
+            port:
+              number: 80
+#@ end
