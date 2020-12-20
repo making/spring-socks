@@ -1,7 +1,7 @@
 applications:
 - name: sock-user
   path: target/user-api-0.0.1-SNAPSHOT.jar
-  memory: 256m
+  memory: 384m
   health-check-type: http
   health-check-http-endpoint: /actuator/health/readiness
   timeout: 180
