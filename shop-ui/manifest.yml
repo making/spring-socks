@@ -6,6 +6,7 @@ applications:
   health-check-http-endpoint: /management/health/readiness
   timeout: 180
   services:
+  - ui-redis
   - user-api # cf create-user-provided-service user-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-user --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - catalog-api # cf create-user-provided-service catalog-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-catalog --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - cart-api # cf create-user-provided-service cart-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-cart --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
@@ -14,6 +15,8 @@ applications:
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
+    SPRING_REDIS_CLIENTTYPE: lettuce
+    SPRING_SESSION_STORETYPE: redis
     SOCK_USERURL: ${vcap.services.user-api.credentials.url}
     SOCK_CARTURL: ${vcap.services.cart-api.credentials.url}
     SOCK_ORDERURL: ${vcap.services.order-api.credentials.url}

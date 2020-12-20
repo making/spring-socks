@@ -1,0 +1,67 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+
+#@ if str(data.values.use_external_redis) == 'False':
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sock-ui-redis-master
+  namespace: sock-ui
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: master
+        image: k8s.gcr.io/redis
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sock-ui-redis-master
+  namespace: sock-ui
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redis
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": "sock-ui"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: sock-ui
+        #@overlay/match missing_ok=True
+        env:
+        #@overlay/match by="name", missing_ok=True
+        - name: SPRING_REDIS_CLIENTTYPE
+          value: lettuce
+        #@overlay/match by="name", missing_ok=True
+        - name: SPRING_SESSION_STORETYPE
+          value: redis
+        #@overlay/match by="name", missing_ok=True
+        - name: SPRING_REDIS_HOST
+          value: sock-ui-redis-master.sock-ui.svc.cluster.local
+        #@overlay/match by="name", missing_ok=True
+        - name: SPRING_REDIS_PASSWORD
+          value: ""
+        #@overlay/match by="name", missing_ok=True
+        - name: SPRING_REDIS_PORT
+          value: "6379"
+#@ end

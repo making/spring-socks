@@ -12,7 +12,7 @@ metadata:
   labels:
     app: sock-user
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: sock-user
@@ -75,10 +75,10 @@ spec:
         resources:
           limits:
             cpu: 0.5
-            memory: 256Mi
+            memory: 384Mi
           requests:
             cpu: 0.2
-            memory: 256Mi
+            memory: 384Mi
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness

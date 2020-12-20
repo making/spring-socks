@@ -8,10 +8,13 @@ applications:
   services:
   - spring-socks # cf create-user-provided-service spring-socks -p "{\"url\":\"https://spring-socks.cfapps.io\"}"
   - user-db # cf create-service p.mysql db-small user-db
+  - user-redis
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
+    SPRING_REDIS_CLIENTTYPE: lettuce
+    SPRING_SESSION_STORETYPE: redis
     SOCK_HOMEURL: ${vcap.services.spring-socks.credentials.url}
     SERVER_PORT: 8080
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
