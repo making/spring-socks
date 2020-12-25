@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.catalog.client.TagsResponse;
+import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,6 +46,7 @@ public class CatalogClient {
 	public CatalogClient(WebClient.Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;
 	}

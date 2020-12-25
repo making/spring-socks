@@ -8,6 +8,7 @@ import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.cart.CartUnavailableException;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.catalog.CatalogClient;
+import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
 
@@ -41,6 +42,7 @@ public class CartController {
 		this.cartClient = cartClient;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;
 	}

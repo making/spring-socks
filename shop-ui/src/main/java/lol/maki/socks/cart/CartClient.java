@@ -6,6 +6,7 @@ import java.util.function.Function;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.cart.client.CartResponse;
+import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,9 @@ public class CartClient {
 	private final Logger log = LoggerFactory.getLogger(CartClient.class);
 
 	protected CartClient(Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
-		this.webClient = builder.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+		this.webClient = builder
+				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.baseUrl(props.getCartUrl())
 				.build();
 	}

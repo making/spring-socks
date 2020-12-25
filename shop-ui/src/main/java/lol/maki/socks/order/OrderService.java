@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import lol.maki.socks.cart.Cart;
+import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.order.client.OrderRequest;
 import lol.maki.socks.order.client.OrderResponse;
@@ -41,6 +42,7 @@ public class OrderService {
 		this.objectMapper = objectMapper;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;
 	}
