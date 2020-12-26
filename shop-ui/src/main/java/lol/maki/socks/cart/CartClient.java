@@ -81,12 +81,24 @@ public class CartClient {
 				.onErrorReturn(Cart.empty(cartId));
 	}
 
-	public Mono<Void> mergeWithFallback(String customerId, String sessionId) {
+	private Mono<ResponseEntity<Void>> mergeInternal(String customerId, String sessionId) {
 		return this.webClient.get()
 				.uri("carts/{customerId}/merge?sessionId={sessionId}", customerId, sessionId)
 				.attributes(clientRegistrationId("sock"))
 				.retrieve()
-				.toBodilessEntity()
+				.toBodilessEntity();
+	}
+
+	public Mono<Void> merge(String customerId, Cart cart) {
+		if (!cart.hasSessionId()) {
+			return Mono.empty();
+		}
+		return this.mergeInternal(customerId, cart.getCartId())
+				.then();
+	}
+
+	public Mono<Void> mergeWithFallback(String customerId, String sessionId) {
+		return this.mergeInternal(customerId, sessionId)
 				.onErrorReturn(ResponseEntity.ok(null))
 				.then();
 	}

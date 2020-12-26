@@ -113,7 +113,7 @@ public class CheckoutController {
 		}
 		final Mono<OrderResponse> orderResponse = user == null ?
 				this.orderService.placeOrderWithoutLogin(cart, order, authorizedClient) :
-				this.orderService.placeOrderWithLogin(user, cart, order, authorizedClient);
+				this.orderService.placeOrderWithLogin(user, cart, order);
 		return orderResponse
 				.doOnSuccess(__ -> /* Delete Cookie */
 						exchange.getResponse().addCookie(ResponseCookie.from(CART_ID_COOKIE_NAME, "deleted")
