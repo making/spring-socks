@@ -2,6 +2,7 @@ package lol.maki.socks.order.web;
 
 import am.ik.yavi.core.ConstraintViolations;
 import lol.maki.socks.cart.Cart;
+import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.order.Order;
 import lol.maki.socks.order.OrderService;
@@ -50,6 +51,7 @@ public class CheckoutController {
 		this.orderService = orderService;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;
 	}
