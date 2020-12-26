@@ -8,9 +8,9 @@ import lol.maki.socks.order.Order;
 import lol.maki.socks.order.OrderService;
 import lol.maki.socks.order.client.OrderResponse;
 import lol.maki.socks.security.ShopUser;
+import lol.maki.socks.user.UserClient;
 import lol.maki.socks.user.client.CustomerAddressResponse;
 import lol.maki.socks.user.client.CustomerCardResponse;
-import lol.maki.socks.user.client.CustomerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -41,14 +41,17 @@ import static lol.maki.socks.security.RedirectToServerRedirectStrategy.REDIRECT_
 public class CheckoutController {
 	private final OrderService orderService;
 
+	private final UserClient userClient;
+
 	private final WebClient webClient;
 
 	private final SockProps props;
 
 	private final Logger log = LoggerFactory.getLogger(CheckoutController.class);
 
-	public CheckoutController(OrderService orderService, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CheckoutController(OrderService orderService, UserClient userClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.orderService = orderService;
+		this.userClient = userClient;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
@@ -61,11 +64,7 @@ public class CheckoutController {
 		if (user == null) {
 			return Mono.just(new Order());
 		}
-		return this.webClient.get()
-				.uri(props.getUserUrl(), b -> b.path("me").build())
-				.headers(httpHeaders -> httpHeaders.setBearerAuth(user.getIdToken().getTokenValue()))
-				.retrieve()
-				.bodyToMono(CustomerResponse.class)
+		return this.userClient.getMe(user.getIdToken().getTokenValue())
 				.map(c -> {
 					final Order order = new Order();
 					order.setFirstName(c.getFirstName());
