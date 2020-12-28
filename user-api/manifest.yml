@@ -28,6 +28,7 @@ applications:
     SPRING_ZIPKIN_ENABLED: true
     SPRING_ZIPKIN_BASE_URL: ${vcap.services.zipkin.credentials.url}
     SPRING_ZIPKIN_SERVICE_NAME: ${management.metrics.tags.space}:${spring.application.name}
+    SPRING_SLEUTH_REDIS_REMOTESERVICENAME: ${spring.zipkin.service.name}-redis
     SPRING_SLEUTH_WEB_ADDITIONALSKIPPATTERN: /actuator.*|/cloudfoundryapplication.*
     MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
