@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.UUID;
 
 import com.nimbusds.jwt.SignedJWT;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.order.client.OrderResponse;
@@ -33,6 +34,7 @@ public class OrderService {
 		this.cartClient = cartClient;
 	}
 
+	@CircuitBreaker(name = "order")
 	public Mono<OrderResponse> placeOrderWithLogin(ShopUser shopUser, Cart cart, Order order) {
 		final String customerId = shopUser.getSubject();
 		final String accessToken = shopUser.getAccessToken().getTokenValue();
@@ -41,6 +43,7 @@ public class OrderService {
 						.then(this.orderClient.createOrder(tpl.getT1(), tpl.getT2(), accessToken)));
 	}
 
+	@CircuitBreaker(name = "order")
 	public Mono<OrderResponse> placeOrderWithoutLogin(Cart cart, Order order, OAuth2AuthorizedClient authorizedClient) {
 		final ClientRegistration client = authorizedClient.getClientRegistration();
 		final String username = order.isCreateAccount() ? order.getUsername() : UUID.randomUUID().toString();
