@@ -7,6 +7,7 @@ import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.security.ShopUser;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpCookie;
@@ -30,7 +31,7 @@ public class CartHandlerMethodArgumentResolver extends HandlerMethodArgumentReso
 
 	private final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
-	protected CartHandlerMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry, CartClient cartClient) {
+	protected CartHandlerMethodArgumentResolver(@Lazy ReactiveAdapterRegistry adapterRegistry, CartClient cartClient) {
 		super(adapterRegistry);
 		this.cartClient = cartClient;
 	}
