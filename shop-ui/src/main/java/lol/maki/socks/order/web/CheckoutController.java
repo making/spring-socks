@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -49,11 +50,12 @@ public class CheckoutController {
 
 	private final Logger log = LoggerFactory.getLogger(CheckoutController.class);
 
-	public CheckoutController(OrderService orderService, UserClient userClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CheckoutController(OrderService orderService, UserClient userClient, Builder builder, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.orderService = orderService;
 		this.userClient = userClient;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(loadBalancerExchangeFilterFunction)
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;

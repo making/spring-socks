@@ -15,6 +15,8 @@ applications:
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
+    SIMPLE_DNS_RESOLVEHOSTNAME: false
+    SIMPLE_DNS_USESECUREDSERVICEINSTANCES: true
     SPRING_REDIS_CLIENTTYPE: lettuce
     SPRING_SESSION_STORETYPE: redis
     SOCK_USERURL: ${vcap.services.user-api.credentials.url}

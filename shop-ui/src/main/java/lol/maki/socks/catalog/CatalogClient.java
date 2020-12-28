@@ -13,6 +13,7 @@ import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -43,9 +44,10 @@ public class CatalogClient {
 
 	private static final Resource fallbackImage = new ClassPathResource("static/img/spring_socks_1.jpg");
 
-	public CatalogClient(WebClient.Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CatalogClient(WebClient.Builder builder, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(loadBalancerExchangeFilterFunction)
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;

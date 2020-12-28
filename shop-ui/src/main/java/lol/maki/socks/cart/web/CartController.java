@@ -12,6 +12,7 @@ import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
@@ -37,11 +38,12 @@ public class CartController {
 
 	private final SockProps props;
 
-	public CartController(CatalogClient catalogClient, CartClient cartClient, Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CartController(CatalogClient catalogClient, CartClient cartClient, Builder builder, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.catalogClient = catalogClient;
 		this.cartClient = cartClient;
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(loadBalancerExchangeFilterFunction)
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;

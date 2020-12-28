@@ -11,6 +11,7 @@ import lol.maki.socks.order.client.OrderResponse;
 import lol.maki.socks.payment.client.AuthorizationResponse;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
@@ -29,9 +30,10 @@ public class OrderClient {
 
 	private final ObjectMapper objectMapper;
 
-	public OrderClient(Builder builder, SockProps props, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, ObjectMapper objectMapper) {
+	public OrderClient(Builder builder, SockProps props, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, ObjectMapper objectMapper) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(loadBalancerExchangeFilterFunction)
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;

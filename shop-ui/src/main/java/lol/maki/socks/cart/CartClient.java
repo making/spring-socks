@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
@@ -30,9 +31,10 @@ public class CartClient {
 
 	private final Logger log = LoggerFactory.getLogger(CartClient.class);
 
-	protected CartClient(Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	protected CartClient(Builder builder, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(loadBalancerExchangeFilterFunction)
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.baseUrl(props.getCartUrl())
 				.build();
