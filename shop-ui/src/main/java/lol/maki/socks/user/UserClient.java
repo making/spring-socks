@@ -9,8 +9,9 @@ import lol.maki.socks.user.client.CustomerCreateRequest;
 import lol.maki.socks.user.client.CustomerResponse;
 import reactor.core.publisher.Mono;
 
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,9 +24,9 @@ public class UserClient {
 
 	private final SockProps props;
 
-	public UserClient(WebClient.Builder builder, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public UserClient(WebClient.Builder builder, ReactiveClientRegistrationRepository clientRegistrationRepository, ServerOAuth2AuthorizedClientRepository authorizedClientRepository, SockProps props) {
 		this.webClient = builder
-				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
+				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationRepository, authorizedClientRepository))
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.props = props;
