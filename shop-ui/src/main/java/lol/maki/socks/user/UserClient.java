@@ -47,10 +47,10 @@ public class UserClient {
 				.map(n -> n.get("access_token").asText());
 	}
 
-	public Mono<CustomerResponse> getMe(String idToken) {
+	public Mono<CustomerResponse> getMe() {
 		return this.webClient.get()
 				.uri(props.getUserUrl(), b -> b.path("me").build())
-				.headers(httpHeaders -> httpHeaders.setBearerAuth(idToken))
+				.attributes(clientRegistrationId("ui"))
 				.retrieve()
 				.bodyToMono(CustomerResponse.class);
 	}

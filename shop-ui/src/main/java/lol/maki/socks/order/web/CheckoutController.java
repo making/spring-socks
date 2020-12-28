@@ -66,7 +66,7 @@ public class CheckoutController {
 		if (user == null) {
 			return Mono.just(new Order());
 		}
-		return this.userClient.getMe(user.getIdToken().getTokenValue())
+		return this.userClient.getMe()
 				.map(c -> {
 					final Order order = new Order();
 					order.setFirstName(c.getFirstName());
