@@ -23,6 +23,7 @@ public class SockConfig {
 	public WebClient webClient(WebClient.Builder builder) {
 		return builder
 				.filter(new ServletBearerExchangeFilterFunction())
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 	}
 
