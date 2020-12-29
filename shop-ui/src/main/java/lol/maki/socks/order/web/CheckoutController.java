@@ -2,8 +2,7 @@ package lol.maki.socks.order.web;
 
 import am.ik.yavi.core.ConstraintViolations;
 import lol.maki.socks.cart.Cart;
-import lol.maki.socks.config.LoggingExchangeFilterFunction;
-import lol.maki.socks.config.SockProps;
+import lol.maki.socks.cart.CartService;
 import lol.maki.socks.order.Order;
 import lol.maki.socks.order.OrderService;
 import lol.maki.socks.order.client.OrderResponse;
@@ -15,13 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
@@ -29,8 +25,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -44,21 +38,14 @@ public class CheckoutController {
 
 	private final UserClient userClient;
 
-	private final WebClient webClient;
-
-	private final SockProps props;
+	private final CartService cartService;
 
 	private final Logger log = LoggerFactory.getLogger(CheckoutController.class);
 
-	public CheckoutController(OrderService orderService, UserClient userClient, Builder builder, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CheckoutController(OrderService orderService, UserClient userClient, CartService cartService) {
 		this.orderService = orderService;
 		this.userClient = userClient;
-		this.webClient = builder
-				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
-				.filter(loadBalancerExchangeFilterFunction)
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
-				.build();
-		this.props = props;
+		this.cartService = cartService;
 	}
 
 	@ModelAttribute("order")
@@ -97,11 +84,11 @@ public class CheckoutController {
 	}
 
 	@GetMapping(path = "checkout")
-	public Mono<String> checkoutForm(Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+	public Mono<String> checkoutForm(Cart cart, Model model) {
 		if (cart.getItems().isEmpty()) {
 			model.addAttribute("errorMessage", "Cart is empty.");
 		}
-		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
+		final Mono<Cart> latestCart = this.cartService.retrieveLatest(cart);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("checkout");
 	}
@@ -111,7 +98,7 @@ public class CheckoutController {
 		final ConstraintViolations violations = order.validate();
 		if (!violations.isValid()) {
 			violations.apply(bindingResult::rejectValue);
-			return this.checkoutForm(cart, model, authorizedClient);
+			return this.checkoutForm(cart, model);
 		}
 		final Mono<OrderResponse> orderResponse = user == null ?
 				this.orderService.placeOrderWithoutLogin(cart, order, authorizedClient) :
@@ -128,7 +115,7 @@ public class CheckoutController {
 					final String message = e.getMessage();
 					log.warn(message, e);
 					model.addAttribute("errorMessage", message);
-					return this.checkoutForm(cart, model, authorizedClient);
+					return this.checkoutForm(cart, model);
 				});
 	}
 }

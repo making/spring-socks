@@ -3,29 +3,22 @@ package lol.maki.socks.cart.web;
 import java.util.Map;
 import java.util.UUID;
 
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.CartClient;
+import lol.maki.socks.cart.CartService;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.catalog.CatalogClient;
-import lol.maki.socks.config.LoggingExchangeFilterFunction;
-import lol.maki.socks.config.SockProps;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.result.view.Rendering;
 
 @Controller
@@ -34,19 +27,12 @@ public class CartController {
 
 	private final CartClient cartClient;
 
-	private final WebClient webClient;
+	private final CartService cartService;
 
-	private final SockProps props;
-
-	public CartController(CatalogClient catalogClient, CartClient cartClient, Builder builder, LoadBalancedExchangeFilterFunction loadBalancerExchangeFilterFunction, ReactiveOAuth2AuthorizedClientManager authorizedClientManager, SockProps props) {
+	public CartController(CatalogClient catalogClient, CartClient cartClient, CartService cartService) {
 		this.catalogClient = catalogClient;
 		this.cartClient = cartClient;
-		this.webClient = builder
-				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
-				.filter(loadBalancerExchangeFilterFunction)
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
-				.build();
-		this.props = props;
+		this.cartService = cartService;
 	}
 
 	@PostMapping(path = "cart")
@@ -61,14 +47,14 @@ public class CartController {
 	}
 
 	@PostMapping(path = "cart", params = "delete")
-	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
+	public Mono<String> deleteCartItem(@ModelAttribute DeleteCartItemForm cartItem, Cart cart) {
 		return this.cartClient.deleteCartItem(cart.getCartId(), cartItem.getId())
 				.thenReturn("redirect:/cart");
 	}
 
 	@PostMapping(path = "cart", params = "update")
-	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
+	public Mono<String> updateCart(@ModelAttribute UpdateCartForm cartForm, Cart cart) {
+		final Mono<Cart> latestCart = this.cartService.retrieveLatest(cart);
 		final Map<UUID, Integer> cartItems = cartForm.getCartItems();
 		return latestCart.flatMapIterable(Cart::getItems)
 				.filter(item -> cartItems.containsKey(item.getItemId()))
@@ -98,8 +84,8 @@ public class CartController {
 	}
 
 	@GetMapping(path = "cart")
-	public Mono<String> viewCart(Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Mono<Cart> latestCart = cart.retrieveLatest(props.getCatalogUrl(), this.webClient, authorizedClient);
+	public Mono<String> viewCart(Cart cart, Model model) {
+		final Mono<Cart> latestCart = this.cartService.retrieveLatest(cart);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("shopping-cart");
 	}

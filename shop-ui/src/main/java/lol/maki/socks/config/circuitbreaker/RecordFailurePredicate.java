@@ -20,7 +20,7 @@ public class RecordFailurePredicate implements Predicate<Throwable> {
 				return false;
 			}
 		}
-		log.warn("Record " + throwable, throwable);
+		log.warn(">> Record failure: " + throwable);
 		return true;
 	}
 }
