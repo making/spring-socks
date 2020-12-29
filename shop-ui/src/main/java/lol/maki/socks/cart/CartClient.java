@@ -3,6 +3,7 @@ package lol.maki.socks.cart;
 import java.util.UUID;
 import java.util.function.Function;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.cart.client.CartResponse;
@@ -40,6 +41,7 @@ public class CartClient {
 				.build();
 	}
 
+	@CircuitBreaker(name = "cart")
 	public Mono<CartItemResponse> addCartItem(String cartId, CartItemRequest item) {
 		return this.webClient.post()
 				.uri("carts/{cartId}/items", cartId)
@@ -50,6 +52,7 @@ public class CartClient {
 				.onErrorResume(this.handleException());
 	}
 
+	@CircuitBreaker(name = "cart")
 	public Mono<Void> deleteCartItem(String cartId, UUID itemId) {
 		return this.webClient.delete()
 				.uri("carts/{cartId}/items/{itemId}", cartId, itemId.toString())
@@ -60,6 +63,7 @@ public class CartClient {
 				.onErrorResume(this.handleException());
 	}
 
+	@CircuitBreaker(name = "cart")
 	public Mono<Void> patchCartItem(String cartId, CartItemRequest item) {
 		return this.webClient.patch()
 				.uri("carts/{cartId}/items", cartId)
@@ -91,6 +95,7 @@ public class CartClient {
 				.toBodilessEntity();
 	}
 
+	@CircuitBreaker(name = "cart")
 	public Mono<Void> merge(String customerId, Cart cart) {
 		if (!cart.hasSessionId()) {
 			return Mono.empty();

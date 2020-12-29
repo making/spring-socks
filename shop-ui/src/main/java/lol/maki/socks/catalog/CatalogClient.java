@@ -3,9 +3,8 @@ package lol.maki.socks.catalog;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lol.maki.socks.catalog.client.SockResponse;
 import lol.maki.socks.catalog.client.TagsResponse;
 import lol.maki.socks.config.LoggingExchangeFilterFunction;
@@ -16,14 +15,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
@@ -61,12 +57,12 @@ public class CatalogClient {
 				.bodyToMono(SockResponse.class);
 	}
 
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackSock")
 	public Mono<SockResponse> getSockWithFallback(UUID id, OAuth2AuthorizedClient authorizedClient) {
-		return this.getSock(id, authorizedClient)
-				.onErrorResume(RuntimeException.class,
-						e -> this.handleWebClientResponseException(e, __ -> Mono.error(new SockNotFoundException(id)), () -> fallbackSock));
+		return this.getSock(id, authorizedClient);
 	}
 
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackSocks")
 	public Flux<SockResponse> getSocksWithFallback(CatalogOrder order, int page, int size, List<String> tags, OAuth2AuthorizedClient authorizedClient) {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("catalogue")
@@ -77,45 +73,48 @@ public class CatalogClient {
 						.build())
 				.attributes(oauth2AuthorizedClient(authorizedClient))
 				.retrieve()
-				.bodyToFlux(SockResponse.class)
-				.onErrorReturn(fallbackSock);
+				.bodyToFlux(SockResponse.class);
 	}
 
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackTags")
 	public Mono<TagsResponse> getTagsWithFallback(OAuth2AuthorizedClient authorizedClient) {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("tags").build())
 				.attributes(oauth2AuthorizedClient(authorizedClient))
 				.retrieve()
-				.bodyToMono(TagsResponse.class)
-				.onErrorReturn(new TagsResponse());
+				.bodyToMono(TagsResponse.class);
 	}
 
-	public Mono<ResponseEntity<Resource>> getImageWithFallback(String fileName) {
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackImage")
+	public Mono<Resource> getImageWithFallback(String fileName) {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("images/{fileName}").build(fileName))
 				.retrieve()
-				.toEntity(Resource.class)
-				.onErrorResume(RuntimeException.class,
-						e -> this.handleWebClientResponseException(e, Mono::error, () -> ResponseEntity.ok(fallbackImage)));
+				.bodyToMono(Resource.class);
 	}
 
-	public Mono<ResponseEntity<Resource>> headImageWithFallback(String fileName) {
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackImage")
+	public Mono<Resource> headImageWithFallback(String fileName) {
 		return this.webClient.head()
 				.uri(props.getCatalogUrl(), b -> b.path("images/{fileName}").build(fileName))
 				.retrieve()
-				.toEntity(Resource.class)
-				.onErrorResume(RuntimeException.class,
-						e -> this.handleWebClientResponseException(e, Mono::error, () -> ResponseEntity.ok(fallbackImage)));
+				.bodyToMono(Resource.class);
 	}
 
-	<T> Mono<T> handleWebClientResponseException(RuntimeException e, Function<WebClientResponseException, Mono<T>> notfound, Supplier<T> fallback) {
-		if (e instanceof WebClientResponseException) {
-			WebClientResponseException ex = (WebClientResponseException) e;
-			final HttpStatus statusCode = ex.getStatusCode();
-			if (statusCode == HttpStatus.NOT_FOUND) {
-				return notfound.apply(ex);
-			}
-		}
-		return Mono.fromCallable(fallback::get);
+	Mono<SockResponse> fallbackSock(UUID id, OAuth2AuthorizedClient authorizedClient, Throwable throwable) {
+		SockNotFoundException.throwIfNotFound(id, throwable);
+		return Mono.just(fallbackSock);
+	}
+
+	Flux<SockResponse> fallbackSocks(CatalogOrder order, int page, int size, List<String> tags, OAuth2AuthorizedClient authorizedClient, Throwable throwable) {
+		return Flux.just(fallbackSock);
+	}
+
+	Mono<TagsResponse> fallbackTags(OAuth2AuthorizedClient authorizedClient, Throwable throwable) {
+		return Mono.fromCallable(TagsResponse::new);
+	}
+
+	Mono<Resource> fallbackImage(String fileName, Throwable throwable) {
+		return Mono.just(fallbackImage);
 	}
 }

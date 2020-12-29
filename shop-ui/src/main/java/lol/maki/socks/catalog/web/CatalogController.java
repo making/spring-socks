@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
@@ -61,16 +60,16 @@ public class CatalogController {
 
 	@ResponseBody
 	@GetMapping(path = "images/{fileName:.+}")
-	public Mono<ResponseEntity<Resource>> getImage(@PathVariable String fileName) {
+	public Mono<Resource> getImage(@PathVariable String fileName) {
 		if (fileName.startsWith("img/")) {
-			return Mono.just(ResponseEntity.ok(new ClassPathResource(fileName)));
+			return Mono.just(new ClassPathResource(fileName));
 		}
 		return this.catalogClient.getImageWithFallback(fileName);
 	}
 
 	@ResponseBody
 	@RequestMapping(method = HEAD, path = "images/{fileName:.+}")
-	public Mono<ResponseEntity<Resource>> headImage(@PathVariable String fileName) {
+	public Mono<Resource> headImage(@PathVariable String fileName) {
 		return this.catalogClient.headImageWithFallback(fileName);
 	}
 
