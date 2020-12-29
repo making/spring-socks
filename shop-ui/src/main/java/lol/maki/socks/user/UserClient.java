@@ -1,6 +1,7 @@
 package lol.maki.socks.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.user.client.CustomerAddressCreateRequest;
@@ -32,6 +33,7 @@ public class UserClient {
 		this.props = props;
 	}
 
+	@CircuitBreaker(name = "user")
 	public Mono<String> retrieveToken(String username, String password, String clientId, String clientSecret) {
 		return this.webClient.post()
 				.uri(props.getUserUrl(), b -> b.path("oauth/token").build())
@@ -48,6 +50,7 @@ public class UserClient {
 				.map(n -> n.get("access_token").asText());
 	}
 
+	@CircuitBreaker(name = "user")
 	public Mono<CustomerResponse> getMe() {
 		return this.webClient.get()
 				.uri(props.getUserUrl(), b -> b.path("me").build())
@@ -56,6 +59,7 @@ public class UserClient {
 				.bodyToMono(CustomerResponse.class);
 	}
 
+	@CircuitBreaker(name = "user")
 	public Mono<?> createUser(CustomerCreateRequest request) {
 		return this.webClient.post()
 				.uri(props.getUserUrl(), b -> b.path("customers").build())
@@ -65,6 +69,7 @@ public class UserClient {
 				.toBodilessEntity();
 	}
 
+	@CircuitBreaker(name = "user")
 	public Mono<String> createAddress(CustomerAddressCreateRequest request, String accessToken) {
 		return this.webClient.post()
 				.uri(props.getUserUrl(), b -> b.path("addresses").build())
@@ -75,6 +80,7 @@ public class UserClient {
 				.map(n -> n.get("addressId").asText());
 	}
 
+	@CircuitBreaker(name = "user")
 	public Mono<String> createCard(CustomerCardCreateRequest request, String accessToken) {
 		return this.webClient.post()
 				.uri(props.getUserUrl(), b -> b.path("cards").build())
