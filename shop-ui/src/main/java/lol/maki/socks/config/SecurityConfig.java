@@ -4,6 +4,7 @@ import java.net.URI;
 
 import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.cart.web.MergeCartServerAuthenticationSuccessHandler;
+import lol.maki.socks.security.LoginPageWebFilter;
 import lol.maki.socks.security.RedirectToServerRedirectStrategy;
 import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
 
@@ -13,6 +14,7 @@ import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
@@ -51,6 +53,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 		return http
+				.addFilterAt(new LoginPageWebFilter(), SecurityWebFiltersOrder.LOGIN_PAGE_GENERATING)
 				.authorizeExchange(exchanges -> exchanges
 						.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 						.matchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()

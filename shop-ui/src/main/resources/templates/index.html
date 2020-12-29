@@ -57,7 +57,7 @@
     <div class="humberger__menu__widget">
         <div class="header__top__right__auth">
             <a data-th-unless="${#authentication}"
-               data-th-href="@{/oauth2/authorization/ui}">
+               data-th-href="@{/login}">
                 <i class="fa fa-user"></i> Login
             </a>
             <span data-th-if="${#authentication != null && #authentication.principal != null}"
@@ -95,7 +95,7 @@
                     <div class="header__top__right">
                         <div class="header__top__right__auth">
                             <a data-th-unless="${#authentication}"
-                               data-th-href="@{/oauth2/authorization/ui}">
+                               data-th-href="@{/login}">
                                 <i class="fa fa-user"></i> Login
                             </a>
                             <span data-th-if="${#authentication != null && #authentication.principal != null}"
