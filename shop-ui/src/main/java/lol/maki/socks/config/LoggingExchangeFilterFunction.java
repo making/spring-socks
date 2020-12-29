@@ -39,6 +39,10 @@ public enum LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 						log.info("<-- END HTTP");
 					}
 				})
+				.doOnCancel(() -> {
+					final long elapsed = System.currentTimeMillis() - begin.get();
+					log.info("<-- CANCELED {} ({}ms)", clientRequest.url(), elapsed);
+				})
 				.doOnError(e -> {
 					if (log.isDebugEnabled()) {
 						final long elapsed = System.currentTimeMillis() - begin.get();
