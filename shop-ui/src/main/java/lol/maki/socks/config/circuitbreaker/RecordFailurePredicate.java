@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.client.ClientAuthorizationRequiredException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class RecordFailurePredicate implements Predicate<Throwable> {
@@ -19,6 +20,9 @@ public class RecordFailurePredicate implements Predicate<Throwable> {
 			if (statusCode.is4xxClientError()) {
 				return false;
 			}
+		}
+		if (throwable instanceof ClientAuthorizationRequiredException) {
+			return false;
 		}
 		log.warn(">> Record failure: " + throwable);
 		return true;
