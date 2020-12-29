@@ -18,7 +18,6 @@ public class LoggingCircuitBreakerRegistryEventConsumer implements RegistryEvent
 	@Override
 	public void onEntryAddedEvent(EntryAddedEvent<CircuitBreaker> entryAddedEvent) {
 		final CircuitBreaker circuitBreaker = entryAddedEvent.getAddedEntry();
-		System.out.println(circuitBreaker);
 		final EventPublisher eventPublisher = circuitBreaker.getEventPublisher();
 		eventPublisher.onStateTransition(event -> log.info("{}: {}", event.getCircuitBreakerName(), event.getStateTransition()));
 	}
