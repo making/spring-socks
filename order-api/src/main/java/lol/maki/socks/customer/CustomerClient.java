@@ -1,5 +1,6 @@
 package lol.maki.socks.customer;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.user.client.CustomerResponse;
 import reactor.core.publisher.Mono;
@@ -18,6 +19,7 @@ public class CustomerClient {
 		this.props = props;
 	}
 
+	@CircuitBreaker(name = "user")
 	public Mono<CustomerResponse> retrieveCustomer(String customerUri) {
 		return this.webClient.get()
 				.uri(this.props.getUserUrl(), b -> b.path("me").build())

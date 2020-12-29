@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.customer.CustomerClient;
@@ -43,7 +46,13 @@ public class OrderService {
 
 	private final Clock clock;
 
-	public OrderService(CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, CustomerClient customerClient, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock) {
+	private final CircuitBreaker cartCircuitBreaker;
+
+	private final CircuitBreaker paymentCircuitBreaker;
+
+	private final CircuitBreaker shipmentCircuitBreaker;
+
+	public OrderService(CartApi cartApi, PaymentApi paymentApi, ShipmentApi shipmentApi, CustomerClient customerClient, OrderMapper orderMapper, IdGenerator idGenerator, Clock clock, CircuitBreakerRegistry circuitBreakerRegistry) {
 		this.cartApi = cartApi;
 		this.paymentApi = paymentApi;
 		this.shipmentApi = shipmentApi;
@@ -51,6 +60,9 @@ public class OrderService {
 		this.orderMapper = orderMapper;
 		this.idGenerator = idGenerator;
 		this.clock = clock;
+		this.cartCircuitBreaker = circuitBreakerRegistry.circuitBreaker("cart");
+		this.paymentCircuitBreaker = circuitBreakerRegistry.circuitBreaker("payment");
+		this.shipmentCircuitBreaker = circuitBreakerRegistry.circuitBreaker("shipment");
 	}
 
 	@Transactional
@@ -80,6 +92,7 @@ public class OrderService {
 							.map(t -> Tuples.of(c, t.getT1(), t.getT2()));
 				});
 		final Flux<Item> itemFlux = this.cartApi.getItemsByCustomerId(customerId)
+				.transformDeferred(CircuitBreakerOperator.of(this.cartCircuitBreaker))
 				.map(item -> this.toItem(orderId, item))
 				.switchIfEmpty(Mono.error(() -> new IllegalOrderException("The requested cart is not found (customerId=" + customerId + ")")));
 		final Mono<Order> preOrderMono = Mono.zip(customerMono, itemFlux.collectList())
@@ -93,6 +106,7 @@ public class OrderService {
 				.flatMap(order -> {
 					final AuthorizationRequest authorizationRequest = new AuthorizationRequest().amount(order.total());
 					return this.paymentApi.authorizePayment(authorizationRequest)
+							.transformDeferred(CircuitBreakerOperator.of(this.paymentCircuitBreaker))
 							.flatMap(authorizationResponse -> {
 								if (authorizationResponse.getAuthorization().getAuthorised()) {
 									return Mono.just(order);
@@ -105,6 +119,7 @@ public class OrderService {
 		final Mono<Order> orderMono = preOrderMono.flatMap(preOrder -> {
 			final ShipmentRequest shipmentRequest = new ShipmentRequest().orderId(orderId).itemCount(preOrder.itemCount());
 			return this.shipmentApi.postShipping(shipmentRequest)
+					.transformDeferred(CircuitBreakerOperator.of(this.shipmentCircuitBreaker))
 					.map(shipmentResponse -> this.createOrder(preOrder, shipmentResponse));
 		});
 		final Order order;
@@ -118,6 +133,7 @@ public class OrderService {
 		}
 		try {
 			this.cartApi.deleteCartByCustomerId(customerId)
+					.transformDeferred(CircuitBreakerOperator.of(this.cartCircuitBreaker))
 					.block();
 		}
 		catch (RuntimeException ignored) {

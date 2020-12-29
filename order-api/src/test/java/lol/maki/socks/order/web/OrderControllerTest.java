@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.customer.CustomerClient;
@@ -41,6 +42,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -59,7 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(properties = "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://uaa.run.pcfone.io/oauth/token", controllers = OrderController.class)
-@Import(OrderService.class)
+@Import({ OrderService.class, Config.class })
 class OrderControllerTest {
 	@Autowired
 	MockMvc mockMvc;
@@ -336,5 +339,13 @@ class OrderControllerTest {
 				.andExpect(jsonPath("$[1].date").value("2020-07-14T00:00:00+09:00"))
 				.andExpect(jsonPath("$[1].status").value(this.order1.status().toString()))
 		;
+	}
+}
+
+@Configuration
+class Config {
+	@Bean
+	public CircuitBreakerRegistry circuitBreakerRegistry() {
+		return CircuitBreakerRegistry.ofDefaults();
 	}
 }
