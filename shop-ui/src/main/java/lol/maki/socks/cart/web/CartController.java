@@ -3,9 +3,9 @@ package lol.maki.socks.cart.web;
 import java.util.Map;
 import java.util.UUID;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.CartClient;
-import lol.maki.socks.cart.CartUnavailableException;
 import lol.maki.socks.cart.client.CartItemRequest;
 import lol.maki.socks.catalog.CatalogClient;
 import lol.maki.socks.config.LoggingExchangeFilterFunction;
@@ -104,12 +104,12 @@ public class CartController {
 		return Mono.just("shopping-cart");
 	}
 
-	@ExceptionHandler(CartUnavailableException.class)
-	Rendering handleException(CartUnavailableException e, Cart cart) {
+	@ExceptionHandler(RuntimeException.class)
+	Rendering handleException(RuntimeException e, Cart cart) {
 		return Rendering
 				.view("shopping-cart")
 				.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.modelAttribute("error", e.getMessage())
+				.modelAttribute("error", "Cart is currently unavailable. Retry later. Sorry for the inconvenience.")
 				.build();
 	}
 

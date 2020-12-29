@@ -1,7 +1,6 @@
 package lol.maki.socks.cart;
 
 import java.util.UUID;
-import java.util.function.Function;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lol.maki.socks.cart.client.CartItemRequest;
@@ -20,8 +19,6 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
@@ -48,8 +45,7 @@ public class CartClient {
 				.attributes(clientRegistrationId("sock"))
 				.bodyValue(item)
 				.retrieve()
-				.bodyToMono(CartItemResponse.class)
-				.onErrorResume(this.handleException());
+				.bodyToMono(CartItemResponse.class);
 	}
 
 	@CircuitBreaker(name = "cart")
@@ -59,8 +55,7 @@ public class CartClient {
 				.attributes(clientRegistrationId("sock"))
 				.retrieve()
 				.toBodilessEntity()
-				.then()
-				.onErrorResume(this.handleException());
+				.then();
 	}
 
 	@CircuitBreaker(name = "cart")
@@ -71,10 +66,10 @@ public class CartClient {
 				.bodyValue(item)
 				.retrieve()
 				.toBodilessEntity()
-				.then()
-				.onErrorResume(this.handleException());
+				.then();
 	}
 
+	@CircuitBreaker(name = "cart", fallbackMethod = "fallbackCart")
 	public Mono<Cart> findOneWithFallback(String cartId) {
 		return this.webClient.get()
 				.uri("carts/{cartId}", cartId)
@@ -83,8 +78,7 @@ public class CartClient {
 				.bodyToMono(CartResponse.class)
 				.map(c -> new Cart(cartId, c.getItems().stream()
 						.map(i -> new CartItem(UUID.fromString(i.getItemId()), i.getQuantity(), i.getUnitPrice()))
-						.collect(toUnmodifiableList())))
-				.onErrorReturn(Cart.empty(cartId));
+						.collect(toUnmodifiableList())));
 	}
 
 	private Mono<ResponseEntity<Void>> mergeInternal(String customerId, String sessionId) {
@@ -110,15 +104,7 @@ public class CartClient {
 				.then();
 	}
 
-	<T> Function<Throwable, Mono<T>> handleException() {
-		return throwable -> {
-			log.warn("Failed to call cart-api.", throwable);
-			if (throwable instanceof WebClientRequestException || (throwable instanceof WebClientResponseException && ((WebClientResponseException) throwable).getStatusCode().is5xxServerError())) {
-				return Mono.error(new CartUnavailableException(throwable));
-			}
-			else {
-				return Mono.error(throwable);
-			}
-		};
+	Mono<Cart> fallbackCart(String cartId, Throwable throwable) {
+		return Mono.fromCallable(() -> Cart.empty(cartId));
 	}
 }
