@@ -5,9 +5,9 @@ export function UserInfo() {
     useEffect(() => {
         fetchMe().then(setMe);
     }, []);
-    if (me.family_name && me.given_name) {
+    if (me.lastName && me.firstName) {
         return <p>
-            {`${me.family_name} ${me.given_name}`}<br/>
+            {`${me.lastName} ${me.firstName}`}<br/>
             <a href={"/logout"}>Logout</a>
         </p>;
     }
