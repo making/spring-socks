@@ -1,7 +1,5 @@
 package lol.maki.socks.config;
 
-import lol.maki.socks.config.LoggingExchangeFilterFunction;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
