@@ -11,12 +11,14 @@ import lol.maki.socks.catalog.CatalogClient;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.result.view.Rendering;
 
 @Controller
@@ -86,6 +88,18 @@ public class CartController {
 		final Mono<Cart> latestCart = this.cartService.retrieveLatest(cart);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("shopping-cart");
+	}
+
+	@ResponseBody
+	@GetMapping(path = "cart", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Cart viewCart(Cart cart) {
+		return cart;
+	}
+
+	@ResponseBody
+	@GetMapping(path = "cart", params = "latest", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<Cart> latestCart(Cart cart) {
+		return this.cartService.retrieveLatest(cart);
 	}
 
 	@ExceptionHandler(RuntimeException.class)

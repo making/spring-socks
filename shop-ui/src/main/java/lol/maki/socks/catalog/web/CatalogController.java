@@ -2,6 +2,8 @@ package lol.maki.socks.catalog.web;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import lol.maki.socks.cart.Cart;
@@ -17,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,6 +52,16 @@ public class CatalogController {
 		return "shop-details";
 	}
 
+	@ResponseBody
+	@GetMapping(path = "details/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<Map<String, ?>> details(@PathVariable("id") UUID id) {
+		return this.catalogClient.getSockWithFallback(id)
+				.flatMap(sock -> this.catalogClient.getSocksWithFallback(CatalogOrder.PRICE, 1, 4, sock.getTag())
+						.filter(s -> !Objects.equals(s.getId(), sock.getId()))
+						.collectList()
+						.map(relatedProducts -> Map.of("sock", sock, "relatedProducts", relatedProducts)));
+	}
+
 	@GetMapping(path = "tags/{tag}")
 	public String tag(@PathVariable("tag") List<String> tag, @RequestParam(name = "order", defaultValue = "price") CatalogOrder order, Model model, Cart cart) {
 		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(order, 1, 10, tag);
@@ -57,6 +70,21 @@ public class CatalogController {
 		model.addAttribute("tags", tags);
 		model.addAttribute("order", order.toString());
 		return "shop-grid";
+	}
+
+	@ResponseBody
+	@GetMapping(path = "tags", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<TagsResponse> tags() {
+		return this.catalogClient.getTagsWithFallback();
+	}
+
+	@ResponseBody
+	@GetMapping(path = "tags/{tag}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Flux<SockResponse> tag(@PathVariable("tag") List<String> tag,
+			@RequestParam(name = "order", defaultValue = "price") CatalogOrder order,
+			@RequestParam(name = "page", defaultValue = "1") int page,
+			@RequestParam(name = "size", defaultValue = "10") int size) {
+		return this.catalogClient.getSocksWithFallback(order, page, size, tag);
 	}
 
 	@ResponseBody
