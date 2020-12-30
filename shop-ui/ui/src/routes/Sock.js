@@ -1,5 +1,6 @@
 import {Link, Redirect, useParams} from "react-router-dom";
 import React, {useEffect, useState} from "react";
+import {Panel} from 'primereact/panel';
 import {Button} from 'primereact/button';
 import {InputNumber} from 'primereact/inputnumber';
 import {Tags} from "../components/Tags";
@@ -29,19 +30,21 @@ export function Sock({refreshCart}) {
     return <div className="p-grid p-dir-rev">
         {redirectToCart && <Redirect to={{pathname: "/cart"}}/>}
         <div className="p-col-10">
-            <h2>{sock.name}</h2>
-            <img alt={sock.name} src={sock.imageUrl && sock.imageUrl[0]} width={'450px'}/>
-            <p>${sock.price}</p>
-            <p>{sock.description}</p>
-            <form>
-                <InputNumber value={quantity} onValueChange={onChangeQuantity}
-                             mode="decimal" showButtons min={0} max={50}
-                             disabled={isSubmitting}/>
-                &nbsp;
-                <Button onClick={onClickAddCartItem}
-                        disabled={isSubmitting}>
-                    <i className="pi pi-shopping-cart"></i>&nbsp;Add To Cart</Button>
-            </form>
+            <Panel header={sock.name}>
+                <img alt={sock.name} src={sock.imageUrl && sock.imageUrl[0]}
+                     width={'450px'}/>
+                <p>${sock.price}</p>
+                <p>{sock.description}</p>
+                <form>
+                    <InputNumber value={quantity} onValueChange={onChangeQuantity}
+                                 mode="decimal" showButtons min={0} max={50}
+                                 disabled={isSubmitting}/>
+                    &nbsp;
+                    <Button onClick={onClickAddCartItem}
+                            disabled={isSubmitting}>
+                        <i className="pi pi-shopping-cart"></i>&nbsp;Add To Cart</Button>
+                </form>
+            </Panel>
             <h3>Related Products</h3>
             <ul>
                 {relatedProducts.map(sock => <li key={sock.id}><Link

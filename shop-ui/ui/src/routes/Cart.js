@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from "react";
+import {DataTable} from 'primereact/datatable';
+import {Column} from 'primereact/column';
 import {Link} from "react-router-dom";
 
 export function Cart() {
@@ -11,30 +13,23 @@ export function Cart() {
     return <div className="p-grid p-dir-rev">
         <div className="p-col-10">
             <h2>Cart</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                </tr>
-                </thead>
-                <tbody>
-                {cart.items.map(item => <tr key={item.itemId}>
-                    <td><img src={item.imageUrl} alt={item.name} width={'100px'}/> <Link
-                        to={`/details/${item.itemId}`}>{item.name}</Link></td>
-                    <td>${item.unitPrice}</td>
-                    <td>{item.quantity}</td>
-                    <td>${item.total}</td>
-                </tr>)}
-                </tbody>
-            </table>
+            <DataTable value={cart.items}>
+                <Column body={item => <React.Fragment>
+                    <img src={item.imageUrl} alt={item.name}
+                         width={'100px'}/>&nbsp;
+                    <Link
+                        to={`/details/${item.itemId}`}>{item.name}</Link>
+                </React.Fragment>}
+                        header="Name"></Column>
+                <Column body={item => `$${item.unitPrice}`} header="Unit Price"></Column>
+                <Column field="quantity" header="Quantity"></Column>
+                <Column body={item => `$${item.total}`} header="Total"></Column>
+            </DataTable>
             <p>
                 Total: ${cart.total}
             </p>
         </div>
-        <div className="p-col-order-2">
+        <div className=" p-col-order-2">
         </div>
     </div>;
 }
