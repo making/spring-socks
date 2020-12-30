@@ -11,12 +11,15 @@ export function Cart() {
     return <div>
         <h2>Cart</h2>
         <table>
+            <thead>
             <tr>
                 <th>Product</th>
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Total</th>
             </tr>
+            </thead>
+            <tbody>
             {cart.items.map(item => <tr key={item.itemId}>
                 <td><img src={item.imageUrl} alt={item.name} width={'100px'}/> <Link
                     to={`/details/${item.itemId}`}>{item.name}</Link></td>
@@ -24,6 +27,7 @@ export function Cart() {
                 <td>{item.quantity}</td>
                 <td>${item.total}</td>
             </tr>)}
+            </tbody>
         </table>
         <p>
             Total: ${cart.total}

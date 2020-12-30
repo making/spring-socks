@@ -4,22 +4,14 @@ import {Cart} from "./routes/Cart";
 import {Sock} from "./routes/Sock";
 import {Tag} from "./routes/Tag";
 import {Home} from "./routes/Home";
+import {CartSummary} from "./components/CartSummary";
 
 export default function App() {
     return (
         <Router>
             <div>
-                <h1>Spring Socks</h1>
-                <nav>
-                    <ul>
-                        <li>
-                            <Link to="/">Home</Link>
-                        </li>
-                        <li>
-                            <Link to="/cart">Cart</Link>
-                        </li>
-                    </ul>
-                </nav>
+                <h1><Link to="/">Spring Socks</Link></h1>
+                <CartSummary/>
                 <Switch>
                     <Route path="/cart">
                         <Cart/>
