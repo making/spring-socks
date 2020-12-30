@@ -19,6 +19,7 @@
 		<java.version>11</java.version>
 		<spring-cloud.version>2020.0.0</spring-cloud.version>
 		<wavefront.version>2.1.0-RC1</wavefront.version>
+		<frontend-maven-plugin.version>1.10.4</frontend-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -154,6 +155,80 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>${frontend-maven-plugin.version}</version>
+				<configuration>
+					<workingDirectory>${basedir}/frontend</workingDirectory>
+					<installDirectory>target</installDirectory>
+					<nodeVersion>v14.15.3</nodeVersion>
+					<yarnVersion>v1.22.5</yarnVersion>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and yarn</id>
+						<goals>
+							<goal>install-node-and-yarn</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>yarn install</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>yarn run build</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+						<phase>compile</phase>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+					<!--
+					<execution>
+						<id>yarn run test</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+						<phase>test</phase>
+						<configuration>
+							<arguments>run test</arguments>
+						</configuration>
+					</execution>
+					-->
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>
+								${basedir}/target/classes/META-INF/resources
+							</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/frontend/build
+									</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<executions>
@@ -218,14 +293,14 @@
 			<name>Spring Milestones</name>
 			<url>https://repo.spring.io/milestone</url>
 		</repository>
-<!--		<repository>-->
-<!--			<id>spring-snapshots</id>-->
-<!--			<name>Spring Snapshots</name>-->
-<!--			<url>https://repo.spring.io/snapshot</url>-->
-<!--			<snapshots>-->
-<!--				<enabled>true</enabled>-->
-<!--			</snapshots>-->
-<!--		</repository>	-->
+		<!--		<repository>-->
+		<!--			<id>spring-snapshots</id>-->
+		<!--			<name>Spring Snapshots</name>-->
+		<!--			<url>https://repo.spring.io/snapshot</url>-->
+		<!--			<snapshots>-->
+		<!--				<enabled>true</enabled>-->
+		<!--			</snapshots>-->
+		<!--		</repository>	-->
 		<repository>
 			<id>sonatype-snapshots</id>
 			<name>Sonatype Snapshots</name>
