@@ -11,8 +11,6 @@ import lol.maki.socks.catalog.CatalogClient;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,8 +34,8 @@ public class CartController {
 	}
 
 	@PostMapping(path = "cart")
-	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, Model model, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		return this.catalogClient.getSock(cartItem.getId(), authorizedClient)
+	public Mono<String> addCart(@ModelAttribute AddCartItemForm cartItem, Cart cart, Model model) {
+		return this.catalogClient.getSock(cartItem.getId())
 				.map(item -> new CartItemRequest()
 						.itemId(item.getId().toString())
 						.quantity(cartItem.getQuantity())

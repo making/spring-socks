@@ -15,13 +15,12 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
 public class CatalogClient {
@@ -49,21 +48,22 @@ public class CatalogClient {
 		this.props = props;
 	}
 
-	public Mono<SockResponse> getSock(UUID id, OAuth2AuthorizedClient authorizedClient) {
+	@CircuitBreaker(name = "catalog")
+	public Mono<SockResponse> getSock(UUID id) {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("catalogue/{id}").build(id))
-				.attributes(oauth2AuthorizedClient(authorizedClient))
+				.attributes(clientRegistrationId("sock"))
 				.retrieve()
 				.bodyToMono(SockResponse.class);
 	}
 
 	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackSock")
-	public Mono<SockResponse> getSockWithFallback(UUID id, OAuth2AuthorizedClient authorizedClient) {
-		return this.getSock(id, authorizedClient);
+	public Mono<SockResponse> getSockWithFallback(UUID id) {
+		return this.getSock(id);
 	}
 
-	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackSocks")
-	public Flux<SockResponse> getSocksWithFallback(CatalogOrder order, int page, int size, List<String> tags, OAuth2AuthorizedClient authorizedClient) {
+	@CircuitBreaker(name = "catalog")
+	public Flux<SockResponse> getSocks(CatalogOrder order, int page, int size, List<String> tags) {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("catalogue")
 						.queryParam("order", order)
@@ -71,18 +71,28 @@ public class CatalogClient {
 						.queryParam("size", size)
 						.queryParam("tags", tags)
 						.build())
-				.attributes(oauth2AuthorizedClient(authorizedClient))
+				.attributes(clientRegistrationId("sock"))
 				.retrieve()
 				.bodyToFlux(SockResponse.class);
 	}
 
-	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackTags")
-	public Mono<TagsResponse> getTagsWithFallback(OAuth2AuthorizedClient authorizedClient) {
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackSocks")
+	public Flux<SockResponse> getSocksWithFallback(CatalogOrder order, int page, int size, List<String> tags) {
+		return this.getSocks(order, page, size, tags);
+	}
+
+	@CircuitBreaker(name = "catalog")
+	public Mono<TagsResponse> getTags() {
 		return this.webClient.get()
 				.uri(props.getCatalogUrl(), b -> b.path("tags").build())
-				.attributes(oauth2AuthorizedClient(authorizedClient))
+				.attributes(clientRegistrationId("sock"))
 				.retrieve()
 				.bodyToMono(TagsResponse.class);
+	}
+
+	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackTags")
+	public Mono<TagsResponse> getTagsWithFallback() {
+		return this.getTags();
 	}
 
 	@CircuitBreaker(name = "catalog", fallbackMethod = "fallbackImage")
@@ -101,16 +111,16 @@ public class CatalogClient {
 				.bodyToMono(Resource.class);
 	}
 
-	Mono<SockResponse> fallbackSock(UUID id, OAuth2AuthorizedClient authorizedClient, Throwable throwable) {
+	Mono<SockResponse> fallbackSock(UUID id, Throwable throwable) {
 		SockNotFoundException.throwIfNotFound(id, throwable);
 		return Mono.just(fallbackSock);
 	}
 
-	Flux<SockResponse> fallbackSocks(CatalogOrder order, int page, int size, List<String> tags, OAuth2AuthorizedClient authorizedClient, Throwable throwable) {
+	Flux<SockResponse> fallbackSocks(CatalogOrder order, int page, int size, List<String> tags, Throwable throwable) {
 		return Flux.just(fallbackSock);
 	}
 
-	Mono<TagsResponse> fallbackTags(OAuth2AuthorizedClient authorizedClient, Throwable throwable) {
+	Mono<TagsResponse> fallbackTags(Throwable throwable) {
 		return Mono.fromCallable(TagsResponse::new);
 	}
 

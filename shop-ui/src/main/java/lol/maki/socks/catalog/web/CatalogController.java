@@ -1,5 +1,6 @@
 package lol.maki.socks.catalog.web;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,9 +15,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,10 +39,10 @@ public class CatalogController {
 	}
 
 	@GetMapping(path = "details/{id}")
-	public String details(@PathVariable("id") UUID id, Model model, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Mono<SockResponse> sock = this.catalogClient.getSockWithFallback(id, authorizedClient);
-		final Flux<SockResponse> relatedProducts = sock.flatMapMany(s -> this.catalogClient.getSocksWithFallback(CatalogOrder.PRICE, 1, 4, s.getTag(), authorizedClient));
-		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback(authorizedClient);
+	public String details(@PathVariable("id") UUID id, Model model, Cart cart) {
+		final Mono<SockResponse> sock = this.catalogClient.getSockWithFallback(id);
+		final Flux<SockResponse> relatedProducts = sock.flatMapMany(s -> this.catalogClient.getSocksWithFallback(CatalogOrder.PRICE, 1, 4, s.getTag()));
+		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback();
 		model.addAttribute("sock", sock);
 		model.addAttribute("relatedProducts", relatedProducts);
 		model.addAttribute("tags", tags);
@@ -49,9 +50,9 @@ public class CatalogController {
 	}
 
 	@GetMapping(path = "tags/{tag}")
-	public String tag(@PathVariable("tag") List<String> tag, @RequestParam(name = "order", defaultValue = "price") CatalogOrder order, Model model, Cart cart, @RegisteredOAuth2AuthorizedClient("sock") OAuth2AuthorizedClient authorizedClient) {
-		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(order, 1, 10, tag, authorizedClient);
-		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback(authorizedClient);
+	public String tag(@PathVariable("tag") List<String> tag, @RequestParam(name = "order", defaultValue = "price") CatalogOrder order, Model model, Cart cart) {
+		final Flux<SockResponse> socks = this.catalogClient.getSocksWithFallback(order, 1, 10, tag);
+		final Mono<TagsResponse> tags = this.catalogClient.getTagsWithFallback();
 		model.addAttribute("socks", socks);
 		model.addAttribute("tags", tags);
 		model.addAttribute("order", order.toString());
@@ -60,17 +61,20 @@ public class CatalogController {
 
 	@ResponseBody
 	@GetMapping(path = "images/{fileName:.+}")
-	public Mono<Resource> getImage(@PathVariable String fileName) {
-		if (fileName.startsWith("img/")) {
-			return Mono.just(new ClassPathResource(fileName));
-		}
-		return this.catalogClient.getImageWithFallback(fileName);
+	public Mono<ResponseEntity<Resource>> getImage(@PathVariable String fileName) {
+		Mono<Resource> image = fileName.startsWith("img/") ? Mono.just(new ClassPathResource(fileName)) : this.catalogClient.getImageWithFallback(fileName);
+		return image.map(body -> ResponseEntity.ok()
+				.cacheControl(CacheControl.maxAge(Duration.ofDays(7)))
+				.body(body));
 	}
 
 	@ResponseBody
 	@RequestMapping(method = HEAD, path = "images/{fileName:.+}")
-	public Mono<Resource> headImage(@PathVariable String fileName) {
-		return this.catalogClient.headImageWithFallback(fileName);
+	public Mono<ResponseEntity<Resource>> headImage(@PathVariable String fileName) {
+		return this.catalogClient.headImageWithFallback(fileName)
+				.map(body -> ResponseEntity.ok()
+						.cacheControl(CacheControl.maxAge(Duration.ofDays(7)))
+						.body(body));
 	}
 
 	@ExceptionHandler(SockNotFoundException.class)
