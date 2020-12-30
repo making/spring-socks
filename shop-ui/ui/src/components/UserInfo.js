@@ -6,12 +6,16 @@ export function UserInfo() {
         fetchMe().then(setMe);
     }, []);
     if (me.lastName && me.firstName) {
-        return <p>
-            {`${me.lastName} ${me.firstName}`}<br/>
-            <a href={"/logout"}>Logout</a>
-        </p>;
+        return <div className="p-d-flex p-jc-end">
+            <p>
+                {`${me.lastName} ${me.firstName}`}<br/>
+                <a href={"/logout"}>Logout</a>
+            </p>
+        </div>;
     }
-    return <p><a href={"/login"}>Login</a></p>;
+    return <div className="p-d-flex p-jc-end">
+        <p><a href={"/login"}>Login</a></p>
+    </div>;
 }
 
 function fetchMe() {
