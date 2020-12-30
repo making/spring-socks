@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from "react";
 import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
 import {Cart} from "./routes/Cart";
 import {Sock} from "./routes/Sock";
@@ -8,18 +8,23 @@ import {CartSummary} from "./components/CartSummary";
 import {UserInfo} from "./components/UserInfo";
 
 export default function App() {
+    const [cart, setCart] = useState({
+        items: []
+    });
+    const refreshCart = () => fetchCart().then(setCart);
+    useEffect(refreshCart, []);
     return (
         <Router>
             <div>
                 <h1><Link to="/">Spring Socks</Link></h1>
                 <UserInfo/>
-                <CartSummary/>
+                <CartSummary cart={cart}/>
                 <Switch>
                     <Route path="/cart">
                         <Cart/>
                     </Route>
                     <Route exact path="/details/:id">
-                        <Sock/>
+                        <Sock refreshCart={refreshCart}/>
                     </Route>
                     <Route exact path="/tags/:tag">
                         <Tag/>
@@ -31,5 +36,15 @@ export default function App() {
             </div>
         </Router>
     );
+}
+
+function fetchCart() {
+    return fetch('/cart', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        },
+    })
+        .then(res => res.json());
 }
 

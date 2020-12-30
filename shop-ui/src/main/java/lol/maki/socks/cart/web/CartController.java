@@ -7,6 +7,7 @@ import lol.maki.socks.cart.Cart;
 import lol.maki.socks.cart.CartClient;
 import lol.maki.socks.cart.CartService;
 import lol.maki.socks.cart.client.CartItemRequest;
+import lol.maki.socks.cart.client.CartItemResponse;
 import lol.maki.socks.catalog.CatalogClient;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.result.view.Rendering;
 
@@ -88,6 +90,17 @@ public class CartController {
 		final Mono<Cart> latestCart = this.cartService.retrieveLatest(cart);
 		model.addAttribute("cart", latestCart);
 		return Mono.just("shopping-cart");
+	}
+
+	@ResponseBody
+	@PostMapping(path = "cart", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Mono<CartItemResponse> addCart(@RequestBody AddCartItemForm cartItem, Cart cart) {
+		return this.catalogClient.getSock(cartItem.getId())
+				.map(item -> new CartItemRequest()
+						.itemId(item.getId().toString())
+						.quantity(cartItem.getQuantity())
+						.unitPrice(item.getPrice()))
+				.flatMap(item -> this.cartClient.addCartItem(cart.getCartId(), item));
 	}
 
 	@ResponseBody
