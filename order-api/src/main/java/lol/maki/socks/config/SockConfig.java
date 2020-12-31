@@ -6,6 +6,7 @@ import lol.maki.socks.cart.client.CartApi;
 import lol.maki.socks.payment.client.PaymentApi;
 import lol.maki.socks.shipping.client.ShipmentApi;
 
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.resource.web.reactive.function.client.ServletBearerExchangeFilterFunction;
@@ -20,9 +21,10 @@ public class SockConfig {
 	}
 
 	@Bean
-	public WebClient webClient(WebClient.Builder builder) {
+	public WebClient webClient(WebClient.Builder builder, LoadBalancedExchangeFilterFunction loadBalancedExchangeFilterFunction) {
 		return builder
 				.filter(new ServletBearerExchangeFilterFunction())
+				.filter(loadBalancedExchangeFilterFunction)
 				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 	}
