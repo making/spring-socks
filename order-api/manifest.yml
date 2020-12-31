@@ -1,7 +1,7 @@
 applications:
 - name: sock-order
   path: target/order-api-0.0.1-SNAPSHOT.jar
-  memory: 256m
+  memory: 384m
   health-check-type: http
   health-check-http-endpoint: /actuator/health/readiness
   timeout: 180
@@ -15,6 +15,8 @@ applications:
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
+    SIMPLE_DNS_RESOLVEHOSTNAME: false
+    SIMPLE_DNS_USESECUREDSERVICEINSTANCES: true
     SOCK_USERURL: ${vcap.services.user-api.credentials.url}
     SOCK_CARTURL: ${vcap.services.cart-api.credentials.url}
     SOCK_PAYMENTURL: ${vcap.services.payment-api.credentials.url}
