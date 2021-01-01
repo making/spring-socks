@@ -34,6 +34,7 @@ applications:
     SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ${vcap.application.uris[0]}
     SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
     SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKURL: http://${CF_INSTANCE_ADDR}${spring.cloud.consul.discovery.health-check-path}
+    SPRING_CLOUD_CONSUL_DISCOVERY_INSTANCEZONE: ${vcap.application.cf_api}:${vcap.application.organization_name}:${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
