@@ -13,12 +13,10 @@ applications:
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
-    SPRING_REDIS_CLIENTTYPE: lettuce
-    SPRING_SESSION_STORETYPE: redis
     SOCK_HOMEURL: ${vcap.services.spring-socks.credentials.url}
     SERVER_PORT: 8080
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
-    SPRING_PROFILES_ACTIVE: cloud
+    SPRING_PROFILES_ACTIVE: redis
     SERVER_TOMCAT_THREADS_MAX: 4
     JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
     JBP_CONFIG_OPEN_JDK_JRE: '{memory_calculator: {stack_threads: 20}, jre: {version: 11.+}}'
