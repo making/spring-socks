@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ class IntegrationTestsApplicationTests {
 	IntegrationTestsApplicationTests(SockProps sockProps, ObjectMapper objectMapper) {
 		this.webClient = WebClient.builder()
 				.exchangeStrategies(ExchangeStrategies.builder().codecs(c -> c.defaultCodecs().enableLoggingRequestDetails(true)).build())
+				.filter(LoggingExchangeFilterFunction.SINGLETON)
 				.build();
 		this.sockProps = sockProps;
 		this.objectMapper = objectMapper;

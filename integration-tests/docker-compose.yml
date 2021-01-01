@@ -156,6 +156,12 @@ services:
       SOCK_PAYMENTURL: http://sock-payment:5002
       SOCK_SHIPPINGURL: http://sock-shipping:5003
       SOCK_USERURL: http://sock-user:5006
+      SIMPLE_DNS_RESOLVEHOSTNAME: "false"
+      SIMPLE_DNS_PORTS_catalog: 5001
+      SIMPLE_DNS_PORTS_cart: 5005
+      SIMPLE_DNS_PORTS_order: 5004
+      SIMPLE_DNS_PORTS_payment: 5002
+      SIMPLE_DNS_PORTS_shipping: 5003
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UI_AUTHORIZATIONURI: http://localhost:15006/oauth/authorize
     depends_on:
     - zipkin
