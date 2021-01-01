@@ -10,6 +10,23 @@ cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}
 cf create-user-provided-service wavefront -p '{"api-token": "****"}'
 ```
 
+Deploy Consul Server
+
+```
+export APPS_DOMAIN=****
+export CF_DOCKER_USERNAME=****
+export CF_DOCKER_PASSWORD=****
+cf push sock-consul --docker-image consul --docker-username ${CF_DOCKER_USERNAME} -m 256m --no-route --no-start
+APP_GUID=$(cf app sock-consul --guid)
+cf curl "/v2/apps/${APP_GUID}" -X PUT -d "{\"ports\": [8500]}"
+cf create-route ${APPS_DOMAIN} --hostname sock-consul
+ROUTE_GUID=$(cf curl "/v2/routes?q=host:sock-consul" | jq -r ".resources[0].metadata.guid")
+cf curl /v2/route_mappings -X POST -d "{\"app_guid\": \"${APP_GUID}\", \"route_guid\": \"${ROUTE_GUID}\", \"app_port\": 8500}"
+cf start sock-consul
+
+cf create-user-provided-service consul -p "{\"host\": \"sock-consul.${APPS_DOMAIN}\", \"scheme\": \"https\", \"port\": \"443\"}"
+```
+
 ### Prepare Service URLs
 
 ```

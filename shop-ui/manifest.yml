@@ -11,21 +11,18 @@ applications:
   - catalog-api # cf create-user-provided-service catalog-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-catalog --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - cart-api # cf create-user-provided-service cart-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-cart --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
   - order-api # cf create-user-provided-service order-api -p "{\"url\":\"https://$(cf curl /v2/apps/$(cf app sock-order --guid)/stats | jq -r '.["0"].stats.uris[0]')\"}"
+  - consul # cf create-user-provided-service consul -p "{\"host\": \"sock-consul.example.com\", \"scheme\": \"https\", \"port\": \"443\"}"
   - prometheus-rsocket-proxy # cf create-user-provided-service prometheus-rsocket-proxy -p '{"host": "rsocket.example.com", "port": 7001}'
   - zipkin # cf create-user-provided-service zipkin -p '{"url": "https://zipkin.example.com"}'
   - wavefront # cf create-user-provided-service wavefront -p '{"api-token": "****"}'
   env:
-    SIMPLE_DNS_RESOLVEHOSTNAME: false
-    SIMPLE_DNS_USESECUREDSERVICEINSTANCES: true
-    SPRING_REDIS_CLIENTTYPE: lettuce
-    SPRING_SESSION_STORETYPE: redis
     SOCK_USERURL: ${vcap.services.user-api.credentials.url}
     SOCK_CARTURL: ${vcap.services.cart-api.credentials.url}
     SOCK_ORDERURL: ${vcap.services.order-api.credentials.url}
     SOCK_CATALOGURL: ${vcap.services.catalog-api.credentials.url}
     SERVER_PORT: 8080
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
-    SPRING_PROFILES_ACTIVE: cloud
+    SPRING_PROFILES_ACTIVE: consul,redis
     SERVER_TOMCAT_THREADS_MAX: 4
     JAVA_OPTS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
     JBP_CONFIG_OPEN_JDK_JRE: '{memory_calculator: {stack_threads: 20}, jre: {version: 11.+}}'
@@ -37,6 +34,14 @@ applications:
     SPRING_ZIPKIN_SERVICE_NAME: ${management.metrics.tags.space}:${spring.application.name}
     SPRING_SLEUTH_REDIS_REMOTESERVICENAME: ${spring.zipkin.service.name}-redis
     SPRING_SLEUTH_WEB_ADDITIONALSKIPPATTERN: /actuator.*|/cloudfoundryapplication.*
+    SPRING_CLOUD_CONSUL_HOST: ${vcap.services.consul.credentials.host}
+    SPRING_CLOUD_CONSUL_PORT: ${vcap.services.consul.credentials.port}
+    SPRING_CLOUD_CONSUL_SCHEME: ${vcap.services.consul.credentials.scheme}
+    SPRING_CLOUD_CONSUL_DISCOVERY_INSTANCEID: ${spring.application.name}-${vcap.application.instance_index}
+    SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
+    SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ${vcap.application.uris[0]}
+    SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
+    SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKURL: http://${CF_INSTANCE_ADDR}${spring.cloud.consul.discovery.health-check-path}
     MANAGEMENT_METRICS_TAGS_ORGANIZATION: ${vcap.application.organization_name}
     MANAGEMENT_METRICS_TAGS_SPACE: ${vcap.application.space_name}
     MANAGEMENT_METRICS_TAGS_APPLICATION: ${vcap.application.application_name}
