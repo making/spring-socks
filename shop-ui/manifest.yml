@@ -31,7 +31,7 @@ applications:
     SPRING_CLOUD_CONSUL_HOST: ${vcap.services.consul.credentials.host}
     SPRING_CLOUD_CONSUL_PORT: ${vcap.services.consul.credentials.port}
     SPRING_CLOUD_CONSUL_SCHEME: ${vcap.services.consul.credentials.scheme}
-    SPRING_CLOUD_CONSUL_DISCOVERY_INSTANCEID: ${spring.application.name}-${vcap.application.instance_index}
+    SPRING_CLOUD_CONSUL_DISCOVERY_INSTANCEID: ${spring.application.name}-${vcap.application.instance_id}
     SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
     SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ${vcap.application.uris[0]}
     SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
