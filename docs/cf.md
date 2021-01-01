@@ -32,21 +32,11 @@ cf create-user-provided-service consul -p "{\"host\": \"sock-consul.${APPS_DOMAI
 ```
 cf create-user-provided-service spring-socks -p "{\"url\":\"<frontend url>\"}"
 cf create-user-provided-service user-api -p "{\"url\":\"<user-api url>\"}"
-cf create-user-provided-service catalog-api -p "{\"url\":\"<catalog-api url>\"}"
-cf create-user-provided-service cart-api -p "{\"url\":\"<cart-api url>\"}"
-cf create-user-provided-service payment-api -p "{\"url\":\"<payment-api url>\"}"
-cf create-user-provided-service shipping-api -p "{\"url\":\"<shipping-api url>\"}"
-cf create-user-provided-service order-api -p "{\"url\":\"<order-api url>\"}"
 
 Ex.
 
 cf create-user-provided-service spring-socks -p "{\"url\":\"https://spring-socks.apps.cf.maki.lol\"}"
 cf create-user-provided-service user-api -p "{\"url\":\"https://sock-user.apps.cf.maki.lol\"}"
-cf create-user-provided-service catalog-api -p "{\"url\":\"https://sock-catalog.apps.cf.maki.lol\"}"
-cf create-user-provided-service cart-api -p "{\"url\":\"https://sock-cart.apps.cf.maki.lol\"}"
-cf create-user-provided-service payment-api -p "{\"url\":\"https://sock-payment.apps.cf.maki.lol\"}"
-cf create-user-provided-service shipping-api -p "{\"url\":\"https://sock-shipping.apps.cf.maki.lol\"}"
-cf create-user-provided-service order-api -p "{\"url\":\"https://sock-order.apps.cf.maki.lol\"}"
 ```
 
 ## Deploy User API
