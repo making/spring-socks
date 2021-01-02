@@ -45,8 +45,7 @@ class IntegrationTestsApplicationTests {
 
 	IntegrationTestsApplicationTests(SockProps sockProps, ObjectMapper objectMapper) {
 		this.webClient = WebClient.builder()
-				.exchangeStrategies(ExchangeStrategies.builder().codecs(c -> c.defaultCodecs().enableLoggingRequestDetails(true)).build())
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
+				.filter(new LoggingExchangeFilterFunction(true))
 				.build();
 		this.sockProps = sockProps;
 		this.objectMapper = objectMapper;

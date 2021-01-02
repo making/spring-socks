@@ -1,55 +1,170 @@
 package lol.maki.socks.config;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ClientResponse.Headers;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-public enum LoggingExchangeFilterFunction implements ExchangeFilterFunction {
-	SINGLETON;
+public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 
 	private final Logger log = LoggerFactory.getLogger(LoggingExchangeFilterFunction.class);
+
+	private final boolean includeBody;
+
+	public LoggingExchangeFilterFunction(boolean includeBody) {
+		this.includeBody = includeBody;
+	}
 
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction exchangeFunction) {
 		final AtomicLong begin = new AtomicLong();
+		final ClientRequest request;
 		if (log.isDebugEnabled()) {
-			log.info("--> {} {}", clientRequest.method(), clientRequest.url());
+			log.debug("--> {} {}", clientRequest.method(), clientRequest.url());
 			clientRequest.headers().forEach((k, v) -> {
-				log.info("{}: {}", k, String.join(",", v));
+				log.debug("{}: {}", k, String.join(",", v));
 			});
-			log.info("--> END {}", clientRequest.method());
+			final BodyInserter<?, ? super ClientHttpRequest> bodyInserter = clientRequest.body();
+			request = this.includeBody ? ClientRequest.from(clientRequest)
+					.body((outputMessage, context) -> bodyInserter.insert(new LoggingClientHttpRequest(outputMessage), context)
+							.doOnTerminate(() -> {
+								if (log.isDebugEnabled()) {
+									log.debug("--> END {}", clientRequest.method());
+								}
+							}))
+					.build() : clientRequest;
 			begin.set(System.currentTimeMillis());
 		}
-		return exchangeFunction.exchange(clientRequest)
+		else {
+			request = clientRequest;
+		}
+		return exchangeFunction.exchange(request)
 				.doOnNext(clientResponse -> {
 					if (log.isDebugEnabled()) {
 						final long elapsed = System.currentTimeMillis() - begin.get();
-						log.info("<-- {} {} ({}ms)", clientResponse.statusCode(), clientRequest.url(), elapsed);
+						log.debug("<-- {} {} ({}ms)", clientResponse.statusCode(), clientRequest.url(), elapsed);
 						clientResponse.headers().asHttpHeaders().forEach((k, v) -> {
-							log.info("{}: {}", k, String.join(",", v));
+							log.debug("{}: {}", k, String.join(",", v));
 						});
-						log.info("<-- END HTTP");
 					}
 				})
 				.doOnCancel(() -> {
 					final long elapsed = System.currentTimeMillis() - begin.get();
-					log.info("<-- CANCELED {} ({}ms)", clientRequest.url(), elapsed);
+					log.debug("<-- CANCELED {} ({}ms)", clientRequest.url(), elapsed);
 				})
 				.doOnError(e -> {
 					if (log.isDebugEnabled()) {
 						final long elapsed = System.currentTimeMillis() - begin.get();
 						final Object status = (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode() : "000";
-						log.info("<-- {} {} ({}ms)", status, clientRequest.url(), elapsed);
+						log.debug("<-- {} {} ({}ms)", status, clientRequest.url(), elapsed);
 					}
-					log.info("<-- FAILED HTTP");
-				});
+				})
+				.flatMap(clientResponse -> {
+					final Headers headers = clientResponse.headers();
+					if (!log.isDebugEnabled() || !this.includeBody || headers.contentLength().isPresent() && headers.contentLength().getAsLong() == 0L) {
+						return Mono.just(clientResponse);
+					}
+					return clientResponse.bodyToMono(String.class)
+							.doOnNext(r -> {
+								log.debug("");
+								log.debug("{}", r);
+							})
+							.map(body -> clientResponse.mutate().body(body).build());
+				})
+				.doOnTerminate(() -> log.debug("<-- END HTTP"));
+	}
+
+	class LoggingClientHttpRequest implements ClientHttpRequest {
+		private final ClientHttpRequest delegate;
+
+		LoggingClientHttpRequest(ClientHttpRequest delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return this.delegate.getHeaders();
+		}
+
+		@Override
+		public DataBufferFactory bufferFactory() {
+			return this.delegate.bufferFactory();
+		}
+
+		@Override
+		public void beforeCommit(Supplier<? extends Mono<Void>> action) {
+			this.delegate.beforeCommit(action);
+		}
+
+		@Override
+		public boolean isCommitted() {
+			return this.delegate.isCommitted();
+		}
+
+		@Override
+		public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+			return log.isDebugEnabled() ? this.delegate.writeWith(DataBufferUtils.join(body)
+					.doOnNext(data -> {
+						log.debug("");
+						log.debug("{}", data.toString(StandardCharsets.UTF_8));
+					})) : this.delegate.writeWith(body);
+		}
+
+		@Override
+		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+			return log.isDebugEnabled() ? this.delegate.writeAndFlushWith(Flux.from(body)
+					.map(b -> DataBufferUtils.join(b).doOnNext(data -> {
+						log.debug("");
+						log.debug("{}", data.toString(StandardCharsets.UTF_8));
+					}))) : this.delegate.writeAndFlushWith(body);
+		}
+
+		@Override
+		public Mono<Void> setComplete() {
+			return this.delegate.setComplete();
+		}
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.delegate.getMethod();
+		}
+
+		@Override
+		public URI getURI() {
+			return this.delegate.getURI();
+		}
+
+		@Override
+		public MultiValueMap<String, HttpCookie> getCookies() {
+			return this.delegate.getCookies();
+		}
+
+		@Override
+		public <T> T getNativeRequest() {
+			return this.delegate.getNativeRequest();
+		}
 	}
 }
+
