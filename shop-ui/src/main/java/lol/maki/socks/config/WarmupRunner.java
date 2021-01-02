@@ -12,7 +12,7 @@ public class WarmupRunner implements CommandLineRunner {
 	public WarmupRunner(WebClient.Builder builder, @Value("${server.port:8080}") int serverPort) {
 		this.webClient = builder
 				.baseUrl("http://localhost:" + serverPort)
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
+				.filter(new LoggingExchangeFilterFunction(true))
 				.build();
 	}
 

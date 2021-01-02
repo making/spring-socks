@@ -17,7 +17,7 @@ public class CustomerClient {
 	public CustomerClient(WebClient.Builder builder, SockProps props) {
 		this.webClient = builder
 				.filter(new ServletBearerExchangeFilterFunction())
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
+				.filter(new LoggingExchangeFilterFunction(true))
 				.baseUrl(props.getUserUrl())
 				.build();
 	}

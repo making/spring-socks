@@ -24,7 +24,7 @@ public class CartService {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.filter(loadBalancerExchangeFilterFunction)
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
+				.filter(new LoggingExchangeFilterFunction(true))
 				.baseUrl(props.getCatalogUrl())
 				.build();
 	}

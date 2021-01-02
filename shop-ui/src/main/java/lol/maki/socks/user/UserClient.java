@@ -28,7 +28,7 @@ public class UserClient {
 	public UserClient(WebClient.Builder builder, ReactiveClientRegistrationRepository clientRegistrationRepository, ServerOAuth2AuthorizedClientRepository authorizedClientRepository, SockProps props) {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationRepository, authorizedClientRepository))
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
+				.filter(new LoggingExchangeFilterFunction(true))
 				.build();
 		this.props = props;
 	}

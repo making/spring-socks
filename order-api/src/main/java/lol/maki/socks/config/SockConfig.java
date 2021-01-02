@@ -25,7 +25,7 @@ public class SockConfig {
 		return builder
 				.filter(new ServletBearerExchangeFilterFunction())
 				.filter(loadBalancedExchangeFilterFunction)
-				.filter(LoggingExchangeFilterFunction.SINGLETON)
+				.filter(new LoggingExchangeFilterFunction(true))
 				.build();
 	}
 
