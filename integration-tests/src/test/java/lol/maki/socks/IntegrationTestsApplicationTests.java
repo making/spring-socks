@@ -21,7 +21,6 @@ import org.springframework.test.context.TestConstructor.AutowireMode;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +44,7 @@ class IntegrationTestsApplicationTests {
 
 	IntegrationTestsApplicationTests(SockProps sockProps, ObjectMapper objectMapper) {
 		this.webClient = WebClient.builder()
-				.filter(new LoggingExchangeFilterFunction(true))
+				.filter(new LoggingExchangeFilterFunction(false))
 				.build();
 		this.sockProps = sockProps;
 		this.objectMapper = objectMapper;

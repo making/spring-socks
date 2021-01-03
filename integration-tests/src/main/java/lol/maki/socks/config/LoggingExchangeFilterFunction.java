@@ -47,14 +47,22 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 				log.debug("{}: {}", k, String.join(",", v));
 			});
 			final BodyInserter<?, ? super ClientHttpRequest> bodyInserter = clientRequest.body();
-			request = this.includeBody ? ClientRequest.from(clientRequest)
-					.body((outputMessage, context) -> bodyInserter.insert(new LoggingClientHttpRequest(outputMessage), context)
-							.doOnTerminate(() -> {
-								if (log.isDebugEnabled()) {
-									log.debug("--> END {}", clientRequest.method());
-								}
-							}))
-					.build() : clientRequest;
+			if (this.includeBody) {
+				request = ClientRequest.from(clientRequest)
+						.body((outputMessage, context) -> bodyInserter.insert(new LoggingClientHttpRequest(outputMessage), context)
+								.doOnTerminate(() -> {
+									if (log.isDebugEnabled()) {
+										log.debug("--> END {}", clientRequest.method());
+									}
+								}))
+						.build();
+			}
+			else {
+				request = clientRequest;
+				if (log.isDebugEnabled()) {
+					log.debug("--> END {}", clientRequest.method());
+				}
+			}
 			begin.set(System.currentTimeMillis());
 		}
 		else {
