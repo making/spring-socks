@@ -33,7 +33,7 @@ public class CartClient {
 		this.webClient = builder
 				.filter(new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager))
 				.filter(loadBalancerExchangeFilterFunction)
-				.filter(new LoggingExchangeFilterFunction(true))
+				.filter(new LoggingExchangeFilterFunction(false))
 				.baseUrl(props.getCartUrl())
 				.build();
 	}
