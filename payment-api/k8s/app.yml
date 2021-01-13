@@ -82,3 +82,4 @@ spec:
   selector:
     app: sock-payment
   type: ClusterIP
+  clusterIP: None

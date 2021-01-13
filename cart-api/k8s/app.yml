@@ -109,3 +109,4 @@ spec:
   selector:
     app: sock-cart
   type: ClusterIP
+  clusterIP: None

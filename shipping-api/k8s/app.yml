@@ -109,3 +109,4 @@ spec:
   selector:
     app: sock-shipping
   type: ClusterIP
+  clusterIP: None

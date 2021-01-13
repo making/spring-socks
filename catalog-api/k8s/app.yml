@@ -109,3 +109,4 @@ spec:
   selector:
     app: sock-catalog
   type: ClusterIP
+  clusterIP: None

@@ -37,6 +37,8 @@ spec:
           value: http://sock-shipping.sock-shipping.svc.cluster.local
         - name: SOCK_USERURL
           value: http://sock-user.sock-user.svc.cluster.local
+        - name: SIMPLE_DNS_DEFAULTPORTS_HTTP
+          value: "8080"
         - name: SPRING_PROFILES_ACTIVE
           value: kubernetes
         - name: SERVER_PORT
