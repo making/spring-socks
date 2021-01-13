@@ -5,12 +5,25 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import am.ik.yavi.arguments.Arguments1;
+import am.ik.yavi.arguments.Arguments2;
+import am.ik.yavi.arguments.Arguments2Validator;
+import am.ik.yavi.builder.ArgumentsValidatorBuilder;
+
 public final class Cart {
 	private final String customerId;
 
 	private final List<CartItem> items;
 
+	static final Arguments2Validator<String, List<CartItem>, Cart> validator = ArgumentsValidatorBuilder
+			.<String, List<CartItem>, Cart>of(Cart::new)
+			.builder(b -> b
+					._string(Arguments1::arg1, "customerId", c -> c.notBlank())
+					._collection(Arguments2::arg2, "items", c -> c.notNull()))
+			.build();
+
 	public Cart(String customerId, List<CartItem> items) {
+		Cart.validator.validateAndThrowIfInvalid(customerId, items);
 		this.customerId = customerId;
 		this.items = items;
 	}

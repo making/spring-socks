@@ -75,6 +75,11 @@
 		<!--            <artifactId>spring-cloud-starter-loadbalancer</artifactId>-->
 		<!--        </dependency>-->
 		<dependency>
+			<groupId>am.ik.yavi</groupId>
+			<artifactId>yavi</artifactId>
+			<version>0.4.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
 		</dependency>

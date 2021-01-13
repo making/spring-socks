@@ -3,6 +3,12 @@ package lol.maki.socks.cart;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import am.ik.yavi.arguments.Arguments1;
+import am.ik.yavi.arguments.Arguments2;
+import am.ik.yavi.arguments.Arguments3;
+import am.ik.yavi.arguments.Arguments3Validator;
+import am.ik.yavi.builder.ArgumentsValidatorBuilder;
+
 public final class CartItem {
 	private final String itemId;
 
@@ -10,7 +16,15 @@ public final class CartItem {
 
 	private BigDecimal unitPrice;
 
+	static final Arguments3Validator<String, Integer, BigDecimal, CartItem> validator = ArgumentsValidatorBuilder.of(CartItem::new)
+			.builder(b -> b
+					._string(Arguments1::arg1, "itemId", c -> c.notBlank())
+					._integer(Arguments2::arg2, "quantity", c -> c.greaterThanOrEqual(1))
+					._bigDecimal(Arguments3::arg3, "unitPrice", c -> c.greaterThan(BigDecimal.ZERO)))
+			.build();
+
 	public CartItem(String itemId, int quantity, BigDecimal unitPrice) {
+		CartItem.validator.validateAndThrowIfInvalid(itemId, quantity, unitPrice);
 		this.itemId = itemId;
 		this.quantity = quantity;
 		this.unitPrice = unitPrice;

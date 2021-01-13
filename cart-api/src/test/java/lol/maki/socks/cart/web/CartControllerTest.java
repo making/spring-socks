@@ -169,6 +169,26 @@ class CartControllerTest {
 	}
 
 	@Test
+	void patchItemsByCustomerId_400() throws Exception {
+		assertThat(this.cart1.findItem("1").isPresent()).isTrue();
+		assertThat(this.cart1.findItem("1").get().quantity()).isEqualTo(1);
+		given(this.cartMapper.findCartByCustomerId("1234")).willReturn(Optional.of(this.cart1));
+		this.mockMvc.perform(patch("/carts/{customerId}/items", "1234")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_cart:write"),
+						new SimpleGrantedAuthority("ROLE_TRUSTED_CLIENT")))
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding(StandardCharsets.UTF_8.toString())
+				.content("{\"itemId\":\"\",\"quantity\":-1}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
+				.andExpect(jsonPath("$.details.length()").value(2))
+				.andExpect(jsonPath("$.details[0].defaultMessage").value("\"itemId\" must not be blank"))
+				.andExpect(jsonPath("$.details[1].defaultMessage").value("\"quantity\" must be greater than or equal to 1"))
+		;
+		assertThat(this.cart1.findItem("1").get().quantity()).isEqualTo(1);
+	}
+
+	@Test
 	void postItemsByCustomerId() throws Exception {
 		assertThat(this.cart1.findItem("3").isPresent()).isFalse();
 		given(this.cartMapper.findCartByCustomerId("1234")).willReturn(Optional.of(this.cart1));
@@ -186,5 +206,25 @@ class CartControllerTest {
 		assertThat(cartItem.itemId()).isEqualTo("3");
 		assertThat(cartItem.unitPrice()).isEqualTo(BigDecimal.ONE);
 		assertThat(cartItem.quantity()).isEqualTo(10);
+	}
+
+	@Test
+	void postItemsByCustomerId_400() throws Exception {
+		assertThat(this.cart1.findItem("3").isPresent()).isFalse();
+		given(this.cartMapper.findCartByCustomerId("1234")).willReturn(Optional.of(this.cart1));
+		this.mockMvc.perform(post("/carts/{customerId}/items", "1234")
+				.with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_cart:write"),
+						new SimpleGrantedAuthority("ROLE_TRUSTED_CLIENT")))
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding(StandardCharsets.UTF_8.toString())
+				.content("{\"itemId\":\"\",\"quantity\":0,\"unitPrice\":0}"))
+				.andExpect(status().isBadRequest())
+				.andExpect(openApi().isValid("META-INF/resources/openapi/doc.yml"))
+				.andExpect(jsonPath("$.details.length()").value(3))
+				.andExpect(jsonPath("$.details[0].defaultMessage").value("\"itemId\" must not be blank"))
+				.andExpect(jsonPath("$.details[1].defaultMessage").value("\"quantity\" must be greater than or equal to 1"))
+				.andExpect(jsonPath("$.details[2].defaultMessage").value("\"unitPrice\" must be greater than 0"))
+		;
+		assertThat(this.cart1.findItem("3").isPresent()).isFalse();
 	}
 }
