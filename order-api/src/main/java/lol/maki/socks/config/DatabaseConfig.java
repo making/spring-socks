@@ -7,7 +7,6 @@ import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.boot.jdbc.DatabaseDriver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.support.DatabaseStartupValidator;
@@ -31,7 +30,6 @@ public class DatabaseConfig {
 	public DatabaseStartupValidator databaseStartupValidator(DataSource dataSource) {
 		final DatabaseStartupValidator dsv = new DatabaseStartupValidator();
 		dsv.setDataSource(dataSource);
-		dsv.setValidationQuery(DatabaseDriver.MYSQL.getValidationQuery());
 		return dsv;
 	}
 }
