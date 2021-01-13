@@ -115,6 +115,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CartItemResponse'
+        '400':
+          description: Bad Request
       description: Add a cart item for the requested customer id
       requestBody:
         content:
@@ -129,6 +131,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          description: Bad Request
       requestBody:
         content:
           application/json:
