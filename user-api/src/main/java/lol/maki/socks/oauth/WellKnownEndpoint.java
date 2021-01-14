@@ -34,10 +34,11 @@ public class WellKnownEndpoint {
 	public Map<String, Object> openIdConfiguration(UriComponentsBuilder builder) {
 		final String issuerUrl = Optional.ofNullable(this.sockProps.getIssuerUrl())
 				.orElseGet(() -> builder.replacePath("oauth/token").build().toString());
+		final UriComponentsBuilder issuerBuilder = UriComponentsBuilder.fromHttpUrl(issuerUrl);
 		return Map.of("issuer", issuerUrl,
-				"authorization_endpoint", builder.replacePath("oauth/authorize").build().toString(),
-				"token_endpoint", builder.replacePath("oauth/token").build().toString(),
-				"jwks_uri", builder.replacePath("token_keys").build().toString(),
+				"authorization_endpoint", issuerBuilder.replacePath("oauth/authorize").build().toString(),
+				"token_endpoint", issuerBuilder.replacePath("oauth/token").build().toString(),
+				"jwks_uri", issuerBuilder.replacePath("token_keys").build().toString(),
 				"subject_types_supported", List.of("public"));
 	}
 
