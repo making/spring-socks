@@ -1,4 +1,4 @@
-# How to deploy Spring Sock Shop on Kubernetes
+# How to deploy Spring Socks on Kubernetes
 
 ## Prepare CLIs
 
