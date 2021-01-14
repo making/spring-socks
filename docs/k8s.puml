@@ -1,0 +1,67 @@
+@startuml
+actor User
+
+node "ns: sock-ui" {
+  [ingress:sock-ui]
+  (sock-ui)
+  (sock-ui-redis)
+}
+[ingress:sock-ui] --> [sock-ui]
+(sock-ui) ..> (sock-ui-redis)
+
+node "ns: sock-user" {
+  [ingress:sock-user]
+  (sock-user)
+  (sock-user-mysql)
+  (sock-user-redis)
+}
+[ingress:sock-user] --> [sock-user]
+(sock-user) ..> (sock-user-mysql)
+(sock-user) ..> (sock-user-redis)
+
+node "ns: sock-catalog" {
+  (sock-catalog)
+  (sock-catalog-mysql)
+}
+(sock-catalog) ..> (sock-catalog-mysql)
+
+node "ns: sock-cart" {
+  (sock-cart)
+  (sock-cart-mysql)
+}
+(sock-cart) ..> (sock-cart-mysql)
+
+node "ns: sock-shipping" {
+  (sock-shipping)
+  (sock-shipping-mysql)
+}
+(sock-shipping) ..> (sock-shipping-mysql)
+
+node "ns: sock-payment" {
+  (sock-payment)
+}
+
+node "ns: sock-order" {
+  (sock-order)
+  (sock-order-mysql)
+}
+(sock-order) ..> (sock-order-mysql)
+
+
+[sock-ui] -> [sock-user]
+[sock-ui] -> [sock-catalog]
+[sock-ui] -> [sock-cart]
+[sock-ui] --> [sock-order]
+
+[sock-order] --> [sock-payment]
+[sock-order] --> [sock-shipping]
+
+[sock-catalog] -up-> [ingress:sock-user]
+[sock-cart] -up-> [ingress:sock-user]
+[sock-shipping] -up-> [ingress:sock-user]
+[sock-payment] -up-> [ingress:sock-user]
+[sock-order] -up-> [ingress:sock-user]
+
+User --> [ingress:sock-ui]
+User --> [ingress:sock-user]
+@enduml

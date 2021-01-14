@@ -1,4 +1,4 @@
-# How to deploy Spring Shop on Cloud Foundry
+# How to deploy Spring Sock Shop on Cloud Foundry
 
 ## Prepare shared service instances
 
