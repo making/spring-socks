@@ -14,12 +14,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
+				.addFilterBefore(new ForwardedHeaderFilter(), LogoutFilter.class)
 				.authorizeRequests(authorizeRequests -> authorizeRequests
 						.requestMatchers(EndpointRequest.to("info", "health", "prometheus")).permitAll()
 						.mvcMatchers(HttpMethod.GET, "orders").access("hasRole('TRUSTED_CLIENT') and hasAuthority('SCOPE_order:read')")
