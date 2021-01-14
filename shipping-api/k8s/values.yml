@@ -6,3 +6,4 @@ mysql_username: sockshop
 mysql_password: sockshop
 mysql_database: sock_shipping
 use_external_mysql: False
+sock_user_external_url:
