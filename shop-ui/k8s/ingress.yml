@@ -25,5 +25,5 @@ spec:
           service:
             name: sock-ui
             port:
-              number: 80
+              number: 8080
 #@ end

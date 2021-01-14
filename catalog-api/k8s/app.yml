@@ -35,7 +35,7 @@ spec:
         - name: BPL_JVM_THREAD_COUNT
           value: "20"
         - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI
-          value: http://sock-user.sock-user.svc.cluster.local/oauth/token
+          value: http://sock-user.sock-user.svc.cluster.local:8080/oauth/token
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://${MYSQL_HOSTNAME}:${MYSQL_PORT}/${MYSQL_DATABASE}
         - name: SPRING_DATASOURCE_USERNAME
@@ -103,7 +103,7 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 80
+    port: 8080
     protocol: TCP
     targetPort: 8080
   selector:

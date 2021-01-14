@@ -26,17 +26,17 @@ spec:
         image: ghcr.io/making/spring-socks-ui
         env:
         - name: SOCK_CATALOGURL
-          value: http://sock-catalog.sock-catalog.svc.cluster.local
+          value: http://sock-catalog.sock-catalog.svc.cluster.local:8080
         - name: SOCK_CARTURL
-          value: http://sock-cart.sock-cart.svc.cluster.local
+          value: http://sock-cart.sock-cart.svc.cluster.local:8080
         - name: SOCK_ORDERURL
-          value: http://sock-order.sock-order.svc.cluster.local
+          value: http://sock-order.sock-order.svc.cluster.local:8080
         - name: SOCK_PAYMENTURL
-          value: http://sock-payment.sock-payment.svc.cluster.local
+          value: http://sock-payment.sock-payment.svc.cluster.local:8080
         - name: SOCK_SHIPPINGURL
-          value: http://sock-shipping.sock-shipping.svc.cluster.local
+          value: http://sock-shipping.sock-shipping.svc.cluster.local:8080
         - name: SOCK_USERURL
-          value: http://sock-user.sock-user.svc.cluster.local
+          value: http://sock-user.sock-user.svc.cluster.local:8080
         - name: SIMPLE_DNS_DEFAULTPORTS_HTTP
           value: "8080"
         - name: SPRING_PROFILES_ACTIVE
@@ -91,7 +91,7 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 80
+    port: 8080
     protocol: TCP
     targetPort: 8080
   selector:
