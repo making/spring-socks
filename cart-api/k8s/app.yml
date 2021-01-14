@@ -12,7 +12,7 @@ metadata:
   labels:
     app: sock-cart
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: sock-cart
