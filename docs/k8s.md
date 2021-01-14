@@ -98,6 +98,32 @@ Go to `http://<sock-ui's External IP>:8080`
 
 You can log in as a demo user (username: `jdoe` / password: `demo`).
 
+Deployed pods are below
+
+```
+$ kubectl get pod -A | grep sock
+sock-cart              sock-cart-7bb74c984-6sqkg                           1/1     Running   1          17m
+sock-cart              sock-cart-7bb74c984-wg2g6                           1/1     Running   0          17m
+sock-cart              sock-cart-mysql-f54588cc5-dxq9n                     1/1     Running   0          17m
+sock-catalog           sock-catalog-6c54f9674-5bq9n                        1/1     Running   0          18m
+sock-catalog           sock-catalog-6c54f9674-x94sk                        1/1     Running   0          18m
+sock-catalog           sock-catalog-mysql-75b9544bd6-5b7fn                 1/1     Running   0          18m
+sock-order             sock-order-847754f44-f5g9s                          1/1     Running   0          14m
+sock-order             sock-order-847754f44-jhc2j                          1/1     Running   0          14m
+sock-order             sock-order-mysql-76bb884c7c-m7ft4                   1/1     Running   0          14m
+sock-payment           sock-payment-66c9f449dc-qw8bm                       1/1     Running   0          15m
+sock-shipping          sock-shipping-6f888c88b-z6vxc                       1/1     Running   1          14m
+sock-shipping          sock-shipping-mysql-54598775bb-nm9k7                1/1     Running   0          14m
+sock-ui                sock-ui-6cb7895cbd-l49s9                            1/1     Running   0          8m11s
+sock-ui                sock-ui-6cb7895cbd-ls8dp                            1/1     Running   0          8m11s
+sock-ui                sock-ui-redis-master-7c88d94dc4-h5dv4               1/1     Running   0          8m11s
+sock-user              sock-user-7db4cf4c9c-6nxrv                          1/1     Running   0          6m13s
+sock-user              sock-user-7db4cf4c9c-88ncv                          1/1     Running   0          5m51s
+sock-user              sock-user-mysql-76bd667c95-csfps                    1/1     Running   0          21m
+sock-user              sock-user-redis-master-5fb694bbc8-d4xj5             1/1     Running   0          21m
+```
+
+
 ## With Ingress and Cert Manager (Let's Encrypt)
 
 
