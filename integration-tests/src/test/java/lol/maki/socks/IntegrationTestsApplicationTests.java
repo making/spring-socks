@@ -44,7 +44,7 @@ class IntegrationTestsApplicationTests {
 
 	IntegrationTestsApplicationTests(SockProps sockProps, ObjectMapper objectMapper) {
 		this.webClient = WebClient.builder()
-				.filter(new LoggingExchangeFilterFunction(false))
+				.filter(new LoggingExchangeFilterFunction(true))
 				.build();
 		this.sockProps = sockProps;
 		this.objectMapper = objectMapper;

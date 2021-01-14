@@ -87,6 +87,13 @@ services:
       SOCK_PAYMENTURL: http://sock-payment:5002
       SOCK_SHIPPINGURL: http://sock-shipping:5003
       SOCK_USERURL: http://sock-user:5006
+      SPRING_APPLICATION_JSON: |
+        {
+          "simple.dns.resolve-hostname": false,
+          "simple.dns.ports[sock-cart].http": 5005,
+          "simple.dns.ports[sock-payment].http": 5002,
+          "simple.dns.ports[sock-shipping].http": 5003
+        }
     depends_on:
     - mysql
     - zipkin
