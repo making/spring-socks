@@ -36,7 +36,7 @@ spec:
         - name: SOCK_SHIPPINGURL
           value: http://sock-shipping.sock-shipping.svc.cluster.local:8080
         - name: SOCK_USERURL
-          value: #@ data.values.sock_user_external_url or "http://sock-user.sock-user.svc.cluster.local:8080"
+          value: #@ "/".join(data.values.sock_issuer_url.split("/")[0:3]) if data.values.sock_user_external_url else "http://sock-user.sock-user.svc.cluster.local:8080"
         - name: SIMPLE_DNS_DEFAULTPORTS_HTTP
           value: "8080"
         - name: SPRING_PROFILES_ACTIVE

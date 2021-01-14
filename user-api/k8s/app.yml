@@ -27,6 +27,9 @@ spec:
         env:
         - name: SOCK_HOMEURL
           value: #@ data.values.sock_ui_external_url
+        #@ if/end data.values.sock_issuer_url:
+        - name: SOCK_ISSUERURL
+          value: #@ data.values.sock_issuer_url
         - name: SPRING_PROFILES_ACTIVE
           value: kubernetes
         - name: SERVER_PORT

@@ -9,5 +9,6 @@ use_external_mysql: False
 use_external_redis: False
 sock_ui_external_url: http://spring-socks.example.com
 sock_user_external_url: http://sock-user.example.com
+sock_issuer_url:
 cluster_issuer_name: letsencrypt
 use_ingress: False

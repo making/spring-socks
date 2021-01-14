@@ -36,7 +36,7 @@ spec:
         - name: BPL_JVM_THREAD_COUNT
           value: "20"
         - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI
-          value: #@ "{}/oauth/token".format(data.values.sock_user_external_url or "http://sock-user.sock-user.svc.cluster.local:8080")
+          value: #@ data.values.sock_issuer_url or "http://sock-user.sock-user.svc.cluster.local:8080/oauth/token"
         - name: INFO_JAVA_VERSION
           value: ${java.runtime.version}
         - name: INFO_JAVA_VENDOR
