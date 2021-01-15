@@ -30,9 +30,6 @@ public class SimpleDnsDiscoveryClient extends SimpleDnsDiscoverySupport implemen
 			// pass through the service instance
 			return Collections.singletonList(super.createServiceInstance(0, serviceId, serviceId));
 		}
-		if (!isHostname(serviceId)) {
-			return Collections.emptyList();
-		}
 		// Resolve serviceId as hostname
 		log.info("Resolving {}", serviceId);
 		return super.resolveServiceInstances(serviceId);

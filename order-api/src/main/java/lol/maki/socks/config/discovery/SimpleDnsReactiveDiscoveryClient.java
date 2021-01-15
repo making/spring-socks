@@ -29,9 +29,6 @@ public class SimpleDnsReactiveDiscoveryClient extends SimpleDnsDiscoverySupport 
 			// pass through the service instance
 			return Flux.just(super.createServiceInstance(0, serviceId, serviceId));
 		}
-		if (!isHostname(serviceId)) {
-			return Flux.empty();
-		}
 		// Resolve serviceId as hostname
 		return Flux
 				.defer(() -> {
