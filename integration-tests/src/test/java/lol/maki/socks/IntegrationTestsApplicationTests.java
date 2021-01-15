@@ -98,8 +98,6 @@ class IntegrationTestsApplicationTests {
 		assertThat(catalogue.getStatusCode()).isEqualTo(HttpStatus.OK);
 		final JsonNode item1 = catalogue.getBody().get(0);
 		final JsonNode item2 = catalogue.getBody().get(1);
-		log.info("item1 = {}", prettyPrint(item1));
-		log.info("item2 = {}", prettyPrint(item2));
 		// Add items to a cart
 		final ResponseEntity<JsonNode> cartItem1 = this.webClient.post()
 				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.userInfo.get("sub").asText()))
@@ -118,8 +116,6 @@ class IntegrationTestsApplicationTests {
 				.block();
 		assertThat(cartItem1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(cartItem2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		log.info("cartItem1 = {}", prettyPrint(cartItem1.getBody()));
-		log.info("cartItem2 = {}", prettyPrint(cartItem2.getBody()));
 		// Increase the quantity of the cart item
 		final ResponseEntity<JsonNode> updatedCartItem2 = this.webClient.patch()
 				.uri(this.sockProps.getCartUrl(), b -> b.path("carts/{customerId}/items").build(this.userInfo.get("sub").asText()))
@@ -139,7 +135,6 @@ class IntegrationTestsApplicationTests {
 				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
 		assertThat(cart.getStatusCode()).isEqualTo(HttpStatus.OK);
-		log.info("cart = {}", prettyPrint(cart.getBody()));
 		assertThat(cart.getBody()).hasSize(2);
 		assertThat(cart.getBody().get("items").get(0).get("quantity").asInt()).isEqualTo(1);
 		assertThat(cart.getBody().get("items").get(1).get("quantity").asInt()).isEqualTo(3);
@@ -162,7 +157,6 @@ class IntegrationTestsApplicationTests {
 				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
 		assertThat(order.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		log.info("order = {}", prettyPrint(order.getBody()));
 		assertThat(order.getBody().get("total").asText()).isEqualTo("37.0");
 		assertThat(order.getBody().get("status").asText()).isEqualTo("CREATED");
 		assertThat(order.getBody().get("shipment").get("carrier").asText()).isEqualTo("USPS");
@@ -173,7 +167,6 @@ class IntegrationTestsApplicationTests {
 				.headers(httpHeaders -> httpHeaders.setBearerAuth(this.userAccessToken))
 				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
-		log.info("shipment = {}", prettyPrint(shipment.getBody()));
 		assertThat(shipment.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 		// Show a cart again
@@ -183,7 +176,6 @@ class IntegrationTestsApplicationTests {
 				.exchangeToMono(x -> x.toEntity(JsonNode.class))
 				.block();
 		assertThat(cartAgain.getStatusCode()).isEqualTo(HttpStatus.OK);
-		log.info("cart = {}", prettyPrint(cartAgain.getBody()));
 		assertThat(cartAgain.getBody().get("items")).hasSize(0);
 	}
 
