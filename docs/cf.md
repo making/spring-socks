@@ -33,10 +33,10 @@ cf create-user-provided-service consul -p "{\"host\": \"sock-consul.${APPS_DOMAI
 cf create-user-provided-service spring-socks -p "{\"url\":\"<frontend url>\"}"
 cf create-user-provided-service user-api -p "{\"url\":\"<user-api url>\"}"
 
-Ex.
+Eg.
 
-cf create-user-provided-service spring-socks -p "{\"url\":\"https://spring-socks.apps.cf.maki.lol\"}"
-cf create-user-provided-service user-api -p "{\"url\":\"https://sock-user.apps.cf.maki.lol\"}"
+cf create-user-provided-service spring-socks -p "{\"url\":\"https://spring-socks.apps.pcfone.io\"}"
+cf create-user-provided-service user-api -p "{\"url\":\"https://sock-user.apps.pcfone.io\"}"
 ```
 
 ## Deploy User API
@@ -44,7 +44,7 @@ cf create-user-provided-service user-api -p "{\"url\":\"https://sock-user.apps.c
 ```
 cf create-service <mysql service> <plan> user-db
 
-Ex.
+Eg.
 cf create-service p.mysql db-small user-db
 cf create-service shared-mysql shared user-db
 
@@ -63,7 +63,7 @@ cf push -f user-api
 ```
 cf create-service <mysql service> <plan> catalog-db
 
-Ex.
+Eg.
 cf create-service p.mysql db-small catalog-db
 cf create-service shared-mysql shared catalog-db
 
@@ -82,7 +82,7 @@ cf push -f catalog-api
 ```
 cf create-service <mysql service> <plan> cart-db
 
-Ex.
+Eg.
 cf create-service p.mysql db-small cart-db
 cf create-service shared-mysql shared cart-db
 
@@ -108,7 +108,7 @@ cf push -f payment-api
 ```
 cf create-service <mysql service> <plan> shipping-db
 
-Ex.
+Eg.
 cf create-service p.mysql db-small shipping-db
 cf create-service shared-mysql shared shipping-db
 
@@ -127,7 +127,7 @@ cf push -f shipping-api
 ```
 cf create-service <mysql service> <plan> order-db
 
-Ex.
+Eg.
 cf create-service p.mysql db-small order-db
 cf create-service shared-mysql shared order-db
 
@@ -147,3 +147,7 @@ cf push -f order-api
 ./mvnw clean package -DskipTests -f shop-ui
 cf push -f shop-ui
 ```
+
+![image](https://user-images.githubusercontent.com/106908/104691274-4530fe80-5749-11eb-821e-fd95161ce5a9.png)
+
+You can log in as a demo user (username: `jdoe` / password: `demo`).
