@@ -8,8 +8,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
@@ -30,8 +28,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
@@ -52,8 +48,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
@@ -74,8 +68,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
@@ -89,7 +81,6 @@ services:
       SOCK_USERURL: http://sock-user:5006
       SPRING_APPLICATION_JSON: |
         {
-          "simple.dns.resolve-hostname": false,
           "simple.dns.ports[sock-cart].http": 5005,
           "simple.dns.ports[sock-payment].http": 5002,
           "simple.dns.ports[sock-shipping].http": 5003
@@ -106,8 +97,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
@@ -128,8 +117,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       SERVER_TOMCAT_THREADS_MAX: 4
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
@@ -150,8 +137,6 @@ services:
     restart: always
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      LOGGING_LEVEL_ROOT: WARN
-      LOGGING_LEVEL_WEB: DEBUG
       LOGGING_LEVEL_LOL_MAKI_SOCKS: DEBUG
       JAVA_TOOL_OPTIONS: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
       BPL_JVM_THREAD_COUNT: 20
@@ -165,7 +150,6 @@ services:
       SOCK_USERURL: http://sock-user:5006
       SPRING_APPLICATION_JSON: |
         {
-          "simple.dns.resolve-hostname": false,
           "simple.dns.ports[sock-catalog].http": 5001,
           "simple.dns.ports[sock-cart].http": 5005,
           "simple.dns.ports[sock-order].http": 5004,
