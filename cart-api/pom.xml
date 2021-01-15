@@ -35,6 +35,14 @@
 					<groupId>io.springfox</groupId>
 					<artifactId>springfox-swagger-ui</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openapitools</groupId>
+					<artifactId>jackson-databind-nullable</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
