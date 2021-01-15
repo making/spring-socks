@@ -10,6 +10,7 @@ Live Demo: https://spring-socks.apps.pcfone.io
 
 <img src="https://user-images.githubusercontent.com/106908/95973135-3ab35000-0e4e-11eb-9267-00ab2bee3c5f.png" width="800px">
 
+* [How to run Spring Socks with Docker Compose](docs/docker-compose.md)
 * [How to deploy Spring Socks on Kubernetes](docs/k8s.md)
 * [How to deploy Spring Socks on Cloud Foundry](docs/cf.md)
 
