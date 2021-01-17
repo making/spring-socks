@@ -1,6 +1,7 @@
 package lol.maki.socks.customer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,11 +22,11 @@ public class Customer implements Serializable {
 
 	private final boolean allowDuplicateEmail;
 
-	private final List<Address> addresses;
+	private final List<Address> addresses = new ArrayList<>();
 
-	private final List<Card> cards;
+	private final List<Card> cards = new ArrayList<>();
 
-	public Customer(UUID customerId, String username, String password, String firstName, String lastName, Email email, boolean allowDuplicateEmail, List<Address> addresses, List<Card> cards) {
+	public Customer(UUID customerId, String username, String password, String firstName, String lastName, Email email, boolean allowDuplicateEmail) {
 		this.customerId = customerId;
 		this.username = username;
 		this.password = password;
@@ -33,8 +34,6 @@ public class Customer implements Serializable {
 		this.lastName = lastName;
 		this.email = email;
 		this.allowDuplicateEmail = allowDuplicateEmail;
-		this.addresses = addresses;
-		this.cards = cards;
 	}
 
 	public static long serialVersionUID() {

@@ -1,6 +1,5 @@
 package lol.maki.socks.customer.web;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import lol.maki.socks.customer.Address;
@@ -69,9 +68,7 @@ public class CustomerHelper {
 				request.getFirstName(),
 				request.getLastName(),
 				new Email(request.getEmail()),
-				request.getAllowDuplicateEmail(),
-				new ArrayList<>(),
-				new ArrayList<>());
+				request.getAllowDuplicateEmail());
 	}
 
 	static Card fromCustomerCardCreateRequest(UUID cardId, CustomerCardCreateRequest req) {

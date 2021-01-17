@@ -1,6 +1,5 @@
 package lol.maki.socks.customer;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,9 +30,7 @@ public class CustomerMapper {
 						rs.getString("first_name"),
 						rs.getString("last_name"),
 						new Email(rs.getString("email")),
-						rs.getBoolean("allow_duplicate_email"),
-						new ArrayList<>(),
-						new ArrayList<>());
+						rs.getBoolean("allow_duplicate_email"));
 			}
 			final String addressId = rs.getString("address_id");
 			if (addressId != null) {
