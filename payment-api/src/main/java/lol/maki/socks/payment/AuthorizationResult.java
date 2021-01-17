@@ -1,12 +1,28 @@
 package lol.maki.socks.payment;
 
-import org.immutables.value.Value.Immutable;
 
-@Immutable
-public abstract class AuthorizationResult {
-	public abstract boolean authorized();
+public class AuthorizationResult {
+	private final boolean authorized;
 
-	public abstract boolean valid();
+	private final boolean valid;
 
-	public abstract String message();
+	private final String message;
+
+	public AuthorizationResult(boolean authorized, boolean valid, String message) {
+		this.authorized = authorized;
+		this.valid = valid;
+		this.message = message;
+	}
+
+	public boolean authorized() {
+		return authorized;
+	}
+
+	public boolean valid() {
+		return valid;
+	}
+
+	public String message() {
+		return message;
+	}
 }

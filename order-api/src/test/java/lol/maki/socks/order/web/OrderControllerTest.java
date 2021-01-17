@@ -15,12 +15,6 @@ import lol.maki.socks.customer.CustomerClient;
 import lol.maki.socks.order.Address;
 import lol.maki.socks.order.Card;
 import lol.maki.socks.order.Customer;
-import lol.maki.socks.order.ImmutableAddress;
-import lol.maki.socks.order.ImmutableCard;
-import lol.maki.socks.order.ImmutableCustomer;
-import lol.maki.socks.order.ImmutableItem;
-import lol.maki.socks.order.ImmutableOrder;
-import lol.maki.socks.order.ImmutableShipment;
 import lol.maki.socks.order.Item;
 import lol.maki.socks.order.Order;
 import lol.maki.socks.order.OrderMapper;
@@ -92,79 +86,70 @@ class OrderControllerTest {
 
 	String orderId2 = "22222222";
 
-	Customer customer1 = ImmutableCustomer.builder()
-			.id("1234")
-			.firstName("John")
-			.lastName("Doe")
-			.username("jdoe")
-			.build();
+	Customer customer1 = new Customer(
+			"1234",
+			"John",
+			"Doe",
+			"jdoe");
 
-	Address address1 = ImmutableAddress.builder()
-			.number("123")
-			.street("Street")
-			.city("City")
-			.country("Country")
-			.postcode("1111111")
-			.build();
+	Address address1 = new Address(
+			"123",
+			"Street",
+			"City",
+			"1111111",
+			"Country");
 
 	UUID addressId1 = UUID.fromString("3b541549-1384-4c70-b507-c65431c61650");
 
-	Card card1 = ImmutableCard.builder()
-			.longNum("4111111111111111")
-			.ccv("123")
-			.expires(LocalDate.of(2024, 1, 1))
-			.build();
+	Card card1 = new Card(
+			"4111111111111111",
+			LocalDate.of(2024, 1, 1),
+			"123");
 
 	UUID cardId1 = UUID.fromString("e8ae2ef6-3ef3-44b8-9bb2-5390c1788040");
 
-	Item item1 = ImmutableItem.builder()
-			.itemId("6d62d909-f957-430e-8689-b5129c0bb75e")
-			.orderId(this.orderId1)
-			.quantity(2)
-			.unitPrice(new BigDecimal("17.15"))
-			.build();
+	Item item1 = new Item(
+			this.orderId1,
+			"6d62d909-f957-430e-8689-b5129c0bb75e",
+			2,
+			new BigDecimal("17.15"));
 
-	Item item2 = ImmutableItem.builder()
-			.itemId("f611b671-40a3-4020-ab7f-68d56a813dc8")
-			.orderId(this.orderId1)
-			.quantity(1)
-			.unitPrice(new BigDecimal("20"))
-			.build();
+	Item item2 = new Item(
+			this.orderId1,
+			"f611b671-40a3-4020-ab7f-68d56a813dc8",
+			1,
+			new BigDecimal("20"));
 
-	Item item3 = ImmutableItem.builder()
-			.itemId("0e22b596-812d-4d06-a65e-39e144299fb8")
-			.orderId(this.orderId2)
-			.quantity(1)
-			.unitPrice(new BigDecimal("10.25"))
-			.build();
+	Item item3 = new Item(
+			this.orderId2,
+			"0e22b596-812d-4d06-a65e-39e144299fb8",
+			1,
+			new BigDecimal("10.25"));
 
-	Shipment shipment1 = ImmutableShipment.builder()
-			.trackingNumber(UUID.fromString("06df0447-8679-47fd-a184-65101acc52dc"))
-			.carrier("UPS")
-			.deliveryDate(LocalDate.of(2020, 7, 17))
-			.build();
+	Shipment shipment1 = new Shipment(
+			"UPS",
+			UUID.fromString("06df0447-8679-47fd-a184-65101acc52dc"),
+			LocalDate.of(2020, 7, 17));
 
-	Order order1 = ImmutableOrder.builder()
-			.id(this.orderId1)
-			.customer(this.customer1)
-			.card(this.card1)
-			.address(this.address1)
-			.shipment(this.shipment1)
-			.items(List.of(this.item1, this.item2))
-			.status(OrderStatus.SHIPPED)
-			.date(LocalDate.of(2020, 7, 14).atStartOfDay().atOffset(OffsetDateTime.now().getOffset()))
-			.build();
+	Order order1 = new Order(
+			this.orderId1,
+			this.customer1,
+			this.address1,
+			this.card1,
+			List.of(this.item1, this.item2),
+			this.shipment1,
+			LocalDate.of(2020, 7, 14).atStartOfDay().atOffset(OffsetDateTime.now().getOffset()),
+			OrderStatus.SHIPPED);
 
-	Order order2 = ImmutableOrder.builder()
-			.id(this.orderId2)
-			.customer(this.customer1)
-			.card(this.card1)
-			.address(this.address1)
-			.shipment(this.shipment1)
-			.items(List.of(this.item3))
-			.status(OrderStatus.PAID)
-			.date(LocalDate.of(2020, 7, 15).atStartOfDay().atOffset(OffsetDateTime.now().getOffset()))
-			.build();
+	Order order2 = new Order(
+			this.orderId2,
+			this.customer1,
+			this.address1,
+			this.card1,
+			List.of(this.item3),
+			this.shipment1,
+			LocalDate.of(2020, 7, 15).atStartOfDay().atOffset(OffsetDateTime.now().getOffset()),
+			OrderStatus.PAID);
 
 	@Test
 	void createOrder() throws Exception {

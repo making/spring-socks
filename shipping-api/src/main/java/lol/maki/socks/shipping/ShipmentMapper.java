@@ -14,12 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShipmentMapper {
 	private final JdbcTemplate jdbcTemplate;
 
-	private final RowMapper<Shipment> shipmentRowMapper = (rs, i) -> ImmutableShipment.builder()
-			.orderId(rs.getString("order_id"))
-			.carrier(Carrier.valueOf(rs.getString("carrier")))
-			.shipmentDate(rs.getDate("shipment_date").toLocalDate())
-			.trackingNumber(UUID.fromString(rs.getString("tracking_number")))
-			.build();
+	private final RowMapper<Shipment> shipmentRowMapper = (rs, i) -> new Shipment(
+			Carrier.valueOf(rs.getString("carrier")),
+			rs.getString("order_id"),
+			rs.getDate("shipment_date").toLocalDate(),
+			UUID.fromString(rs.getString("tracking_number")));
 
 	public ShipmentMapper(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;

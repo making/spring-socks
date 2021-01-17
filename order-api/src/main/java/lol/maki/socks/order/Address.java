@@ -1,16 +1,42 @@
 package lol.maki.socks.order;
 
-import org.immutables.value.Value.Immutable;
 
-@Immutable
-public abstract class Address {
-	public abstract String number();
+public class Address {
+	private final String number;
 
-	public abstract String street();
+	private final String street;
 
-	public abstract String city();
+	private final String city;
 
-	public abstract String postcode();
+	private final String postcode;
 
-	public abstract String country();
+	private final String country;
+
+	public Address(String number, String street, String city, String postcode, String country) {
+		this.number = number;
+		this.street = street;
+		this.city = city;
+		this.postcode = postcode;
+		this.country = country;
+	}
+
+	public String number() {
+		return number;
+	}
+
+	public String street() {
+		return street;
+	}
+
+	public String city() {
+		return city;
+	}
+
+	public String postcode() {
+		return postcode;
+	}
+
+	public String country() {
+		return country;
+	}
 }

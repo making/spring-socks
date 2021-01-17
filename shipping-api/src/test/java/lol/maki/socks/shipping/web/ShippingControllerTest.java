@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lol.maki.socks.shipping.Carrier;
-import lol.maki.socks.shipping.ImmutableShipment;
 import lol.maki.socks.shipping.Shipment;
 import lol.maki.socks.shipping.ShipmentMapper;
 import org.junit.jupiter.api.Test;
@@ -47,19 +46,17 @@ class ShippingControllerTest {
 	@MockBean
 	IdGenerator idGenerator;
 
-	Shipment shipment1 = ImmutableShipment.builder()
-			.orderId("1")
-			.carrier(Carrier.FEDEX)
-			.shipmentDate(LocalDate.of(2020, 7, 1))
-			.trackingNumber(UUID.fromString("6a8cd59f-73dd-40a1-b2ca-ec53f78e391a"))
-			.build();
+	Shipment shipment1 = new Shipment(
+			Carrier.FEDEX,
+			"1",
+			LocalDate.of(2020, 7, 1),
+			UUID.fromString("6a8cd59f-73dd-40a1-b2ca-ec53f78e391a"));
 
-	Shipment shipment2 = ImmutableShipment.builder()
-			.orderId("2")
-			.carrier(Carrier.UPS)
-			.shipmentDate(LocalDate.of(2020, 7, 2))
-			.trackingNumber(UUID.fromString("a22f048f-4617-46f2-b1bb-93885d66daf7"))
-			.build();
+	Shipment shipment2 = new Shipment(
+			Carrier.UPS,
+			"2",
+			LocalDate.of(2020, 7, 2),
+			UUID.fromString("a22f048f-4617-46f2-b1bb-93885d66daf7"));
 
 	@Test
 	void getShippingById() throws Exception {

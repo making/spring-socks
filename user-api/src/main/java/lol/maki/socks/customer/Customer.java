@@ -4,31 +4,76 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-import org.immutables.value.Value.Immutable;
-
-import org.springframework.lang.Nullable;
-
-@Immutable
-public abstract class Customer implements Serializable {
+public class Customer implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	public abstract UUID customerId();
+	private final UUID customerId;
 
-	public abstract String username();
+	private final String username;
 
-	public abstract String password();
+	private final String password;
 
-	public abstract String firstName();
+	private final String firstName;
 
-	public abstract String lastName();
+	private final String lastName;
 
-	public abstract Email email();
+	private final Email email;
 
-	public abstract boolean allowDuplicateEmail();
+	private final boolean allowDuplicateEmail;
 
-	@Nullable
-	public abstract List<Address> addresses();
+	private final List<Address> addresses;
 
-	@Nullable
-	public abstract List<Card> cards();
+	private final List<Card> cards;
+
+	public Customer(UUID customerId, String username, String password, String firstName, String lastName, Email email, boolean allowDuplicateEmail, List<Address> addresses, List<Card> cards) {
+		this.customerId = customerId;
+		this.username = username;
+		this.password = password;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.allowDuplicateEmail = allowDuplicateEmail;
+		this.addresses = addresses;
+		this.cards = cards;
+	}
+
+	public static long serialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public UUID customerId() {
+		return customerId;
+	}
+
+	public String username() {
+		return username;
+	}
+
+	public String password() {
+		return password;
+	}
+
+	public String firstName() {
+		return firstName;
+	}
+
+	public String lastName() {
+		return lastName;
+	}
+
+	public Email email() {
+		return email;
+	}
+
+	public boolean allowDuplicateEmail() {
+		return allowDuplicateEmail;
+	}
+
+	public List<Address> addresses() {
+		return addresses;
+	}
+
+	public List<Card> cards() {
+		return cards;
+	}
 }

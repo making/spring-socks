@@ -26,17 +26,16 @@ public class SockMapper {
 
 	private final Set<String> acceptedOrder = Set.of("sock_id", "name", "price");
 
-	private final RowMapper<Sock> sockBuilderRowMapper = (rs, i) -> ImmutableSock.builder()
-			.sockId(UUID.fromString(rs.getString("sock_id")))
-			.name(rs.getString("name"))
-			.description(rs.getString("description"))
-			.price(new BigDecimal(rs.getString("price")))
-			.count(rs.getInt("count"))
-			.addImageUrl(rs.getString("image_url_1"), rs.getString("image_url_2"))
-			.tags(Arrays.stream(Objects.requireNonNullElse(rs.getString("tag"), "").split(","))
+	private final RowMapper<Sock> sockBuilderRowMapper = (rs, i) -> new Sock(
+			UUID.fromString(rs.getString("sock_id")),
+			rs.getString("name"),
+			rs.getString("description"),
+			new BigDecimal(rs.getString("price")),
+			rs.getInt("count"),
+			List.of(rs.getString("image_url_1"), rs.getString("image_url_2")),
+			Arrays.stream(Objects.requireNonNullElse(rs.getString("tag"), "").split(","))
 					.map(Tag::valueOf)
-					.collect(toUnmodifiableList()))
-			.build();
+					.collect(toUnmodifiableList()));
 
 	private static final String BASE_QUERY = "SELECT s.sock_id, s.name, description, price, count, image_url_1, image_url_2, GROUP_CONCAT(t.name) AS tag"
 			+ " FROM sock AS s"

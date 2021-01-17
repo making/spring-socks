@@ -5,19 +5,43 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.immutables.value.Value.Immutable;
-
-@Immutable
-public abstract class Card implements Serializable {
+public class Card implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	public abstract UUID cardId();
+	private final UUID cardId;
 
-	public abstract String longNum();
+	private final String longNum;
 
-	public abstract LocalDate expires();
+	private final LocalDate expires;
 
-	public abstract String ccv();
+	private final String ccv;
+
+	public Card(UUID cardId, String longNum, LocalDate expires, String ccv) {
+		this.cardId = cardId;
+		this.longNum = longNum;
+		this.expires = expires;
+		this.ccv = ccv;
+	}
+
+	public static long serialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public UUID cardId() {
+		return cardId;
+	}
+
+	public String longNum() {
+		return longNum;
+	}
+
+	public LocalDate expires() {
+		return expires;
+	}
+
+	public String ccv() {
+		return ccv;
+	}
 
 	public boolean isSame(Card card) {
 		return Objects.equals(this.longNum(), card.longNum()) &&

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import lol.maki.socks.catalog.ImmutableSock;
 import lol.maki.socks.catalog.Sock;
 import lol.maki.socks.catalog.SockMapper;
 import lol.maki.socks.catalog.Tag;
@@ -34,25 +33,23 @@ class CatalogControllerTest {
 
 	WebTestClient webTestClient;
 
-	private final Sock sock1 = ImmutableSock.builder()
-			.sockId(UUID.fromString("57b8db2f-15fc-4164-bfaf-ad30b55ef7e8"))
-			.name("demo1")
-			.description("Demo1")
-			.addTags(Tag.valueOf("blue"), Tag.valueOf("red"))
-			.imageUrl(List.of("/demo1_1.jpg", "/demo1_2.jpg"))
-			.price(BigDecimal.valueOf(10.0))
-			.count(10)
-			.build();
+	private final Sock sock1 = new Sock(
+			UUID.fromString("57b8db2f-15fc-4164-bfaf-ad30b55ef7e8"),
+			"demo1",
+			"Demo1",
+			BigDecimal.valueOf(10.0),
+			10,
+			List.of("/demo1_1.jpg", "/demo1_2.jpg"),
+			List.of(Tag.valueOf("blue"), Tag.valueOf("red")));
 
-	private final Sock sock2 = ImmutableSock.builder()
-			.sockId(UUID.fromString("bb4f7c35-67f9-4f0b-90c2-69cde0964fbd"))
-			.name("demo2")
-			.description("Demo2")
-			.addTags(Tag.valueOf("red"))
-			.imageUrl(List.of("/demo2_1.jpg", "/demo2_2.jpg"))
-			.price(BigDecimal.valueOf(20.0))
-			.count(20)
-			.build();
+	private final Sock sock2 = new Sock(
+			UUID.fromString("bb4f7c35-67f9-4f0b-90c2-69cde0964fbd"),
+			"demo2",
+			"Demo2",
+			BigDecimal.valueOf(20.0),
+			20,
+			List.of("/demo2_1.jpg", "/demo2_2.jpg"),
+			List.of(Tag.valueOf("red")));
 
 	@BeforeEach
 	void setup() throws Exception {
