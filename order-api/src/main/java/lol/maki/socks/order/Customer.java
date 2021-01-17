@@ -1,14 +1,34 @@
 package lol.maki.socks.order;
 
-import org.immutables.value.Value.Immutable;
+public class Customer {
+	private final String id;
 
-@Immutable
-public abstract class Customer {
-	public abstract String id();
+	private final String firstName;
 
-	public abstract String firstName();
+	private final String lastName;
 
-	public abstract String lastName();
+	private final String username;
 
-	public abstract String username();
+	public Customer(String id, String firstName, String lastName, String username) {
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.username = username;
+	}
+
+	public String id() {
+		return id;
+	}
+
+	public String firstName() {
+		return firstName;
+	}
+
+	public String lastName() {
+		return lastName;
+	}
+
+	public String username() {
+		return username;
+	}
 }

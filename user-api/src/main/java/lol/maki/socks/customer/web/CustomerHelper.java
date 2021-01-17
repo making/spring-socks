@@ -1,14 +1,12 @@
 package lol.maki.socks.customer.web;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import lol.maki.socks.customer.Address;
 import lol.maki.socks.customer.Card;
 import lol.maki.socks.customer.Customer;
-import lol.maki.socks.customer.ImmutableAddress;
-import lol.maki.socks.customer.ImmutableCard;
-import lol.maki.socks.customer.ImmutableCustomer;
-import lol.maki.socks.customer.ImmutableEmail;
+import lol.maki.socks.customer.Email;
 import lol.maki.socks.user.spec.CustomerAddressCreateRequest;
 import lol.maki.socks.user.spec.CustomerAddressResponse;
 import lol.maki.socks.user.spec.CustomerCardCreateRequest;
@@ -54,34 +52,33 @@ public class CustomerHelper {
 
 
 	static Address fromCustomerAddressCreateRequest(UUID addressId, CustomerAddressCreateRequest req) {
-		return ImmutableAddress.builder()
-				.addressId(addressId)
-				.number(req.getNumber())
-				.street(req.getStreet())
-				.city(req.getCity())
-				.country(req.getCountry())
-				.postcode(req.getPostcode())
-				.build();
+		return new Address(
+				addressId,
+				req.getNumber(),
+				req.getStreet(),
+				req.getCity(),
+				req.getPostcode(),
+				req.getCountry());
 	}
 
 	static Customer fromCustomerCreateRequest(UUID customerId, String encodedPassword, CustomerCreateRequest request) {
-		return ImmutableCustomer.builder()
-				.customerId(customerId)
-				.firstName(request.getFirstName())
-				.lastName(request.getLastName())
-				.username(request.getUsername())
-				.password(encodedPassword)
-				.email(ImmutableEmail.builder().address(request.getEmail()).build())
-				.allowDuplicateEmail(request.getAllowDuplicateEmail())
-				.build();
+		return new Customer(
+				customerId,
+				request.getUsername(),
+				encodedPassword,
+				request.getFirstName(),
+				request.getLastName(),
+				new Email(request.getEmail()),
+				request.getAllowDuplicateEmail(),
+				new ArrayList<>(),
+				new ArrayList<>());
 	}
 
 	static Card fromCustomerCardCreateRequest(UUID cardId, CustomerCardCreateRequest req) {
-		return ImmutableCard.builder()
-				.cardId(cardId)
-				.longNum(req.getLongNum())
-				.expires(req.getExpires())
-				.ccv(req.getCcv())
-				.build();
+		return new Card(
+				cardId,
+				req.getLongNum(),
+				req.getExpires(),
+				req.getCcv());
 	}
 }

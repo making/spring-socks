@@ -31,11 +31,8 @@ public class CustomerService {
 			// do nothing
 			return existing.get();
 		}
-		final Customer newCustomer = ImmutableCustomer.builder()
-				.from(customer)
-				.addAddresses(newAddress)
-				.build();
-		this.customerMapper.upsert(newCustomer);
+		customer.addresses().add(newAddress);
+		this.customerMapper.upsert(customer);
 		return newAddress;
 	}
 
@@ -46,11 +43,8 @@ public class CustomerService {
 			// do nothing
 			return existing.get();
 		}
-		final Customer newCustomer = ImmutableCustomer.builder()
-				.from(customer)
-				.addCards(newCard)
-				.build();
-		this.customerMapper.upsert(newCustomer);
+		customer.cards().add(newCard);
+		this.customerMapper.upsert(customer);
 		return newCard;
 	}
 

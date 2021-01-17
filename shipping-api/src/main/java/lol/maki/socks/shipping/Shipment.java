@@ -3,15 +3,35 @@ package lol.maki.socks.shipping;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.immutables.value.Value.Immutable;
+public class Shipment {
+	private final Carrier carrier;
 
-@Immutable
-public abstract class Shipment {
-	public abstract Carrier carrier();
+	private final String orderId;
 
-	public abstract String orderId();
+	private final LocalDate shipmentDate;
 
-	public abstract LocalDate shipmentDate();
+	private final UUID trackingNumber;
 
-	public abstract UUID trackingNumber();
+	public Shipment(Carrier carrier, String orderId, LocalDate shipmentDate, UUID trackingNumber) {
+		this.carrier = carrier;
+		this.orderId = orderId;
+		this.shipmentDate = shipmentDate;
+		this.trackingNumber = trackingNumber;
+	}
+
+	public Carrier carrier() {
+		return carrier;
+	}
+
+	public String orderId() {
+		return orderId;
+	}
+
+	public LocalDate shipmentDate() {
+		return shipmentDate;
+	}
+
+	public UUID trackingNumber() {
+		return trackingNumber;
+	}
 }

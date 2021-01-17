@@ -3,15 +3,30 @@ package lol.maki.socks.order;
 import java.time.Clock;
 import java.time.LocalDate;
 
-import org.immutables.value.Value.Immutable;
+public class Card {
+	private final String longNum;
 
-@Immutable
-public abstract class Card {
-	public abstract String longNum();
+	private final LocalDate expires;
 
-	public abstract LocalDate expires();
+	private final String ccv;
 
-	public abstract String ccv();
+	public Card(String longNum, LocalDate expires, String ccv) {
+		this.longNum = longNum;
+		this.expires = expires;
+		this.ccv = ccv;
+	}
+
+	public String longNum() {
+		return longNum;
+	}
+
+	public LocalDate expires() {
+		return expires;
+	}
+
+	public String ccv() {
+		return ccv;
+	}
 
 	public final boolean isExpired(Clock clock) {
 		final LocalDate now = LocalDate.now(clock);

@@ -143,62 +143,55 @@ public class OrderService {
 	}
 
 	Customer toCustomer(String customerId, CustomerResponse r) {
-		return ImmutableCustomer.builder()
-				.id(customerId)
-				.firstName(r.getFirstName())
-				.lastName(r.getLastName())
-				.username(r.getUsername())
-				.build();
+		return new Customer(
+				customerId,
+				r.getFirstName(),
+				r.getLastName(),
+				r.getUsername());
 	}
 
 	Address toAddress(CustomerAddressResponse r) {
-		return ImmutableAddress.builder()
-				.number(r.getNumber())
-				.street(r.getStreet())
-				.city(r.getCity())
-				.country(r.getCountry())
-				.postcode(r.getPostcode())
-				.build();
+		return new Address(
+				r.getNumber(),
+				r.getStreet(),
+				r.getCity(),
+				r.getPostcode(),
+				r.getCountry());
 	}
 
 	Card toCard(CustomerCardResponse r) {
-		return ImmutableCard.builder()
-				.longNum(r.getLongNum())
-				.ccv(r.getCcv())
-				.expires(r.getExpires())
-				.build();
+		return new Card(
+				r.getLongNum(),
+				r.getExpires(),
+				r.getCcv());
 	}
 
 	Item toItem(String orderId, CartItemResponse item) {
-		return ImmutableItem.builder()
-				.itemId(item.getItemId())
-				.orderId(orderId)
-				.quantity(item.getQuantity())
-				.unitPrice(item.getUnitPrice())
-				.build();
+		return new Item(
+				orderId,
+				item.getItemId(),
+				item.getQuantity(),
+				item.getUnitPrice());
 	}
 
 	Order createPreOrder(String orderId, Customer customer, Address address, Card card, List<Item> items) {
-		return ImmutableOrder.builder()
-				.id(orderId)
-				.customer(customer)
-				.address(address)
-				.card(card)
-				.items(items)
-				.date(OffsetDateTime.now(this.clock))
-				.status(OrderStatus.CREATED)
-				.shipment(ImmutableShipment.builder().carrier("dummy").deliveryDate(LocalDate.MIN).trackingNumber(UUID.randomUUID()).build())
-				.build();
+		return new Order(
+				orderId,
+				customer,
+				address,
+				card,
+				items,
+				new Shipment("dummy", UUID.randomUUID(), LocalDate.MIN),
+				OffsetDateTime.now(this.clock),
+				OrderStatus.CREATED);
 	}
 
 	Order createOrder(Order preOrder, ShipmentResponse shipmentResponse) {
-		return ImmutableOrder.builder()
-				.from(preOrder)
-				.shipment(ImmutableShipment.builder()
-						.carrier(shipmentResponse.getCarrier())
-						.trackingNumber(shipmentResponse.getTrackingNumber())
-						.deliveryDate(shipmentResponse.getDeliveryDate())
-						.build())
-				.build();
+		return preOrder
+				.withShipment(
+						new Shipment(
+								shipmentResponse.getCarrier(),
+								shipmentResponse.getTrackingNumber(),
+								shipmentResponse.getDeliveryDate()));
 	}
 }

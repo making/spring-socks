@@ -2,7 +2,6 @@ package lol.maki.socks.payment.web;
 
 import lol.maki.socks.config.PaymentProps;
 import lol.maki.socks.payment.AuthorizationResult;
-import lol.maki.socks.payment.ImmutablePayment;
 import lol.maki.socks.payment.Payment;
 import lol.maki.socks.payment.spec.Authorization;
 import lol.maki.socks.payment.spec.AuthorizationRequest;
@@ -28,10 +27,9 @@ public class PaymentController {
 
 	@PostMapping(path = "/paymentAuth")
 	public ResponseEntity<AuthorizationResponse> authorizePayment(@Validated @RequestBody AuthorizationRequest req) {
-		final Payment payment = ImmutablePayment.builder()
-				.amount(req.getAmount())
-				.declineOverAmount(props.declineOverAmount())
-				.build();
+		final Payment payment = new Payment(
+				req.getAmount(),
+				props.declineOverAmount());
 		final AuthorizationResult result = payment.authorize();
 		if (!result.valid()) {
 			return ResponseEntity.badRequest().body(toResponse(result));

@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import lol.maki.socks.shipping.Carrier;
-import lol.maki.socks.shipping.ImmutableShipment;
 import lol.maki.socks.shipping.Shipment;
 import lol.maki.socks.shipping.ShipmentMapper;
 import lol.maki.socks.shipping.spec.ShipmentRequest;
@@ -51,12 +50,11 @@ public class ShippingController {
 
 	@PostMapping(path = "/shipping")
 	public ResponseEntity<ShipmentResponse> postShipping(@Validated @RequestBody ShipmentRequest req, UriComponentsBuilder builder) {
-		final Shipment shipment = ImmutableShipment.builder()
-				.orderId(req.getOrderId())
-				.carrier(Carrier.chooseByItemCount(req.getItemCount()))
-				.shipmentDate(LocalDate.now(this.clock))
-				.trackingNumber(this.idGenerator.generateId())
-				.build();
+		final Shipment shipment = new Shipment(
+				Carrier.chooseByItemCount(req.getItemCount()),
+				req.getOrderId(),
+				LocalDate.now(this.clock),
+				this.idGenerator.generateId());
 		this.shipmentMapper.insert(shipment);
 		return ResponseEntity.created(builder.replacePath("shipping/{orderId}").build(shipment.orderId()))
 				.body(toResponse(shipment));

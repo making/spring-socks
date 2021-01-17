@@ -2,37 +2,48 @@ package lol.maki.socks.payment;
 
 import java.math.BigDecimal;
 
-import org.immutables.value.Value.Immutable;
+public class Payment {
+	private final BigDecimal amount;
 
-@Immutable
-public abstract class Payment {
-	public abstract BigDecimal amount();
+	private final BigDecimal declineOverAmount;
 
-	public abstract BigDecimal declineOverAmount();
+	public Payment(BigDecimal amount, BigDecimal declineOverAmount) {
+		this.amount = amount;
+		this.declineOverAmount = declineOverAmount;
+	}
 
-	private final AuthorizationResult invalidPaymentAmount = ImmutableAuthorizationResult.builder()
-			.authorized(false)
-			.valid(false)
-			.message("Invalid payment amount")
-			.build();
+	public BigDecimal amount() {
+		return amount;
+	}
+
+	public BigDecimal declineOverAmount() {
+		return declineOverAmount;
+	}
+
+	public AuthorizationResult invalidPaymentAmount() {
+		return invalidPaymentAmount;
+	}
+
+	private final AuthorizationResult invalidPaymentAmount = new AuthorizationResult(
+			false,
+			false,
+			"Invalid payment amount");
 
 	public final AuthorizationResult authorize() {
 		if (amount().compareTo(BigDecimal.ZERO) <= 0) {
 			return this.invalidPaymentAmount;
 		}
 		if (amount().compareTo(declineOverAmount()) <= 0) {
-			return ImmutableAuthorizationResult.builder()
-					.authorized(true)
-					.valid(true)
-					.message("Payment authorised")
-					.build();
+			return new AuthorizationResult(
+					true,
+					true,
+					"Payment authorised");
 		}
 		else {
-			return ImmutableAuthorizationResult.builder()
-					.authorized(false)
-					.valid(true)
-					.message(String.format("Payment declined: amount exceeds %.2f", declineOverAmount()))
-					.build();
+			return new AuthorizationResult(
+					false,
+					true,
+					String.format("Payment declined: amount exceeds %.2f", declineOverAmount()));
 		}
 	}
 }

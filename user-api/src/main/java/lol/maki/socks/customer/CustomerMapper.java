@@ -1,12 +1,9 @@
 package lol.maki.socks.customer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-
-import lol.maki.socks.customer.ImmutableCustomer.Builder;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,50 +21,42 @@ public class CustomerMapper {
 	private static final String BASE_SQL = "SELECT c.customer_id, c.first_name, c.last_name, c.username, c.email, c.allow_duplicate_email, p.password, a.address_id, a.number, a.street, a.city, a.country, a.postcode, d.card_id, d.long_num, d.expires,  d.ccv FROM customer AS c INNER JOIN customer_password AS p ON c.customer_id = p.customer_id LEFT OUTER JOIN customer_address AS a ON c.customer_id = a.customer_id LEFT OUTER JOIN customer_card AS d ON c.customer_id = d.customer_id";
 
 	private final ResultSetExtractor<Customer> customerResultSetExtractor = rs -> {
-		Builder builder = null;
-		final Set<Address> addresses = new LinkedHashSet<>();
-		final Set<Card> cards = new LinkedHashSet<>();
+		Customer customer = null;
 		while (rs.next()) {
-			if (builder == null) {
-				builder = ImmutableCustomer.builder()
-						.customerId(UUID.fromString(rs.getString("customer_id")))
-						.firstName(rs.getString("first_name"))
-						.lastName(rs.getString("last_name"))
-						.username(rs.getString("username"))
-						.email(ImmutableEmail.builder().address(rs.getString("email")).build())
-						.password(rs.getString("password"))
-						.allowDuplicateEmail(rs.getBoolean("allow_duplicate_email"));
+			if (customer == null) {
+				customer = new Customer(
+						UUID.fromString(rs.getString("customer_id")),
+						rs.getString("username"),
+						rs.getString("password"),
+						rs.getString("first_name"),
+						rs.getString("last_name"),
+						new Email(rs.getString("email")),
+						rs.getBoolean("allow_duplicate_email"),
+						new ArrayList<>(),
+						new ArrayList<>());
 			}
 			final String addressId = rs.getString("address_id");
 			if (addressId != null) {
-				addresses.add(ImmutableAddress.builder()
-						.addressId(UUID.fromString(addressId))
-						.number(rs.getString("number"))
-						.street(rs.getString("street"))
-						.city(rs.getString("city"))
-						.country(rs.getString("country"))
-						.postcode(rs.getString("postcode"))
-						.build());
+				customer.addresses()
+						.add(new Address(
+								UUID.fromString(addressId),
+								rs.getString("number"),
+								rs.getString("street"),
+								rs.getString("city"),
+								rs.getString("postcode"),
+								rs.getString("country")));
 			}
 			final String cardId = rs.getString("card_id");
 			if (cardId != null) {
-				cards.add(ImmutableCard.builder()
-						.cardId(UUID.fromString(cardId))
-						.longNum(rs.getString("long_num"))
-						.expires(rs.getDate("expires").toLocalDate())
-						.ccv(rs.getString("ccv"))
-						.build());
+				customer.cards()
+						.add(new Card(
+								UUID.fromString(cardId),
+								rs.getString("long_num"),
+								rs.getDate("expires").toLocalDate(),
+								rs.getString("ccv")));
 			}
 		}
-		if (builder != null) {
-			return builder
-					.addAllAddresses(addresses)
-					.addAllCards(cards)
-					.build();
-		}
-		else {
-			return null;
-		}
+		return customer;
 	};
 
 	public CustomerMapper(JdbcTemplate jdbcTemplate) {

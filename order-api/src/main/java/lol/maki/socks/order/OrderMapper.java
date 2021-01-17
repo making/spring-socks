@@ -22,52 +22,48 @@ public class OrderMapper {
 
 	private final ResultSetExtractor<List<Order>> ordersResultSetExtractor = rs -> {
 		final List<Order> orders = new ArrayList<>();
-		ImmutableOrder.Builder lastOrder = null; ;
+		Order lastOrder = null; ;
 		String lastOrderId = null;
 		while (rs.next()) {
 			final String orderId = rs.getString("order_id");
 			if (lastOrder == null || !Objects.equals(lastOrderId, orderId)) {
 				if (lastOrder != null) {
-					orders.add(lastOrder.build());
+					orders.add(lastOrder);
 				}
-				lastOrder = ImmutableOrder.builder()
-						.id(orderId)
-						.customer(ImmutableCustomer.builder()
-								.id(rs.getString("customer_id"))
-								.firstName(rs.getString("customer_first_name"))
-								.lastName(rs.getString("customer_last_name"))
-								.username(rs.getString("customer_username"))
-								.build())
-						.address(ImmutableAddress.builder()
-								.number(rs.getString("address_number"))
-								.street(rs.getString("address_street"))
-								.city(rs.getString("address_city"))
-								.postcode(rs.getString("address_postcode"))
-								.country(rs.getString("address_country"))
-								.build())
-						.card(ImmutableCard.builder()
-								.longNum(rs.getString("card_long_num"))
-								.expires(rs.getDate("card_expires").toLocalDate())
-								.ccv(rs.getString("card_ccv"))
-								.build())
-						.shipment(ImmutableShipment.builder()
-								.carrier(rs.getString("shipment_carrier"))
-								.trackingNumber(UUID.fromString(rs.getString("shipment_tracking_number")))
-								.deliveryDate(rs.getDate("shipment_delivery_date").toLocalDate())
-								.build())
-						.status(OrderStatus.fromValue(rs.getInt("status")))
-						.date(rs.getTimestamp("date").toInstant().atOffset(OffsetDateTime.now().getOffset()));
+				lastOrder = new Order(
+						orderId,
+						new Customer(
+								rs.getString("customer_id"),
+								rs.getString("customer_first_name"),
+								rs.getString("customer_last_name"),
+								rs.getString("customer_username")),
+						new Address(
+								rs.getString("address_number"),
+								rs.getString("address_street"),
+								rs.getString("address_city"),
+								rs.getString("address_postcode"),
+								rs.getString("address_country")),
+						new Card(
+								rs.getString("card_long_num"),
+								rs.getDate("card_expires").toLocalDate(),
+								rs.getString("card_ccv")),
+						new ArrayList<>(),
+						new Shipment(
+								rs.getString("shipment_carrier"),
+								UUID.fromString(rs.getString("shipment_tracking_number")),
+								rs.getDate("shipment_delivery_date").toLocalDate()),
+						rs.getTimestamp("date").toInstant().atOffset(OffsetDateTime.now().getOffset()),
+						OrderStatus.fromValue(rs.getInt("status")));
 			}
-			lastOrder.addItems(ImmutableItem.builder()
-					.orderId(orderId)
-					.itemId(rs.getString("item_id"))
-					.unitPrice(rs.getBigDecimal("unit_price"))
-					.quantity(rs.getInt("quantity"))
-					.build());
+			lastOrder.addItem(new Item(
+					orderId,
+					rs.getString("item_id"),
+					rs.getInt("quantity"),
+					rs.getBigDecimal("unit_price")));
 			lastOrderId = orderId;
 		}
 		if (lastOrder != null) {
-			orders.add(lastOrder.build());
+			orders.add(lastOrder);
 		}
 		return orders;
 	};

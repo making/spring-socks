@@ -6,27 +6,76 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.immutables.value.Value.Immutable;
-
 import static java.math.BigDecimal.ZERO;
 
-@Immutable
-public abstract class Order {
-	public abstract String id();
+public class Order {
+	private final String id;
 
-	public abstract Customer customer();
+	private final Customer customer;
 
-	public abstract Address address();
+	private final Address address;
 
-	public abstract Card card();
+	private final Card card;
 
-	public abstract List<Item> items();
+	private final List<Item> items;
 
-	public abstract Shipment shipment();
+	private final Shipment shipment;
 
-	public abstract OffsetDateTime date();
+	private final OffsetDateTime date;
 
-	public abstract OrderStatus status();
+	private final OrderStatus status;
+
+	public Order(String id, Customer customer, Address address, Card card, List<Item> items, Shipment shipment, OffsetDateTime date, OrderStatus status) {
+		this.id = id;
+		this.customer = customer;
+		this.address = address;
+		this.card = card;
+		this.items = items;
+		this.shipment = shipment;
+		this.date = date;
+		this.status = status;
+	}
+
+	public String id() {
+		return id;
+	}
+
+	public Customer customer() {
+		return customer;
+	}
+
+	public Address address() {
+		return address;
+	}
+
+	public Card card() {
+		return card;
+	}
+
+	public List<Item> items() {
+		return items;
+	}
+
+	public Shipment shipment() {
+		return shipment;
+	}
+
+	public OffsetDateTime date() {
+		return date;
+	}
+
+	public OrderStatus status() {
+		return status;
+	}
+
+	public Order addItem(Item item) {
+		this.items.add(item);
+		return this;
+	}
+
+	public Order withShipment(Shipment shipment) {
+		return new Order(this.id, this.customer, this.address, this.card, this.items, shipment, this.date, this.status);
+	}
 
 	public static String newOrderId(Supplier<UUID> idGenerator) {
 		return idGenerator.get().toString().substring(0, 8);
