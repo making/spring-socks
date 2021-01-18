@@ -1,0 +1,54 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "DaemonSet", "metadata": {"name": "envoy"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.or_op(overlay.subset({"name": "envoy"}))
+      - args:
+        #@overlay/match by=overlay.subset("--log-level info")
+        - #@ "--log-level " + values.envoy.loglevel
+        image: #@ get_image_location(values.envoy.image.repository, values.envoy.image.name, values.envoy.image.tag)
+        imagePullPolicy: #@ values.envoy.image.pullPolicy
+        ports:
+        #@overlay/match by=overlay.subset({"name":"http"})
+        -
+          #@ if values.envoy.hostPort.enable:
+          hostPort: #@ values.envoy.hostPort.http
+          #@ else:
+          #@overlay/remove
+          hostPort: 80
+          #@ end
+        #@overlay/match by=overlay.subset({"name":"https"})
+        -
+          #@ if values.envoy.hostPort.enable:
+          hostPort: #@ values.envoy.hostPort.https
+          #@ else:
+          #@overlay/remove
+          hostPort: 443
+          #@ end
+      #@ if values.envoy.deployment.hostNetwork:
+      #@overlay/match missing_ok=True
+      hostNetwork: true
+      #@overlay/match missing_ok=True
+      dnsPolicy: ClusterFirstWithHostNet
+      #@ end
+      terminationGracePeriodSeconds: #@ int(values.envoy.deployment.terminationGracePeriodSeconds)
+
+#@overlay/match by=overlay.subset({"kind": "DaemonSet", "metadata": {"name": "envoy"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "shutdown-manager"})
+      - image: #@ get_image_location(values.contour.image.repository, values.contour.image.name, values.contour.image.tag)
+        imagePullPolicy: #@ values.contour.image.pullPolicy
+      initContainers:
+      #@overlay/match by=overlay.subset({"name": "envoy-initconfig"})
+      - image: #@ get_image_location(values.contour.image.repository, values.contour.image.name, values.contour.image.tag)
+        imagePullPolicy: #@ values.contour.image.pullPolicy

@@ -1,0 +1,40 @@
+apiVersion: clusters.tmc.cloud.vmware.com/v1alpha1
+kind: Extension
+metadata:
+  name: contour
+  namespace: tanzu-system-ingress
+  annotations:
+    tmc.cloud.vmware.com/managed: "false"
+spec:
+  description: contour
+  version: "v1.8.1_vmware.1"
+  name: contour
+  namespace: tanzu-system-ingress
+  deploymentStrategy:
+    type: KUBERNETES_NATIVE
+  objects: |
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: contour
+      annotations:
+        tmc.cloud.vmware.com/orphan-resource: "true"
+    spec:
+      syncPeriod: 5m
+      serviceAccountName: contour-extension-sa
+      fetch:
+        - image:
+            url: registry.tkg.vmware.run/tkg-extensions-templates:v1.2.0_vmware.1
+      template:
+        - ytt:
+            ignoreUnknownComments: true
+            paths:
+              - tkg-extensions/common
+              - tkg-extensions/ingress/contour
+            inline:
+              pathsFrom:
+                - secretRef:
+                    name: contour-data-values
+      deploy:
+        - kapp:
+            rawOptions: ["--wait-timeout=5m"]

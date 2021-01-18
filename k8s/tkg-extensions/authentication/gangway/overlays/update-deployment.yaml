@@ -1,0 +1,30 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "gangway"}})
+---
+spec:
+  replicas: #@ values.gangway.deployment.replicas
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "gangway"})
+      - name: gangway
+        #@ if values.gangway.deployment.resources:
+        #@overlay/match missing_ok=True
+        resources:
+          requests:
+            cpu: #@ values.gangway.deployment.resources.requests.cpu
+            memory: #@ values.gangway.deployment.resources.requests.memory
+          limits:
+            cpu: #@ values.gangway.deployment.resources.requests.cpu
+            memory: #@ values.gangway.deployment.resources.requests.memory
+        #@ end
+        image: #@ get_image_location(values.gangway.image.repository, values.gangway.image.name, values.gangway.image.tag)
+        imagePullPolicy: #@ values.gangway.image.pullPolicy
+      volumes:
+      #@overlay/match by=overlay.subset({"name": "tls"})
+      - name: tls
+        secret:
+          secretName: #@ values.gangway.app + "-cert-tls"

@@ -1,0 +1,19 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "contour"}})
+---
+spec:
+  replicas: #@ values.contour.deployment.replicas
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "contour"})
+      - args:
+        #@overlay/append
+        #@ if values.contour.config.useProxyProtocol:
+        - --use-proxy-protocol
+        #@ end
+        image: #@ get_image_location(values.contour.image.repository, values.contour.image.name, values.contour.image.tag)
+        imagePullPolicy: #@ values.contour.image.pullPolicy

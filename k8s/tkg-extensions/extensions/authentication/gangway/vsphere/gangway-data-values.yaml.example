@@ -1,0 +1,22 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+gangway:
+  image:
+    repository: registry.tkg.vmware.run
+  config:
+    clusterName: <WORKLOAD_CLUSTER_NAME>
+    MGMT_CLUSTER_IP: <MANAGEMENT_CLUSTER_VIP>
+    clientID: <WORKLOAD_CLUSTER_NAME>
+    APISERVER_URL: <WORKLOAD_CLUSTER_VIP>
+  secret:
+    sessionKey: <SESSION_KEY>
+    clientSecret: <CLIENT_SECRET>
+dns:
+  vsphere:
+    #@overlay/replace
+    ipAddresses: [<WORKLOAD_CLUSTER_VIP>]
+dex:
+  ca: |
+  <INSERT_DEX_CA_CERT>

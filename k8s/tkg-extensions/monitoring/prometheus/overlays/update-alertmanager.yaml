@@ -1,0 +1,17 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "prometheus-alertmanager"}})
+---
+spec:
+  replicas: #@ values.monitoring.alertmanager.deployment.replicas
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-alertmanager"})
+      - image: #@ get_image_location(values.monitoring.alertmanager.image.repository, values.monitoring.alertmanager.image.name, values.monitoring.alertmanager.image.tag)
+        imagePullPolicy: #@ values.monitoring.alertmanager.image.pullPolicy
+      #@overlay/match by=overlay.subset({"name": "prometheus-alertmanager-configmap-reload"})
+      - image: #@ get_image_location(values.monitoring.prometheus_server_configmap_reload.image.repository, values.monitoring.prometheus_server_configmap_reload.image.name, values.monitoring.prometheus_server_configmap_reload.image.tag)
+        imagePullPolicy: #@ values.monitoring.prometheus_server_configmap_reload.image.pullPolicy

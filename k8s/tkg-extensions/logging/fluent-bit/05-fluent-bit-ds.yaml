@@ -1,0 +1,76 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("globals.star", "get_image_location","globals")
+#@ load("values.star", "values", "labels", "annotations")
+---
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit
+  namespace: #@ values.logging.namespace
+  labels: #@ labels()
+spec:
+  updateStrategy:
+    type: #@ values.logging.update_strategy
+  template:
+    metadata:
+      labels: #@ labels()
+      annotations: #@ annotations()
+    spec:
+      containers:
+        - name: fluent-bit
+          image: #@ get_image_location(values.logging.image.repository, values.logging.image.name, values.logging.image.tag)
+          imagePullPolicy: #@ values.logging.image.pullPolicy
+          ports:
+            - containerPort: 2020
+          readinessProbe:
+            httpGet:
+              path: /api/v1/metrics/prometheus
+              port: 2020
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 2020
+          resources:
+            requests:
+              cpu: 5m
+              memory: 10Mi
+            limits:
+              cpu: 50m
+              memory: 60Mi
+          volumeMounts:
+            - name: var-log
+              mountPath: /var/log
+            - name: var-lib-docker-containers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc/
+            - name: systemd-log
+              mountPath: /run/log
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: var-log
+          hostPath:
+            path: #@ values.host_path.volume_1
+        - name: var-lib-docker-containers
+          hostPath:
+            path: #@ values.host_path.volume_2
+        - name: systemd-log
+          hostPath:
+            path: #@ values.host_path.volume_3
+        - name: fluent-bit-config
+          configMap:
+            name: fluent-bit-config
+      serviceAccountName: #@ values.logging.service_account_name
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - operator: "Exists"
+          effect: "NoExecute"
+        - operator: "Exists"
+          effect: "NoSchedule"
+  selector:
+    matchLabels: #@ labels()
+

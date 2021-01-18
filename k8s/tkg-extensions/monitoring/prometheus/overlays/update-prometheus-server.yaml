@@ -1,0 +1,21 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "prometheus-server"}})
+---
+spec:
+  replicas: #@ values.monitoring.prometheus_server.deployment.replicas
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-server-configmap-reload"})
+      - image: #@ get_image_location(values.monitoring.prometheus_server_configmap_reload.image.repository, values.monitoring.prometheus_server_configmap_reload.image.name, values.monitoring.prometheus_server_configmap_reload.image.tag)
+        imagePullPolicy: #@ values.monitoring.prometheus_server_configmap_reload.image.pullPolicy
+      #@overlay/match by=overlay.subset({"name": "prometheus-server"})
+      - image: #@ get_image_location(values.monitoring.prometheus_server.image.repository, values.monitoring.prometheus_server.image.name, values.monitoring.prometheus_server.image.tag)
+        imagePullPolicy: #@ values.monitoring.prometheus_server.image.pullPolicy
+      initContainers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-server-data-permission-fix"})
+      - image: #@ get_image_location(values.monitoring.prometheus_server_init_container.image.repository, values.monitoring.prometheus_server_init_container.image.name, values.monitoring.prometheus_server_init_container.image.tag)
+        imagePullPolicy: #@ values.monitoring.prometheus_server_init_container.image.pullPolicy

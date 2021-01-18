@@ -1,0 +1,15 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "DaemonSet", "metadata": {"name": "prometheus-node-exporter"}})
+---
+spec:
+  updateStrategy:
+    type: #@ values.monitoring.node_exporter.daemonset.updatestrategy
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-node-exporter"})
+      - image: #@ get_image_location(values.monitoring.node_exporter.image.repository, values.monitoring.node_exporter.image.name, values.monitoring.node_exporter.image.tag)
+        imagePullPolicy: #@ values.monitoring.node_exporter.image.pullPolicy

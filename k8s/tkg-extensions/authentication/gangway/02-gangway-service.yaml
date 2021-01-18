@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: gangwaysvc
+  namespace: tanzu-system-auth
+  labels:
+    app: gangway
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "https"
+      protocol: TCP
+      port: 443
+      targetPort: "https"
+  selector:
+    app: gangway

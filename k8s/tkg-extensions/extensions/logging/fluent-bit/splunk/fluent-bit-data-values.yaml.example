@@ -1,0 +1,15 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+logging:
+  image:
+    repository: registry.tkg.vmware.run
+tkg:
+  instance_name: "<TKG_INSTANCE_NAME>"
+  cluster_name: "<CLUSTER_NAME>"
+fluent_bit:
+  output_plugin: "splunk"
+  splunk:
+    host: "<SPLUNK_HOST>"
+    port: <SPLUNK_PORT>
+    token: <SPLUNK_TOKEN>

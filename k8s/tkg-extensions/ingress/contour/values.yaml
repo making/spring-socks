@@ -1,0 +1,61 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+
+---
+contour:
+  namespace: tanzu-system-ingress
+  config:
+    tls:
+      minimumProtocolVersion: null
+      fallbackCertificate:
+        name: null
+        namespace: null
+    leaderelection:
+      configmapName: leader-elect
+      configmapNamespace: tanzu-system-ingress
+    disablePermitInsecure: false
+    accesslogFormat: envoy
+    jsonFields: null
+    useProxyProtocol: false
+    defaultHTTPVersions: null
+    timeouts:
+      requestTimeout: null
+      connectionIdleTimeout: null
+      streamIdleTimeout: null
+      maxConnectionDuration: null
+      connectionShutdownGracePeriod: null
+    debug: false
+    ingressStatusAddress: null
+  certificate:
+    duration: 8760h
+    renewBefore: 360h
+  deployment:
+    replicas: 2
+  image:
+    repository: "registry.tkg.vmware.run"
+    name: contour
+    tag: v1.8.1_vmware.1
+    pullPolicy: "IfNotPresent"
+envoy:
+  image:
+    repository: "registry.tkg.vmware.run"
+    name: envoy
+    tag: v1.15.0_vmware.1
+    pullPolicy: "IfNotPresent"
+  hostPort:
+    enable: true
+    http: 80
+    https: 443
+  service:
+    type: null
+    externalTrafficPolicy: null
+    nodePort:
+      http: null
+      https: null
+    aws:
+      LBType: classic
+    disableWait: false
+  deployment:
+    hostNetwork: false
+    terminationGracePeriodSeconds: 300
+  loglevel: info

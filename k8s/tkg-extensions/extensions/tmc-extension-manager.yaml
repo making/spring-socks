@@ -1,0 +1,877 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vmware-system-tmc
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+    tmc-extension-name: extension-manager
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.1-0.20200617211605-651903477185
+    tmc.cloud.vmware.com/orphan-resource: "true"
+    tmc.cloud.vmware.com/do-not-delete: "true"
+  creationTimestamp: null
+  name: agents.clusters.tmc.cloud.vmware.com
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.status
+    name: Status
+    type: integer
+  - JSONPath: .status.health
+    name: Health
+    type: integer
+  group: clusters.tmc.cloud.vmware.com
+  names:
+    kind: Agent
+    listKind: AgentList
+    plural: agents
+    singular: agent
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Agent is the Schema for the agents API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: AgentSpec defines the desired state of Agent
+          properties:
+            extensions:
+              items:
+                type: string
+              type: array
+            namespace:
+              type: string
+          type: object
+        status:
+          description: AgentStatus defines the observed state of Agent
+          properties:
+            clusterHealth:
+              description: AggregatedClusterHealth defines the observed state of the
+                cluster.
+              properties:
+                controllerManagerHealth:
+                  description: ComponentHealth defines the health of a component.
+                  properties:
+                    health:
+                      format: int32
+                      type: integer
+                    message:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                etcdHealth:
+                  items:
+                    description: ComponentHealth defines the health of a component.
+                    properties:
+                      health:
+                        format: int32
+                        type: integer
+                      message:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  type: array
+                message:
+                  type: string
+                schedulerHealth:
+                  description: ComponentHealth defines the health of a component.
+                  properties:
+                    health:
+                      format: int32
+                      type: integer
+                    message:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                timestamp:
+                  description: "A Timestamp represents a point in time independent
+                    of any time zone or calendar, represented as seconds and fractions
+                    of seconds at nanosecond resolution in UTC Epoch time. It is encoded
+                    using the Proleptic Gregorian Calendar which extends the Gregorian
+                    calendar backwards to year one. It is encoded assuming all minutes
+                    are 60 seconds long, i.e. leap seconds are \"smeared\" so that
+                    no leap second table is needed for interpretation. Range is from
+                    0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z. By restricting
+                    to that range, we ensure that we can convert to and from  RFC
+                    3339 date strings. See [https://www.ietf.org/rfc/rfc3339.txt](https://www.ietf.org/rfc/rfc3339.txt).
+                    \n # Examples \n Example 1: Compute Timestamp from POSIX `time()`.
+                    \n     Timestamp timestamp;     timestamp.set_seconds(time(NULL));
+                    \    timestamp.set_nanos(0); \n Example 2: Compute Timestamp from
+                    POSIX `gettimeofday()`. \n     struct timeval tv;     gettimeofday(&tv,
+                    NULL); \n     Timestamp timestamp;     timestamp.set_seconds(tv.tv_sec);
+                    \    timestamp.set_nanos(tv.tv_usec * 1000); \n Example 3: Compute
+                    Timestamp from Win32 `GetSystemTimeAsFileTime()`. \n     FILETIME
+                    ft;     GetSystemTimeAsFileTime(&ft);     UINT64 ticks = (((UINT64)ft.dwHighDateTime)
+                    << 32) | ft.dwLowDateTime; \n     // A Windows tick is 100 nanoseconds.
+                    Windows epoch 1601-01-01T00:00:00Z     // is 11644473600 seconds
+                    before Unix epoch 1970-01-01T00:00:00Z.     Timestamp timestamp;
+                    \    timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
+                    \    timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+                    \n Example 4: Compute Timestamp from Java `System.currentTimeMillis()`.
+                    \n     long millis = System.currentTimeMillis(); \n     Timestamp
+                    timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)         .setNanos((int)
+                    ((millis % 1000) * 1000000)).build(); \n Example 5: Compute Timestamp
+                    from current time in Python. \n     timestamp = Timestamp()     timestamp.GetCurrentTime()
+                    \n # JSON Mapping \n In JSON format, the Timestamp type is encoded
+                    as a string in the [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt)
+                    format. That is, the format is \"{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z\"
+                    where {year} is always expressed using four digits while {month},
+                    {day}, {hour}, {min}, and {sec} are zero-padded to two digits
+                    each. The fractional seconds, which can go up to 9 digits (i.e.
+                    up to 1 nanosecond resolution), are optional. The \"Z\" suffix
+                    indicates the timezone (\"UTC\"); the timezone is required. A
+                    proto3 JSON serializer should always use UTC (as indicated by
+                    \"Z\") when printing the Timestamp type and a proto3 JSON parser
+                    should be able to accept both UTC and other timezones (as indicated
+                    by an offset). \n For example, \"2017-01-15T01:30:15.01Z\" encodes
+                    15.01 seconds past 01:30 UTC on January 15, 2017. \n In JavaScript,
+                    one can convert a Date object to this format using the standard
+                    [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString]
+                    method. In Python, a standard `datetime.datetime` object can be
+                    converted to this format using [`strftime`](https://docs.python.org/2/library/time.html#time.strftime)
+                    with the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in
+                    Java, one can use the Joda Time's [`ISODateTimeFormat.dateTime()`](
+                    http://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime--
+                    ) to obtain a formatter capable of generating timestamps in this
+                    format."
+                  properties:
+                    nanos:
+                      description: Non-negative fractions of a second at nanosecond
+                        resolution. Negative second values with fractions must still
+                        have non-negative nanos values that count forward in time.
+                        Must be from 0 to 999,999,999 inclusive.
+                      format: int32
+                      type: integer
+                    seconds:
+                      description: Represents seconds of UTC time since Unix epoch
+                        1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+                        9999-12-31T23:59:59Z inclusive.
+                      format: int64
+                      type: integer
+                  type: object
+              type: object
+            deploymentLink:
+              type: string
+            extensions:
+              items:
+                type: string
+              type: array
+            health:
+              format: int32
+              type: integer
+            metadata:
+              properties:
+                cloudProvider:
+                  format: int32
+                  type: integer
+                clusterCPU:
+                  description: ResourceAllocation defines the resource utilisation
+                    and availability.
+                  properties:
+                    allocatable:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    allocatedPercentage:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    requests:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    units:
+                      type: string
+                  required:
+                  - allocatable
+                  - allocatedPercentage
+                  - requests
+                  - units
+                  type: object
+                clusterMemory:
+                  description: ResourceAllocation defines the resource utilisation
+                    and availability.
+                  properties:
+                    allocatable:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    allocatedPercentage:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    requests:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    units:
+                      type: string
+                  required:
+                  - allocatable
+                  - allocatedPercentage
+                  - requests
+                  - units
+                  type: object
+                kubeServerVersion:
+                  type: string
+                lastUpdate:
+                  description: "A Timestamp represents a point in time independent
+                    of any time zone or calendar, represented as seconds and fractions
+                    of seconds at nanosecond resolution in UTC Epoch time. It is encoded
+                    using the Proleptic Gregorian Calendar which extends the Gregorian
+                    calendar backwards to year one. It is encoded assuming all minutes
+                    are 60 seconds long, i.e. leap seconds are \"smeared\" so that
+                    no leap second table is needed for interpretation. Range is from
+                    0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z. By restricting
+                    to that range, we ensure that we can convert to and from  RFC
+                    3339 date strings. See [https://www.ietf.org/rfc/rfc3339.txt](https://www.ietf.org/rfc/rfc3339.txt).
+                    \n # Examples \n Example 1: Compute Timestamp from POSIX `time()`.
+                    \n     Timestamp timestamp;     timestamp.set_seconds(time(NULL));
+                    \    timestamp.set_nanos(0); \n Example 2: Compute Timestamp from
+                    POSIX `gettimeofday()`. \n     struct timeval tv;     gettimeofday(&tv,
+                    NULL); \n     Timestamp timestamp;     timestamp.set_seconds(tv.tv_sec);
+                    \    timestamp.set_nanos(tv.tv_usec * 1000); \n Example 3: Compute
+                    Timestamp from Win32 `GetSystemTimeAsFileTime()`. \n     FILETIME
+                    ft;     GetSystemTimeAsFileTime(&ft);     UINT64 ticks = (((UINT64)ft.dwHighDateTime)
+                    << 32) | ft.dwLowDateTime; \n     // A Windows tick is 100 nanoseconds.
+                    Windows epoch 1601-01-01T00:00:00Z     // is 11644473600 seconds
+                    before Unix epoch 1970-01-01T00:00:00Z.     Timestamp timestamp;
+                    \    timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
+                    \    timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+                    \n Example 4: Compute Timestamp from Java `System.currentTimeMillis()`.
+                    \n     long millis = System.currentTimeMillis(); \n     Timestamp
+                    timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)         .setNanos((int)
+                    ((millis % 1000) * 1000000)).build(); \n Example 5: Compute Timestamp
+                    from current time in Python. \n     timestamp = Timestamp()     timestamp.GetCurrentTime()
+                    \n # JSON Mapping \n In JSON format, the Timestamp type is encoded
+                    as a string in the [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt)
+                    format. That is, the format is \"{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z\"
+                    where {year} is always expressed using four digits while {month},
+                    {day}, {hour}, {min}, and {sec} are zero-padded to two digits
+                    each. The fractional seconds, which can go up to 9 digits (i.e.
+                    up to 1 nanosecond resolution), are optional. The \"Z\" suffix
+                    indicates the timezone (\"UTC\"); the timezone is required. A
+                    proto3 JSON serializer should always use UTC (as indicated by
+                    \"Z\") when printing the Timestamp type and a proto3 JSON parser
+                    should be able to accept both UTC and other timezones (as indicated
+                    by an offset). \n For example, \"2017-01-15T01:30:15.01Z\" encodes
+                    15.01 seconds past 01:30 UTC on January 15, 2017. \n In JavaScript,
+                    one can convert a Date object to this format using the standard
+                    [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString]
+                    method. In Python, a standard `datetime.datetime` object can be
+                    converted to this format using [`strftime`](https://docs.python.org/2/library/time.html#time.strftime)
+                    with the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in
+                    Java, one can use the Joda Time's [`ISODateTimeFormat.dateTime()`](
+                    http://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime--
+                    ) to obtain a formatter capable of generating timestamps in this
+                    format."
+                  properties:
+                    nanos:
+                      description: Non-negative fractions of a second at nanosecond
+                        resolution. Negative second values with fractions must still
+                        have non-negative nanos values that count forward in time.
+                        Must be from 0 to 999,999,999 inclusive.
+                      format: int32
+                      type: integer
+                    seconds:
+                      description: Represents seconds of UTC time since Unix epoch
+                        1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+                        9999-12-31T23:59:59Z inclusive.
+                      format: int64
+                      type: integer
+                  type: object
+                masterNodeCount:
+                  format: int64
+                  type: integer
+                namespacesCount:
+                  format: int64
+                  type: integer
+                physicalMemory:
+                  format: int64
+                  type: integer
+                podCount:
+                  format: int64
+                  type: integer
+                region:
+                  type: string
+                vcpuCount:
+                  format: int64
+                  type: integer
+                workerNodeCount:
+                  format: int64
+                  type: integer
+              type: object
+            status:
+              format: int32
+              type: integer
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+    tmc-extension-name: extension-manager
+  name: extensions.clusters.tmc.cloud.vmware.com
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.1-0.20200617211605-651903477185
+    tmc.cloud.vmware.com/orphan-resource: "true"
+    tmc.cloud.vmware.com/do-not-delete: "true"
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.state
+    name: State
+    type: integer
+  - JSONPath: .status.health
+    name: Health
+    type: integer
+  - JSONPath: .status.version
+    name: Version
+    type: string
+  group: clusters.tmc.cloud.vmware.com
+  names:
+    kind: Extension
+    listKind: ExtensionList
+    plural: extensions
+    singular: extension
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: Extension is the Schema for the extensions API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ExtensionSpec defines the desired state of Extension
+          properties:
+            deploymentStrategy:
+              description: Deployment strategy of an extension.
+              properties:
+                extensionLifecycleOwner:
+                  description: Component Owning Deployment Strategy of the Extension.
+                    In case this field is empty it is assumed that Owner of Deployment
+                    Strategy is Extension Manager
+                  type: string
+                overlapTimePeriod:
+                  description: Time-Period within which an extension maybe rolled-back
+                    to previous version in case the extension becomes unhealthy after
+                    the new version is updated successfully. After this time-period
+                    elapses, Extensions will not be rolled back to previous versions
+                    if they become unhealthy. If the value is zero this field will
+                    not be used during Extension Lifecycle Management.
+                  format: int64
+                  type: integer
+                processingTimeout:
+                  description: Timeout Value for Processing(Creating/Updating/Deleting/RollingBack)
+                    an Extension.
+                  format: int64
+                  type: integer
+                type:
+                  description: Type of deployment for extension resource.
+                  type: string
+              required:
+              - type
+              type: object
+            description:
+              type: string
+            name:
+              type: string
+            objects:
+              description: Raw JSON/YAML of extension  equivalent to kubernetes 'Unstructured'
+                type.
+              type: string
+            version:
+              type: string
+          required:
+          - deploymentStrategy
+          - name
+          - objects
+          - version
+          type: object
+        status:
+          description: ExtensionStatus defines the observed state of Extension
+          properties:
+            applicationStatus:
+              properties:
+                conditions:
+                  items:
+                    properties:
+                      lastTransitionTime:
+                        format: date-time
+                        type: string
+                      message:
+                        description: A human readable message indicating details about
+                          the transition.
+                        type: string
+                      reason:
+                        description: The reason for the condition's last transition.
+                        type: string
+                      severity:
+                        description: Severity with which to treat failures of this
+                          type of condition. When this is not specified, it defaults
+                          to Error.
+                        type: string
+                      status:
+                        description: Status of the condition, one of True, False,
+                          Unknown.
+                        type: string
+                      type:
+                        description: Type of condition.
+                        type: string
+                    required:
+                    - status
+                    - type
+                    type: object
+                  type: array
+                version:
+                  type: string
+              required:
+              - version
+              type: object
+            health:
+              format: int32
+              type: integer
+            previousVersion:
+              type: string
+            state:
+              format: int32
+              type: integer
+            status:
+              format: int32
+              type: integer
+            version:
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    tmc-extension-name: extension-manager
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.1-0.20200617211605-651903477185
+    tmc.cloud.vmware.com/orphan-resource: "true"
+    tmc.cloud.vmware.com/do-not-delete: "true"
+  creationTimestamp: null
+  name: extensionresourceowners.clusters.tmc.cloud.vmware.com
+spec:
+  group: clusters.tmc.cloud.vmware.com
+  names:
+    kind: ExtensionResourceOwner
+    listKind: ExtensionResourceOwnerList
+    plural: extensionresourceowners
+    singular: extensionresourceowner
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      description: ExtensionResourceOwner is the Schema for the extensionresourceowners
+        API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ExtensionResourceOwnerSpec defines the desired state of ExtensionResourceOwner
+          type: object
+        status:
+          description: ExtensionResourceOwnerStatus defines the observed state of
+            ExtensionResourceOwner
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+    tmc.cloud.vmware.com/orphan-resource: "true"
+    tmc.cloud.vmware.com/do-not-delete: "true"
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+    tmc-extension-name: extension-manager
+  name: extensionintegrations.clusters.tmc.cloud.vmware.com
+spec:
+  group: clusters.tmc.cloud.vmware.com
+  names:
+    kind: ExtensionIntegration
+    listKind: ExtensionIntegrationList
+    plural: extensionintegrations
+    singular: extensionintegration
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: ExtensionIntegration is the Schema for the extensionintegrations
+        API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: ExtensionIntegrationSpec defines the desired state of ExtensionIntegration
+          properties:
+            extensionHealth:
+              description: Health of the Extension Workload that is managing the underlying
+                Application
+              format: int32
+              type: integer
+            extensionState:
+              description: Status of the Extension Workload that is managing the underlying
+                Application
+              format: int32
+              type: integer
+          type: object
+        status:
+          description: ExtensionIntegrationStatus defines the observed state of ExtensionIntegration
+          properties:
+            applicationConditions:
+              description: Conditions of the Extension that is integrated with TMC
+              items:
+                description: Conditions captures readiness and health conditions for
+                  an underlying Application mapping to an extension. Collectively
+                  they capture the set of conditions that define the state and health
+                  of application.
+                properties:
+                  lastTransitionTime:
+                    description: LastTransitionTime is the last time the condition
+                      transitioned from one status to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  severity:
+                    description: Severity with which to treat failures of this type
+                      of condition. When this is not specified, it defaults to Error.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of condition.
+                    type: string
+                type: object
+              type: array
+            applicationVersion:
+              description: Version of the WorkLoad Managed by the Operator TMC
+              type: string
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: extensionconfigs.intents.tmc.cloud.vmware.com
+  annotations:
+    tmc.cloud.vmware.com/orphan-resource: "true"
+    tmc.cloud.vmware.com/do-not-delete: "true"
+spec:
+  group: intents.tmc.cloud.vmware.com
+  names:
+    kind: ExtensionConfig
+    plural: extensionconfigs
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            configMaps:
+              description: ConfigMaps are the configMaps of the extension
+              items:
+                type: object
+              type: array
+          type: object
+        status:
+          properties:
+            state:
+              description: State indicates the state of the ExtensionConfig
+              type: string
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: extension-manager
+    tmc-extension-name: extension-manager
+  name: extension-manager
+  namespace: vmware-system-tmc
+  annotations:
+    tmc.cloud.vmware.com/orphan-resource: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: extension-manager
+    tmc-extension-name: extension-manager
+  creationTimestamp: null
+  name: extension-manager-role
+  annotations:
+    tmc.cloud.vmware.com/orphan-resource: "true"
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+- nonResourceURLs: ['*']
+  verbs: ['*']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: extension-manager
+    tmc-extension-name: extension-manager
+  creationTimestamp: null
+  name: extension-manager-rolebinding
+  annotations:
+    tmc.cloud.vmware.com/orphan-resource: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: extension-manager-role
+subjects:
+- kind: ServiceAccount
+  name: extension-manager
+  namespace: vmware-system-tmc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: extension-manager-service
+  namespace: vmware-system-tmc
+  annotations:
+    tmc.cloud.vmware.com/orphan-resource: "true"
+  labels:
+    app: extension-manager
+    control-plane: extension-manager
+    tmc-extension: "true"
+    controller-tools.k8s.io: "1.0"
+    tmc-extension-name: extension-manager
+spec:
+  selector:
+    control-plane: extension-manager
+    tmc-extension: "true"
+    controller-tools.k8s.io: "1.0"
+  ports:
+  - port: 443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extension-manager
+  namespace: vmware-system-tmc
+  annotations:
+    tmc.cloud.vmware.com/orphan-resource: "true"
+  labels:
+    app: extension-manager
+    control-plane: extension-manager
+    tmc-extension: "true"
+    controller-tools.k8s.io: "1.0"
+    tmc-extension-name: extension-manager
+spec:
+  progressDeadlineSeconds: 600
+  minReadySeconds: 30
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: extension-manager
+      tmc-extension: "true"
+      controller-tools.k8s.io: "1.0"
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+  template:
+    metadata:
+      labels:
+        control-plane: extension-manager
+        tmc-extension: "true"
+        controller-tools.k8s.io: "1.0"
+        tmc-extension-name: extension-manager
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+            - matchExpressions:
+              - key: beta.kubernetes.io/os
+                operator: In
+                values:
+                - linux
+      tolerations:
+        - operator: "Exists"
+      serviceAccountName: extension-manager
+      containers:
+      - command:
+        - /usr/local/bin/manager
+        image: registry.tkg.vmware.run/tmc-extension-manager:v1.2.0_vmware.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 10000
+          runAsGroup: 1000
+        name: extension-manager
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        resources:
+          limits:
+            cpu: 100m
+            memory: 4096Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        ports:
+        - containerPort: 9876
+          name: webhook-server
+          protocol: TCP

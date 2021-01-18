@@ -1,0 +1,57 @@
+#@ load("@ytt:yaml", "yaml")
+#@ load("values.star", "values")
+#@ load("@ytt:assert", "assert")
+#@ load("output-plugins-config.lib.txt", "output_plugins_config")
+#@ load("fluent-bit-config.lib.txt", "fluent_bit_config")
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: #@ values.logging.namespace
+  labels:
+    k8s-app: fluent-bit
+data:
+
+  #! Configuration files: server, input, filters and output
+  #! ======================================================
+  fluent-bit.conf: #@ fluent_bit_config.get_fluent_bit_config(values.fluent_bit.output_plugin, values.fluent_bit.log_level)
+
+
+  input-kubernetes.conf: #@ fluent_bit_config.get_input_kubernetes_config(values.fluent_bit.output_plugin)
+
+
+  filter-kubernetes.conf: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Merge_Log_Key       log_processed
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude Off
+
+  filter-record.conf: #@ fluent_bit_config.get_filter_record_config(values.tkg.cluster_name, values.tkg.instance_name)
+
+  #@ if values.fluent_bit.output_plugin == 'elasticsearch' :
+
+  output-elasticsearch.conf: #@ output_plugins_config.get_output_elastic_config(values.fluent_bit.elasticsearch.host, values.fluent_bit.elasticsearch.port)
+
+  #@ elif values.fluent_bit.output_plugin == 'kafka' :
+
+  output-kafka.conf: #@ output_plugins_config.get_output_kafka_config(values.fluent_bit.kafka.broker_service_name, values.fluent_bit.kafka.topic_name)
+
+  #@ elif values.fluent_bit.output_plugin == 'splunk' :
+
+  output-splunk.conf: #@ output_plugins_config.get_output_splunk_config(values.fluent_bit.splunk.host, values.fluent_bit.splunk.port, values.fluent_bit.splunk.token)
+
+  #@ elif values.fluent_bit.output_plugin == 'http' :
+
+  filter-modify.conf: #@ fluent_bit_config.get_filter_modify_config()
+  output-http.conf: #@ output_plugins_config.get_output_http_config(values.fluent_bit.http.host, values.fluent_bit.http.port, values.fluent_bit.http.uri, values.fluent_bit.http.header_key_value, values.fluent_bit.http.format)
+  #@ end
+
+  parsers.conf: #@ fluent_bit_config.get_parsers_config(values.fluent_bit.output_plugin)

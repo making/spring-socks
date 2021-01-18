@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: https-ingress
+  namespace: test-ingress
+  labels:
+    app: hello
+spec:
+  tls:
+  - secretName: https-secret
+    hosts:
+      - foo.bar.com
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: s1
+          servicePort: 80
+      - path: /bar
+        backend:
+          serviceName: s2
+          servicePort: 80

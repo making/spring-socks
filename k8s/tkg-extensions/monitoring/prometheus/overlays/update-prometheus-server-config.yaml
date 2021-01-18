@@ -1,0 +1,13 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+
+#@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata": {"name": "prometheus-server"}})
+---
+data:
+  alerting_rules.yml: #@ values.monitoring.prometheus_server.config.alerting_rules_yaml
+  prometheus.yml: #@ values.monitoring.prometheus_server.config.prometheus_yaml
+  recording_rules.yml: #@ values.monitoring.prometheus_server.config.recording_rule_yaml
+  #@ if values.monitoring.prometheus_server.alerting.kube_apiserver_enabled:
+  alerting_rules_kubeapiserver.yml: #@ values.monitoring.prometheus_server.config.alerting_rules_kubeapiserver_yaml
+  #@ end

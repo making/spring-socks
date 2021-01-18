@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tanzu-system-ingress
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contour-extension-sa
+  namespace: tanzu-system-ingress
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: contour-extension-role
+  namespace: tanzu-system-ingress
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: contour-extension-rolebinding
+  namespace: tanzu-system-ingress
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: contour-extension-role
+subjects:
+- kind: ServiceAccount
+  name: contour-extension-sa
+  namespace: tanzu-system-ingress
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: contour-extension-cluster-role
+rules:
+- apiGroups: ["*"]
+  resources: ["clusterroles", "clusterrolebindings", "customresourcedefinitions"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: contour-extension-cluster-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: contour-extension-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: contour-extension-sa
+  namespace: tanzu-system-ingress

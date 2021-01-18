@@ -1,0 +1,26 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "aws"
+dex:
+  image:
+    repository: registry.tkg.vmware.run
+  config:
+    connector: oidc
+    oidc:
+      CLIENT_ID: <OIDC_CLIENT_ID>
+      CLIENT_SECRET: <OIDC_CLIENT_SECRET>
+      issuer: <OIDC_IDP_URL>
+    #! Deploy dex first with dummy staticClients. Once gangway is installed in workload cluster, update static clients with gangway information
+    #@overlay/replace
+    staticClients:
+    - id: WORKLOAD_CLUSTER_NAME
+      redirectURIs:
+      - 'https://GANGWAY_SVC_LB_HOSTNAME/callback'
+      name: WORKLOAD_CLUSTER_NAME
+      secret: CLIENT_SECRET
+#! Deploy dex first and update sample-elb with real name once dex service loadbalancer is created, dnsNames is optional.
+dns:
+  aws:
+    DEX_SVC_LB_HOSTNAME: sample-elb
+    dnsNames: []

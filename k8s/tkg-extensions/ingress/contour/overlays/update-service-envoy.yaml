@@ -1,0 +1,33 @@
+#@ load("/values.star", "values", "get_envoy_service_type", "is_service_type_LB", "get_envoy_service_annotations")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "envoy"}})
+---
+metadata:
+  #@overlay/replace
+  annotations: #@ get_envoy_service_annotations()
+spec:
+  #@ if values.envoy.service.externalTrafficPolicy:
+  externalTrafficPolicy: #@ values.envoy.service.externalTrafficPolicy
+  #@ else:
+  #@ if not is_service_type_LB():
+  #@overlay/remove
+  externalTrafficPolicy: Local
+  #@ end
+  #@ end
+  type: #@ get_envoy_service_type()
+  #@ if get_envoy_service_type() == "NodePort":
+  ports:
+  #@overlay/match by=overlay.subset({"name":"http"})
+  -
+    #@ if values.envoy.service.nodePort.http:
+    #@overlay/match missing_ok=True
+    nodePort: #@ values.envoy.service.nodePort.http
+    #@ end
+  #@overlay/match by=overlay.subset({"name":"https"})
+  -
+    #@ if values.envoy.service.nodePort.https:
+    #@overlay/match missing_ok=True
+    nodePort: #@ values.envoy.service.nodePort.https
+    #@ end
+  #@ end

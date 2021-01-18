@@ -1,0 +1,22 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "aws"
+gangway:
+  image:
+    repository: registry.tkg.vmware.run
+  config:
+    clusterName: <WORKLOAD_CLUSTER_NAME>
+    DEX_SVC_LB_HOSTNAME: <DEX_SVC_LB_HOSTNAME>
+    clientID: <WORKLOAD_CLUSTER_NAME>
+    APISERVER_URL: <API_SERVER_LB_HOSTNAME>
+  secret:
+    sessionKey: <SESSION_KEY>
+    clientSecret: <CLIENT_SECRET>
+dns:
+  aws:
+    GANGWAY_SVC_LB_HOSTNAME: <GANGWAY_SVC_LB_HOSTNAME>
+
+dex:
+  ca: |
+  <INSERT_DEX_CA_CERT>

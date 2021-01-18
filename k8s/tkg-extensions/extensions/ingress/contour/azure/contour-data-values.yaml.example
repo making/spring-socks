@@ -1,0 +1,10 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "azure"
+contour:
+  image:
+    repository: registry.tkg.vmware.run
+envoy:
+  image:
+    repository: registry.tkg.vmware.run

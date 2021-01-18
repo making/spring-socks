@@ -1,0 +1,18 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "PersistentVolumeClaim", "metadata": {"name": "grafana-pvc"}})
+---
+metadata:
+  #@ if/end values.monitoring.grafana.pvc.annotations:
+  annotations: #@ values.monitoring.grafana.pvc.annotations
+spec:
+  #@overlay/replace
+  accessModes:
+    - #@ values.monitoring.grafana.pvc.accessMode
+  #@ if/end values.monitoring.grafana.pvc.storage_class:
+  storageClassName: #@ values.monitoring.grafana.pvc.storage_class
+  resources:
+    requests:
+      storage: #@ values.monitoring.grafana.pvc.storage

@@ -1,0 +1,29 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "azure"
+monitoring:
+  prometheus_server:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  alertmanager:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  kube_state_metrics:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  node_exporter:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  pushgateway:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  cadvisor:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  prometheus_server_configmap_reload:
+    image:
+      repository: registry.tkg.vmware.run/prometheus
+  prometheus_server_init_container:
+    image:
+      repository: registry.tkg.vmware.run/prometheus

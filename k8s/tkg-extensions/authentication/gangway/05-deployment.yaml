@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gangway
+  namespace: tanzu-system-auth
+  labels:
+    app: gangway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gangway
+  strategy:
+  template:
+    metadata:
+      labels:
+        app: gangway
+        revision: "1"
+    spec:
+      containers:
+        - name: gangway
+          image: registry.tkg.vmware.run/gangway:v3.2.0_vmware.1
+          imagePullPolicy: IfNotPresent
+          command: ["gangway", "-config", "/gangway/gangway.yaml"]
+          env:
+            - name: GANGWAY_SESSION_SECURITY_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gangway
+                  key: sessionKey
+            - name: GANGWAY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gangway
+                  key: clientSecret
+          ports:
+            - name: https
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: gangway
+              mountPath: /gangway/
+            - name: tls
+              mountPath: /tls/
+            - name: dex-ca
+              mountPath: /etc/dex/
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTPS
+            initialDelaySeconds: 20
+            timeoutSeconds: 1
+            periodSeconds: 60
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTPS
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: gangway
+          configMap:
+            name: gangway
+        - name: tls
+          secret:
+            secretName: gangway-cert-tls
+        - name: dex-ca
+          configMap:
+            name: dex-ca

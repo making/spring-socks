@@ -1,0 +1,42 @@
+# prometheus k14s objects managed by extension manager
+---
+apiVersion: clusters.tmc.cloud.vmware.com/v1alpha1
+kind: Extension
+metadata:
+  name: prometheus
+  namespace: tanzu-system-monitoring
+  annotations:
+    tmc.cloud.vmware.com/managed: "false"
+spec:
+  description: prometheus
+  version: "v2.17.1_vmware.1"
+  name: prometheus
+  namespace: tanzu-system-monitoring
+  deploymentStrategy:
+    type: KUBERNETES_NATIVE
+  objects: |
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: prometheus
+      annotations:
+        tmc.cloud.vmware.com/orphan-resource: "true"
+    spec:
+      syncPeriod: 5m
+      serviceAccountName: prometheus-extension-sa
+      fetch:
+        - image:
+            url: registry.tkg.vmware.run/tkg-extensions-templates:v1.2.0_vmware.1
+      template:
+        - ytt:
+            ignoreUnknownComments: true
+            paths:
+              - tkg-extensions/common
+              - tkg-extensions/monitoring/prometheus
+            inline:
+              pathsFrom:
+                - secretRef:
+                    name: prometheus-data-values
+      deploy:
+        - kapp:
+            rawOptions: ["--wait-timeout=5m"]

@@ -1,0 +1,41 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+#@ load("/globals.star", "get_kapp_annotations")
+
+#@ kind = kind_overlays
+#@ project_gangway_metadata = overlay.subset({"metadata": {"name" : "tanzu-system-auth"}})
+#@ gangway_metadata = overlay.subset({"metadata": {"name": "gangway"}})
+
+#@overlay/match by=overlay.and_op(kind.namespace, project_gangway_metadata)
+---
+metadata:
+  name: #@ values.gangway.namespace
+  #@ annotations = get_kapp_annotations("Namespace")
+  #@ if annotations:
+  #@overlay/match missing_ok=True
+  annotations: #@ annotations
+  #@ end
+
+#@overlay/match by=overlay.or_op(kind.serviceaccount, kind.configmap, kind.role, kind.role_binding),expects="0+"
+---
+metadata:
+  namespace: #@ values.gangway.namespace
+
+#@overlay/match by=overlay.or_op(overlay.and_op(kind.service, gangway_metadata)),expects="0+"
+---
+metadata:
+  name: #@ values.gangway.service.name
+  namespace: #@ values.gangway.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, gangway_metadata)
+---
+metadata:
+  namespace: #@ values.gangway.namespace
+
+#@overlay/match by=overlay.or_op(kind.cluster_role_binding, kind.role_binding),expects="0+"
+---
+subjects:
+#@overlay/match by=kind.serviceaccount
+- kind: ServiceAccount
+  namespace: #@ values.gangway.namespace

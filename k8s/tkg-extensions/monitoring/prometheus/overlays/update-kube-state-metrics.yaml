@@ -1,0 +1,14 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "prometheus-kube-state-metrics"}})
+---
+spec:
+  replicas: #@ values.monitoring.kube_state_metrics.deployment.replicas
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-kube-state-metrics"})
+      - image: #@ get_image_location(values.monitoring.kube_state_metrics.image.repository, values.monitoring.kube_state_metrics.image.name, values.monitoring.kube_state_metrics.image.tag)
+        imagePullPolicy: #@ values.monitoring.kube_state_metrics.image.pullPolicy

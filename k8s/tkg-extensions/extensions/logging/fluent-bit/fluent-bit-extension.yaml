@@ -1,0 +1,41 @@
+# fluent-bit k14s objects managed by extension manager
+---
+apiVersion: clusters.tmc.cloud.vmware.com/v1alpha1
+kind: Extension
+metadata:
+  name: fluent-bit
+  namespace: tanzu-system-logging
+  annotations:
+    tmc.cloud.vmware.com/managed: "false"
+spec:
+  description: fluent-bit
+  version: "v1.5.3_vmware.1"
+  name: fluent-bit
+  namespace: tanzu-system-logging
+  deploymentStrategy:
+    type: KUBERNETES_NATIVE
+  objects: |
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: fluent-bit
+      annotations:
+        tmc.cloud.vmware.com/orphan-resource: "true"
+    spec:
+      syncPeriod: 5m
+      serviceAccountName: fluent-bit-extension-sa
+      fetch:
+        - image:
+            url: registry.tkg.vmware.run/tkg-extensions-templates:v1.2.0_vmware.1
+      template:
+        - ytt:
+            paths:
+              - tkg-extensions/common
+              - tkg-extensions/logging/fluent-bit
+            inline:
+              pathsFrom:
+                - secretRef:
+                    name: fluent-bit-data-values
+      deploy:
+        - kapp:
+            rawOptions: ["--wait-timeout=5m"]

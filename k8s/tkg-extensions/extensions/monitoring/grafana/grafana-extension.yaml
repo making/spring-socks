@@ -1,0 +1,42 @@
+# grafana k14s objects managed by extension manager
+---
+apiVersion: clusters.tmc.cloud.vmware.com/v1alpha1
+kind: Extension
+metadata:
+  name: grafana
+  namespace: tanzu-system-monitoring
+  annotations:
+    tmc.cloud.vmware.com/managed: "false"
+spec:
+  description: grafana
+  version: "v7.0.3_vmware.1"
+  name: grafana
+  namespace: tanzu-system-monitoring
+  deploymentStrategy:
+    type: KUBERNETES_NATIVE
+  objects: |
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: grafana
+      annotations:
+        tmc.cloud.vmware.com/orphan-resource: "true"
+    spec:
+      syncPeriod: 5m
+      serviceAccountName: grafana-extension-sa
+      fetch:
+        - image:
+            url: registry.tkg.vmware.run/tkg-extensions-templates:v1.2.0_vmware.1
+      template:
+        - ytt:
+            ignoreUnknownComments: true
+            paths:
+              - tkg-extensions/common
+              - tkg-extensions/monitoring/grafana
+            inline:
+              pathsFrom:
+                - secretRef:
+                    name: grafana-data-values
+      deploy:
+        - kapp:
+            rawOptions: ["--wait-timeout=5m"]

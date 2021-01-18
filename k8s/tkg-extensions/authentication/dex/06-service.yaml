@@ -1,0 +1,17 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dex
+  namespace: tanzu-system-auth
+  labels:
+    app: dex
+spec:
+  type: NodePort
+  ports:
+    - name: "dex"
+      protocol: TCP
+      port: 5556
+      targetPort: "https"
+  selector:
+    app: dex

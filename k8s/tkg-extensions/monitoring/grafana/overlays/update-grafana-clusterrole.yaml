@@ -1,0 +1,11 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+
+#@overlay/match by=overlay.subset({"kind": "ClusterRole", "metadata": {"name": "grafana-clusterrole"}})
+---
+rules:
+#@overlay/append
+- apiGroups: #@ values.monitoring.grafana.cluster_role.apiGroups
+  resources: #@ values.monitoring.grafana.cluster_role.resources
+  verbs: #@ values.monitoring.grafana.cluster_role.verbs

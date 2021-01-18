@@ -1,0 +1,19 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "DaemonSet", "metadata": {"name": "prometheus-cadvisor"}})
+---
+spec:
+  updateStrategy:
+    type: #@ values.monitoring.cadvisor.daemonset.updatestrategy
+  template:
+    spec:
+      serviceAccountName: #@ values.monitoring.cadvisor.service_account_name
+      containers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-cadvisor"})
+      - image: #@ get_image_location(values.monitoring.cadvisor.image.repository, values.monitoring.cadvisor.image.name, values.monitoring.cadvisor.image.tag)
+        imagePullPolicy: #@ values.monitoring.cadvisor.image.pullPolicy
+        ports:
+        #@overlay/match by=overlay.subset({"name": "http"})
+        - containerPort: #@ values.monitoring.cadvisor.daemonset.containerPort

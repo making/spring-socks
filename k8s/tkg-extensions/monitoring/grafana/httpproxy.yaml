@@ -1,0 +1,26 @@
+#@ load("values.star", "values")
+#@ if values.monitoring.grafana.ingress.enabled:
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: grafana-httpproxy
+  namespace: #@ values.monitoring.namespace
+  labels:
+    app: grafana
+spec:
+  virtualhost:
+    fqdn: #@ values.monitoring.grafana.ingress.virtual_host_fqdn
+    tls:
+      secretName: grafana-tls
+  routes:
+    - conditions:
+      - prefix: #@ values.monitoring.grafana.ingress.prefix
+      pathRewritePolicy:
+        replacePrefix:
+          - prefix: #@ values.monitoring.grafana.ingress.prefix
+            replacement: /
+      services:
+        - name: grafana
+          port: 80
+#@ end

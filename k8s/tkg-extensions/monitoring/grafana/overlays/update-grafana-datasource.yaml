@@ -1,0 +1,19 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:data", "data")
+
+#@ def datasource():
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: #@ values.monitoring.grafana.config.datasource.type
+      url: #@ "prometheus-server." + values.monitoring.namespace + ".svc.cluster.local"
+      access: #@ values.monitoring.grafana.config.datasource.access
+      isDefault: #@ values.monitoring.grafana.config.datasource.isDefault
+#@ end
+
+#@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata": {"name": "grafana-datasource"}})
+---
+data:
+  datasource.yaml: #@ yaml.encode(datasource())

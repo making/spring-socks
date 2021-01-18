@@ -1,0 +1,89 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+
+monitoring:
+  namespace: "tanzu-system-monitoring"
+  create_namespace: false
+
+  grafana:
+    service_account_name: "grafana"
+    cluster_role_name: "grafana-clusterrole"
+    cluster_role:
+      apiGroups: [""]
+      resources: ["configmaps", "secrets"]
+      verbs: ["get", "watch", "list"]
+    image:
+      name: "grafana"
+      tag: "v7.0.3_vmware.1"
+      repository: "registry.tkg.vmware.run/grafana"
+      pullPolicy: "IfNotPresent"
+    config:
+      grafana_ini: |
+        [analytics]
+        check_for_updates = false
+        [grafana_net]
+        url = https://grafana.com
+        [log]
+        mode = console
+        [paths]
+        data = /var/lib/grafana/data
+        logs = /var/log/grafana
+        plugins = /var/lib/grafana/plugins
+        provisioning = /etc/grafana/provisioning
+      datasource:
+        type: prometheus
+        access: proxy
+        isDefault: true
+      provider_yaml: |-
+        apiVersion: 1
+        providers:
+        - name: 'sidecarProvider'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          allowUiUpdates: false
+          options:
+            path: /tmp/dashboards
+    service:
+      type: null
+    pvc:
+      annotations: {}
+      storage_class: null
+      accessMode: ReadWriteOnce
+      storage: "2Gi"
+    secret:
+      type: "Opaque"
+      admin_user: "YWRtaW4="
+      admin_password: ""
+      ldap_toml: ""
+    deployment:
+      replicas: 1
+    ingress:
+      enabled: true
+      virtual_host_fqdn: "grafana.system.tanzu"
+      prefix: "/"
+      # [Optional] The certificate for the ingress if you want to use your own TLS certificate.
+      # We will issue the certificate by cert-manager when it's empty.
+      tlsCertificate:
+        # [Required] the certificate
+        tls.crt:
+        # [Required] the private key
+        tls.key:
+        ca.crt:
+
+
+  grafana_init_container:
+    image:
+      name: "k8s-sidecar"
+      tag: "v0.1.144_vmware.1"
+      repository: "registry.tkg.vmware.run/grafana"
+      pullPolicy: "IfNotPresent"      
+
+  grafana_sc_dashboard:
+    image:
+      name: "k8s-sidecar"
+      tag: "v0.1.144_vmware.1"
+      repository: "registry.tkg.vmware.run/grafana"
+      pullPolicy: "IfNotPresent"

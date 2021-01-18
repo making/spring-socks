@@ -1,0 +1,31 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+
+#@ kind = kind_overlays
+#@ service_account_metadata = overlay.subset({"metadata": {"name": "fluent-bit"}})
+#@ cluster_role_metadata = overlay.subset({"metadata": {"name": "fluent-bit-read"}})
+#@ cluster_role_binding_roleref = overlay.subset({"roleRef": {"name": "fluent-bit-read"}})
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, service_account_metadata)
+---
+metadata:
+  name: #@ values.logging.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role, cluster_role_metadata),expects="1+"
+---
+metadata:
+  name: #@ values.logging.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, cluster_role_binding_roleref),expects="1+"
+---
+roleRef:
+  name: #@ values.logging.cluster_role_name
+
+#@overlay/match by=kind.cluster_role_binding
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    name: #@ values.logging.service_account_name
+

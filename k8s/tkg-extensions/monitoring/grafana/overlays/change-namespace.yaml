@@ -1,0 +1,69 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+
+#@ kind = kind_overlays
+#@ grafana_metadata = overlay.subset({"metadata": {"name" : "grafana"}})
+#@ grafana_rolebinding_metadata = overlay.subset({"metadata": {"name" : "grafana-clusterrolebinding"}})
+#@ grafana_pvc_metadata = overlay.subset({"metadata": {"name" : "grafana-pvc"}})
+#@ grafana_ds_metadata = overlay.subset({"metadata": {"name" : "grafana-datasource"}})
+#@ grafana_default_db_metadata = overlay.subset({"metadata": {"name" : "grafana-default-dashboard"}})
+#@ grafana_db_provider_metadata = overlay.subset({"metadata": {"name" : "grafana-config-dashboards"}})
+#@ grafana_db_kubernetes_apiserver_metadata = overlay.subset({"metadata": {"name" : "grafana-dashboard-apiserver"}})
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, grafana_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, grafana_rolebinding_metadata)
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, grafana_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, grafana_ds_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, grafana_db_provider_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, grafana_db_kubernetes_apiserver_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.secret, grafana_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.service, grafana_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, grafana_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.persistent_volume_claim, grafana_pvc_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, grafana_default_db_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace

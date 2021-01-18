@@ -1,0 +1,9 @@
+#@ load("/values.star", "values")
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex-ca
+  namespace: #@ values.gangway.namespace
+data:
+  dex-ca.crt: #@ values.dex.ca

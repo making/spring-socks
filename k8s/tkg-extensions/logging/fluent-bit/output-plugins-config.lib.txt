@@ -1,0 +1,54 @@
+(@ load("@ytt:struct", "struct") @)
+
+(@- def get_output_elastic_config(fluent_elasticsearch_host,fluent_elasticsearch_port): -@)
+[OUTPUT]
+    Name            es
+    Match           *
+    Host            (@=fluent_elasticsearch_host @)
+    Port            (@=fluent_elasticsearch_port @)
+    Logstash_Format On
+    Replace_Dots    On
+    Retry_Limit     False
+(@ end -@)
+
+(@- def get_output_kafka_config(kafka_broker_service_name,kafka_topic_name): -@)
+[OUTPUT]
+    Name           kafka
+    Match          *
+    Brokers        (@=kafka_broker_service_name @):9092
+    Topics         (@=kafka_topic_name @)
+    Timestamp_Key  @timestamp
+    Retry_Limit    false
+    # hides errors "Receive failed: Disconnected" when kafka kills idle connections
+    rdkafka.log.connection.close false
+    # producer buffer is not included in http://fluentbit.io/documentation/0.12/configuration/memory_usage.html#estimating
+    rdkafka.queue.buffering.max.kbytes 10240
+    # for logs you'll probably want this to be 0 or 1, not more
+    rdkafka.request.required.acks 1
+(@ end -@)
+
+(@- def get_output_splunk_config(splunk_host,splunk_port,splunk_token): -@)
+[OUTPUT]
+    Name           splunk
+    Match          *
+    Host           (@=splunk_host @)
+    Port           (@=splunk_port @)
+    Splunk_Token   (@=splunk_token @)
+    TLS            On
+    TLS.Verify     Off
+(@ end -@)
+
+(@- def get_output_http_config(http_host, http_port, http_uri, http_header_key_value, http_format): -@)
+[OUTPUT]
+    Name              http
+    Match             *
+    Host              (@=http_host @)
+    Port              (@=http_port @)
+    URI               (@=http_uri @)
+    Header            (@=http_header_key_value @)
+    Format            (@=http_format @)
+    tls               On
+(@ end @)
+
+
+(@ output_plugins_config = struct.make(get_output_elastic_config=get_output_elastic_config, get_output_kafka_config=get_output_kafka_config, get_output_splunk_config=get_output_splunk_config, get_output_http_config=get_output_http_config) @)

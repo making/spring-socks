@@ -1,0 +1,25 @@
+extensions:
+  dex:
+    clusterTypes:
+    - management
+    managedBy: user
+  gangway:
+    clusterTypes:
+    - workload
+    managedBy: user
+  fluent-bit:
+    clusterTypes:
+    - workload
+    managedBy: user
+  contour:
+    clusterTypes:
+    - workload
+    managedBy: user
+  prometheus:
+    clusterTypes:
+    - workload
+    managedBy: user
+  harbor:
+    clusterTypes:
+    - workload
+    managedBy: user

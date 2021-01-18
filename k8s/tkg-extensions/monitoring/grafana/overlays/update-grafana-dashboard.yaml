@@ -1,0 +1,8 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+
+#@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata": {"name": "grafana-config-dashboards"}})
+---
+data:
+  provider.yaml: #@ values.monitoring.grafana.config.provider_yaml

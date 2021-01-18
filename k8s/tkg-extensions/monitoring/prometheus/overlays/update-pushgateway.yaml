@@ -1,0 +1,14 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "prometheus-pushgateway"}})
+---
+spec:
+  replicas: #@ values.monitoring.pushgateway.deployment.replicas
+  template:
+    spec:
+      containers:
+      #@overlay/match by=overlay.subset({"name": "prometheus-pushgateway"})
+      - image: #@ get_image_location(values.monitoring.pushgateway.image.repository, values.monitoring.pushgateway.image.name, values.monitoring.pushgateway.image.tag)
+        imagePullPolicy: #@ values.monitoring.pushgateway.image.pullPolicy

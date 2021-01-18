@@ -1,0 +1,21 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/globals.star", "get_image_location", "globals")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "grafana"}})
+---
+spec:
+  replicas: #@ values.monitoring.grafana.deployment.replicas
+  template:
+    spec:
+      initContainers:
+      #@overlay/match by=overlay.subset({"name": "grafana-sc-datasources"})
+      - image: #@ get_image_location(values.monitoring.grafana_init_container.image.repository, values.monitoring.grafana_init_container.image.name, values.monitoring.grafana_init_container.image.tag)
+        imagePullPolicy: #@ values.monitoring.grafana_init_container.image.pullPolicy
+      containers:
+      #@overlay/match by=overlay.subset({"name": "grafana-sc-dashboard"})
+      - image: #@ get_image_location(values.monitoring.grafana_sc_dashboard.image.repository, values.monitoring.grafana_sc_dashboard.image.name, values.monitoring.grafana_sc_dashboard.image.tag)
+        imagePullPolicy: #@ values.monitoring.grafana_sc_dashboard.image.pullPolicy
+      #@overlay/match by=overlay.subset({"name": "grafana"})
+      - image: #@ get_image_location(values.monitoring.grafana.image.repository, values.monitoring.grafana.image.name, values.monitoring.grafana.image.tag)
+        imagePullPolicy: #@ values.monitoring.grafana.image.pullPolicy

@@ -1,0 +1,19 @@
+---
+# Source: prometheus-operator/templates/grafana/configmaps-datasources.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+  namespace: default
+  labels:
+    grafana_datasource: "1"
+    app: grafana
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://RELEASE-NAME-prometheus-op-prometheus:9090/
+      access: proxy
+      isDefault: true

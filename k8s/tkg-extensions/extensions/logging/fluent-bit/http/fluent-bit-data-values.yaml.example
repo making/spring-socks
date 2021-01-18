@@ -1,0 +1,17 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+logging:
+  image:
+    repository: registry.tkg.vmware.run
+tkg:
+  instance_name: "<TKG_INSTANCE_NAME>"
+  cluster_name: "<CLUSTER_NAME>"
+fluent_bit:
+  output_plugin: "http"
+  http:
+    host: <HTTP_HOST>
+    port: <HTTP_PORT>
+    uri: <URI>
+    header_key_value: <HEADER_KEY_VALUE>
+    format: json

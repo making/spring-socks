@@ -1,0 +1,16 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+monitoring:
+  grafana:
+    image:
+      repository: "registry.tkg.vmware.run/grafana"
+    secret:
+      admin_password: <ADMIN_PASSWORD>
+  grafana_init_container:
+    image:
+      repository: "registry.tkg.vmware.run/grafana"
+  grafana_sc_dashboard:
+    image:
+      repository: "registry.tkg.vmware.run/grafana"

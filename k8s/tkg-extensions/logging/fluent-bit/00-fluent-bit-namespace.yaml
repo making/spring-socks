@@ -1,0 +1,14 @@
+#@ load("values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("globals.star", "get_kapp_annotations")
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: #@ values.logging.namespace
+  #@ annotations = get_kapp_annotations("Namespace")
+  #@ if annotations:
+  #@overlay/match missing_ok=True
+  annotations: #@ annotations
+  #@ end

@@ -1,0 +1,25 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+dex:
+  image:
+    repository: registry.tkg.vmware.run
+  config:
+    connector: oidc
+    oidc:
+      CLIENT_ID: <OIDC_CLIENT_ID>
+      CLIENT_SECRET: <OIDC_CLIENT_SECRET>
+      issuer: <OIDC_IDP_URL>
+    #! Deploy dex first without staticClients. Once gangway is installed in workload cluster, update static clients with gangway information
+    #@overlay/replace
+    staticClients:
+    - id: <WORKLOAD_CLUSTER_NAME>
+      redirectURIs:
+      - 'https://<WORKLOAD_CLUSTER_IP>:30166/callback'
+      name: <WORKLOAD_CLUSTER_NAME>
+      secret: <CLIENT_SECRET>
+dns:
+  vsphere:
+    #@overlay/replace
+    ipAddresses: [<MANAGEMENT_CLUSTER_VIP>]

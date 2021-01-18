@@ -1,0 +1,48 @@
+
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+
+logging:
+  namespace: "tanzu-system-logging"
+  service_account_name: "fluent-bit"
+  cluster_role_name: "fluent-bit-read"
+  image:
+    repository: "registry.tkg.vmware.run"
+    name: "fluent-bit"
+    tag: "v1.5.3_vmware.1"
+    pullPolicy: "IfNotPresent"
+  update_strategy: "RollingUpdate"
+
+tkg:
+  cluster_name: null
+  instance_name: null
+
+#! Required params for supported output plugins
+fluent_bit:
+  log_level: "info"
+  output_plugin: null
+  elasticsearch:
+    host: null
+    port: null
+  kafka:
+    broker_service_name: null
+    topic_name: null
+  splunk:
+    host: null
+    port: null
+    token: null
+  http:
+    host: null
+    port: null
+    uri: null
+    header_key_value: null
+    format: null
+
+host_path:
+  volume_1: "/var/log"
+  volume_2: "/var/lib/docker/containers"
+  volume_3: "/run/log"
+
+
+

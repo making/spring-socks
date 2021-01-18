@@ -1,0 +1,126 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+
+#@ kind = kind_overlays
+#@ prometheus_server_metadata = overlay.subset({"metadata": {"name": "prometheus-server"}})
+#@ alertmanager_metadata = overlay.subset({"metadata": {"name": "prometheus-alertmanager"}})
+#@ kube_state_metrics_metadata = overlay.subset({"metadata": {"name": "prometheus-kube-state-metrics"}})
+#@ node_exporter_metadata = overlay.subset({"metadata": {"name": "prometheus-node-exporter"}})
+#@ pushgateway_metadata = overlay.subset({"metadata": {"name": "prometheus-pushgateway"}})
+#@ cadvisor_metadata = overlay.subset({"metadata": {"name": "prometheus-cadvisor"}})
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, prometheus_server_metadata)
+---
+metadata:
+  name: #@ values.monitoring.prometheus_server.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role, prometheus_server_metadata),expects="1+"
+---
+metadata:
+  name: #@ values.monitoring.prometheus_server.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, prometheus_server_metadata),expects="1+"
+---
+roleRef:
+  name: #@ values.monitoring.prometheus_server.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, prometheus_server_metadata),expects="1+"
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    name: #@ values.monitoring.prometheus_server.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, alertmanager_metadata)
+---
+metadata:
+  name: #@ values.monitoring.alertmanager.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role, alertmanager_metadata),expects="1+"
+---
+metadata:
+  name: #@ values.monitoring.alertmanager.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, alertmanager_metadata),expects="1+"
+---
+roleRef:
+  name: #@ values.monitoring.alertmanager.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, alertmanager_metadata),expects="1+"
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    name: #@ values.monitoring.alertmanager.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, kube_state_metrics_metadata)
+---
+metadata:
+  name: #@ values.monitoring.kube_state_metrics.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role, kube_state_metrics_metadata),expects="1+"
+---
+metadata:
+  name: #@ values.monitoring.kube_state_metrics.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, kube_state_metrics_metadata),expects="1+"
+---
+roleRef:
+  name: #@ values.monitoring.kube_state_metrics.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, kube_state_metrics_metadata),expects="1+"
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    name: #@ values.monitoring.kube_state_metrics.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, node_exporter_metadata)
+---
+metadata:
+  name: #@ values.monitoring.node_exporter.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, pushgateway_metadata)
+---
+metadata:
+  name: #@ values.monitoring.pushgateway.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role, pushgateway_metadata),expects="1+"
+---
+metadata:
+  name: #@ values.monitoring.pushgateway.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, pushgateway_metadata),expects="1+"
+---
+roleRef:
+  name: #@ values.monitoring.pushgateway.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, pushgateway_metadata),expects="1+"
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    name: #@ values.monitoring.pushgateway.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, cadvisor_metadata)
+---
+metadata:
+  name: #@ values.monitoring.cadvisor.service_account_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role, cadvisor_metadata),expects="1+"
+---
+metadata:
+  name: #@ values.monitoring.cadvisor.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, cadvisor_metadata),expects="1+"
+---
+roleRef:
+  name: #@ values.monitoring.cadvisor.cluster_role_name
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, cadvisor_metadata),expects="1+"
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    name: #@ values.monitoring.cadvisor.service_account_name

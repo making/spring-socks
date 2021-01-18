@@ -1,0 +1,19 @@
+
+#@ load("/values.star", "get_gangway_service_type", "is_service_type_LB", "get_gangway_service_annotations", "is_service_NodePort")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "gangwaysvc"}})
+---
+metadata:
+  #@ if is_service_type_LB():
+  #@overlay/match missing_ok=True
+  annotations: #@ get_gangway_service_annotations()
+  #@ end
+spec:
+  type: #@ get_gangway_service_type()
+  ports:
+  #@overlay/match by=overlay.subset({"name": "https"})
+  - targetPort: "https"
+    #@ if/end is_service_NodePort() :
+    #@overlay/match missing_ok=True
+    nodePort: 30166

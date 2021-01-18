@@ -1,0 +1,64 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+gangway:
+  app: gangway
+  namespace: tanzu-system-auth
+  organization: vmware
+  commonname: tkg-gangway
+  config:
+    serveTLS: true
+    certFile: /tls/tls.crt
+    keyFile: /tls/tls.key
+    clusterName: null #! Required <WORKLOAD_CLUSTER_NAME>
+    DEX_SVC_LB_HOSTNAME: null #! Required <DEX_SVC_LB_HOSTNAME>
+    MGMT_CLUSTER_IP: null #! Required <MGMT_CLUSTER_VIP>
+    authPort: "30167"
+    redirectPort: "30166"
+    scopes:
+    - openid
+    - profile
+    - email
+    - offline_access
+    - groups #! If using groups with ldap make sure groupSearch in dex configmap is correctly configured
+    clientID: null #! Required same value of clusterName
+    allowEmptyClientSecret: false
+    usernameClaim: email
+    APISERVER_URL: null #! Required IP/DNS of Kubernetes API Server endpoint of workload cluster.
+    apiPort: "6443"
+    cluster_ca_path: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    trustedCAPath: /etc/dex/dex-ca.crt
+    idpCAPath: /etc/dex/dex-ca.crt
+
+  service:
+    name: gangwaysvc
+    type: null
+  deployment:
+    replicas: 1
+    resources: null
+  certificate: 
+    duration: 2160h
+    renewBefore: 360h
+  image:
+    name: gangway
+    tag: v3.2.0_vmware.2
+    repository: registry.tkg.vmware.run
+    pullPolicy: IfNotPresent
+  secret:
+    sessionKey: "" #! Required gangway secret sessionKey
+    clientSecret: "" #! Required gangway secret clientSecret
+dns:
+  aws:
+    dnsNames: 
+    - tkg-gangway
+    GANGWAY_SVC_LB_HOSTNAME: example.com #! Required to replace with <GANGWAY_SVC_LB_HOSTNAME> for AWS loadbalancer service
+  vsphere:
+    dnsNames:
+    - tkg-gangway
+    ipAddresses: [] #! Required IP of the control plane nodes of workload cluster
+  azure:
+    dnsNames:
+    - tkg-gangway
+    GANGWAY_SVC_LB_HOSTNAME: gangway.example.com #! Required to replace with <GANGWAY_SVC_LB_HOSTNAME> for Azure loadbalancer service
+dex:
+  ca: null # ! Required ca cert from dex

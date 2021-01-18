@@ -1,0 +1,26 @@
+#@ load("/values.star", "values")
+#@ load("/globals.star", "globals")
+---
+#@ if values.monitoring.prometheus_server.sc.sc_enabled == True :
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: prometheus-server
+  annotations:
+    storageclass.kubernetes.io/is-default-class:  #@ "{}".format(values.monitoring.prometheus_server.sc.is_default).lower()
+#@ if globals.infrastructure_provider == "vsphere":
+provisioner: csi.vsphere.vmware.com
+#@ else:
+provisioner: kubernetes.io/aws-ebs
+#@ end
+parameters:
+  #@ if globals.infrastructure_provider == "aws":
+  type: #@ values.monitoring.prometheus_server.sc.aws_type
+  fsType: #@ values.monitoring.prometheus_server.sc.aws_fsType
+  #@ else:
+  datastoreurl: #@ values.monitoring.prometheus_server.sc.vsphereDatastoreurl
+  #@ end
+#@ if globals.infrastructure_provider == "aws":
+allowVolumeExpansion: #@ values.monitoring.prometheus_server.sc.allowVolumeExpansion
+#@ end
+#@ end

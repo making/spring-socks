@@ -1,0 +1,66 @@
+#@ load("/values.star", "values")
+#@ load("/globals.star", "globals")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+#@ load("@ytt:yaml", "yaml")
+#@ load("/globals.star", "get_kapp_annotations")
+
+#@ gangway_metadata = overlay.subset({"metadata": {"name": "gangway"}})
+
+#@ def gangway_configmap_yaml():
+
+serveTLS: #@ values.gangway.config.serveTLS
+certFile: #@ values.gangway.config.certFile
+keyFile: #@ values.gangway.config.keyFile
+clusterName: #@ values.gangway.config.clusterName
+
+#@ if globals.infrastructure_provider == "aws":
+authorizeURL: #@ "https://" + values.gangway.config.DEX_SVC_LB_HOSTNAME + "/auth"
+#@ elif globals.infrastructure_provider == "azure":
+authorizeURL: #@ "https://" + values.gangway.config.DEX_SVC_LB_HOSTNAME + "/auth"
+#@ elif globals.infrastructure_provider == "vsphere":
+authorizeURL: #@ "https://" + values.gangway.config.MGMT_CLUSTER_IP + ":" + values.gangway.config.authPort + "/auth"
+#@ end
+
+#@ if globals.infrastructure_provider == "aws":   
+tokenURL: #@ "https://" + values.gangway.config.DEX_SVC_LB_HOSTNAME + "/token"
+#@ elif globals.infrastructure_provider == "azure":
+tokenURL: #@ "https://" + values.gangway.config.DEX_SVC_LB_HOSTNAME + "/token"
+#@ elif globals.infrastructure_provider == "vsphere":
+tokenURL: #@ "https://" + values.gangway.config.MGMT_CLUSTER_IP + ":" + values.gangway.config.authPort + "/token"
+#@ end
+
+scopes: #@ values.gangway.config.scopes
+
+#@ if globals.infrastructure_provider == "aws":   
+redirectURL: #@ "https://" + values.dns.aws.GANGWAY_SVC_LB_HOSTNAME + "/callback"
+#@ elif globals.infrastructure_provider == "azure":
+redirectURL: #@ "https://" + values.dns.azure.GANGWAY_SVC_LB_HOSTNAME + "/callback"
+#@ elif globals.infrastructure_provider == "vsphere":
+redirectURL: #@ "https://" + values.dns.vsphere.ipAddresses[0] + ":" + values.gangway.config.redirectPort + "/callback"
+#@ end
+ 
+#@ if/end values.gangway.config.allowEmptyClientSecret in (True, False):
+allowEmptyClientSecret:  #@ values.gangway.config.allowEmptyClientSecret
+clientID: #@ values.gangway.config.clientID
+usernameClaim: #@ values.gangway.config.usernameClaim
+apiServerURL:  #@ "https://" + values.gangway.config.APISERVER_URL + ":" + values.gangway.config.apiPort
+
+#@ if/end values.gangway.config.cluster_ca_path:
+cluster_ca_path:  #@ values.gangway.config.cluster_ca_path
+trustedCAPath: #@ values.gangway.config.trustedCAPath
+idpCAPath: #@ values.gangway.config.idpCAPath
+
+#@ end
+
+
+#@overlay/match by=overlay.and_op(kind_overlays.configmap, gangway_metadata)
+---
+metadata:
+  #@ annotations = get_kapp_annotations("ConfigMap")
+  #@ if annotations:
+  #@overlay/match missing_ok=True
+  annotations: #@ annotations
+  #@ end
+data:
+  gangway.yaml: #@ yaml.encode(gangway_configmap_yaml())

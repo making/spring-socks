@@ -1,0 +1,4 @@
+#@data/values
+---
+base_domain_name: example.com
+cluster_issuer_name:

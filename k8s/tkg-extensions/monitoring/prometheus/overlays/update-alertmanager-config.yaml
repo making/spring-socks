@@ -1,0 +1,36 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:data", "data")
+
+#@ def alertmanager():
+    global:
+      #! ResolveTimeout is the time after which an alert is declared resolved
+      #! if it has not been updated.
+      resolve_timeout: 5m
+    #! The directory from which notification templates are read.
+    templates:
+    - '/etc/alertmanager/templates/*.tmpl'
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      repeat_interval: 15m
+      receiver: email-receiver
+      routes:
+      - receiver: slack_demo
+        #! Send severity=slack alerts to slack.
+        match:
+          severity: slack
+        group_wait: 10s
+        repeat_interval: 1m
+    receivers:
+    #@ if/end values.monitoring.alertmanager.config.email_receiver:
+    - #@ values.monitoring.alertmanager.config.email_receiver
+    #@ if/end values.monitoring.alertmanager.config.slack_demo:
+    - #@ values.monitoring.alertmanager.config.slack_demo
+#@ end
+
+#@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata": {"name": "prometheus-alertmanager"}})
+---
+data:
+  alertmanager.yml: #@ yaml.encode(alertmanager())

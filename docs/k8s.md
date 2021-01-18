@@ -423,3 +423,34 @@ kapp delete -a cart-api -y --filter '{"not":{"resource":{"kinds":["AntreaControl
 kapp delete -a catalog-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
 kapp delete -a user-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
 ```
+
+
+## Deploy EFK
+
+
+### Deploy Elasticsearch and Kibana
+
+```
+kapp deploy -a elasticsearch-kibana -f <(ytt --data-values-env YTT \
+  -f k8s/elastic/values.yml \
+  -f k8s/elastic/namespace.yml \
+  -f k8s/elastic/elasticsearch.yml \
+  -f k8s/elastic/kibana.yml \
+  -v cluster_issuer_name=letsencrypt-maki-lol \
+  -v base_domain_name=apple.maki.lol) \
+  -c
+```
+
+### Deploy Fluent Bit
+
+```
+kapp deploy -a fluent-bit -f <(ytt --data-values-env YTT \
+  -f k8s/tkg-extensions/common \
+  -f k8s/tkg-extensions/logging/fluent-bit \
+  -v tkg.instance_name=carrot \
+  -v tkg.cluster_name=apple \
+  -v fluent_bit.output_plugin=elasticsearch \
+  -v fluent_bit.elasticsearch.host=elasticsearch.elasticsearch-kibana.svc.cluster.local \
+  -v fluent_bit.elasticsearch.port=9200) \
+  -c
+```

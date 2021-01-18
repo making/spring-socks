@@ -1,0 +1,76 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:yaml", "yaml")
+#@ load("/globals.star", "get_kapp_annotations")
+
+#@ def contour_configmap_yaml():
+
+disablePermitInsecure: #@ values.contour.config.disablePermitInsecure
+
+tls:
+  #@ if/end values.contour.config.tls.minimumProtocolVersion:
+  minimum-protocol-version: #@ values.contour.config.tls.minimumProtocolVersion
+  fallback-certificate:
+    #@ if/end values.contour.config.tls.fallbackCertificate.name:
+    name: #@ values.contour.config.tls.fallbackCertificate.name
+    #@ if/end values.contour.config.tls.fallbackCertificate.namespace:
+    namespace: #@ values.contour.config.tls.fallbackCertificate.namespace
+
+#@ if/end values.contour.config.leaderelection.configmapName and values.contour.config.leaderelection.configmapNamespace:
+leaderelection:
+  configmap-name: #@ values.contour.config.leaderelection.configmapName
+  configmap-namespace: #@ values.contour.config.leaderelection.configmapNamespace
+
+#@ if/end values.contour.config.accesslogFormat:
+accesslog-format: #@ values.contour.config.accesslogFormat
+
+#@ if/end values.contour.config.jsonFields:
+json-fields: #@ values.contour.config.jsonFields
+
+#@ if/end values.contour.config.defaultHTTPVersions:
+default-http-versions: #@ values.contour.config.defaultHTTPVersions
+
+#@ if is_timeouts_config_defined():
+timeouts:
+  #@ if/end values.contour.config.timeouts.requestTimeout:
+  request-timeout: #@ values.contour.config.timeouts.requestTimeout
+  #@ if/end values.contour.config.timeouts.connectionIdleTimeout:
+  connection-idle-timeout: #@ values.contour.config.timeouts.connectionIdleTimeout
+  #@ if/end values.contour.config.timeouts.streamIdleTimeout:
+  stream-idle-timeout: #@ values.contour.config.timeouts.streamIdleTimeout
+  #@ if/end values.contour.config.timeouts.maxConnectionDuration:
+  max-connection-duration: #@ values.contour.config.timeouts.maxConnectionDuration
+  #@ if/end values.contour.config.timeouts.connectionShutdownGracePeriod:
+  connection-shutdown-grace-period: #@ values.contour.config.timeouts.connectionShutdownGracePeriod
+#@ end
+
+#@ if/end values.contour.config.debug:
+debug: #@ values.contour.config.debug
+
+#@ if/end values.contour.config.ingressStatusAddress:
+ingress-status-address: #@ values.contour.config.ingressStatusAddress
+
+#@ end
+
+#@ def is_timeouts_config_defined():
+#@   timeouts = values.contour.config.timeouts
+#@   if timeouts:
+#@     return (timeouts.requestTimeout or
+#@             timeouts.connectionIdleTimeout or
+#@             timeouts.streamIdleTimeout or
+#@             timeouts.maxConnectionDuration or
+#@             timeouts.connectionShutdownGracePeriod)
+#@   end
+#@   return False
+#@ end
+
+#@overlay/match by=overlay.subset({"kind": "ConfigMap"})
+---
+metadata:
+  #@ annotations = get_kapp_annotations("ConfigMap")
+  #@ if annotations:
+  #@overlay/match missing_ok=True
+  annotations: #@ annotations
+  #@ end
+data:
+  contour.yaml: #@ yaml.encode(contour_configmap_yaml())

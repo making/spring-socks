@@ -1,0 +1,41 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+#@ load("/globals.star", "get_kapp_annotations")
+
+#@ kind = kind_overlays
+#@ project_dex_metadata = overlay.subset({"metadata": {"name" : "tanzu-system-auth"}})
+#@ dex_metadata = overlay.subset({"metadata": {"name": "dex"}})
+
+#@overlay/match by=overlay.and_op(kind.namespace, project_dex_metadata)
+---
+metadata:
+  name: #@ values.dex.namespace
+  #@ annotations = get_kapp_annotations("Namespace")
+  #@ if annotations:
+  #@overlay/match missing_ok=True
+  annotations: #@ annotations
+  #@ end
+
+#@overlay/match by=overlay.or_op(kind.serviceaccount, kind.configmap, kind.role, kind.role_binding),expects="0+"
+---
+metadata:
+  namespace: #@ values.dex.namespace
+
+#@overlay/match by=overlay.or_op(overlay.and_op(kind.service, dex_metadata)),expects="0+"
+---
+metadata:
+  name: #@ values.dex.service.name
+  namespace: #@ values.dex.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, dex_metadata)
+---
+metadata:
+  namespace: #@ values.dex.namespace
+
+#@overlay/match by=overlay.or_op(kind.cluster_role_binding, kind.role_binding),expects="0+"
+---
+subjects:
+#@overlay/match by=kind.serviceaccount
+- kind: ServiceAccount
+  namespace: #@ values.dex.namespace

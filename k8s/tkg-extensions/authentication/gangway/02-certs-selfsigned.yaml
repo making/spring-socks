@@ -1,0 +1,45 @@
+#@ load("values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+#@ load("globals.star", "globals")
+#@ load("certificates.lib.yaml", "generate_dns_names", "get_certificate_with_params", "generate_self_signed_issuer", "certificate_generate_args")
+
+#@ def gangway_dns():
+#@   if globals.infrastructure_provider == "aws":
+#@     list = values.dns.aws.dnsNames
+#@     list.append(values.dns.aws.GANGWAY_SVC_LB_HOSTNAME)
+#@     return list
+#@   elif globals.infrastructure_provider == "azure":
+#@     list = values.dns.azure.dnsNames
+#@     list.append(values.dns.azure.GANGWAY_SVC_LB_HOSTNAME)
+#@     return list
+#@   else:
+#@     return values.dns.vsphere.dnsNames
+#@   end
+#@ end
+
+#@ def gangway_ips():
+#@   if globals.infrastructure_provider == "aws":
+#@     return []
+#@   elif globals.infrastructure_provider == "azure":
+#@     return []
+#@   else:
+#@     return values.dns.vsphere.ipAddresses
+#@   end
+#@ end
+
+#@ gangway_name = values.gangway.app
+#@ gangway_namespace = values.gangway.namespace
+#@ gangway_organization = values.gangway.organization
+#@ gangway_self_signed_ca_issuer = gangway_name + "-selfsigned-ca-issuer"
+#@ gangway_ca = gangway_name + "-cert"
+#@ gangway_ca_common_name = values.gangway.commonname
+#@ gangway_secret_name = gangway_name + "-cert-tls"
+#@ gangway_cert_duration = values.gangway.certificate.duration or globals.certificate.duration
+#@ gangway_cert_renew_before = values.gangway.certificate.renewBefore or globals.certificate.renewBefore
+#@ gangway_dns_list = gangway_dns()
+#@ gangway_ipaddress = gangway_ips()
+#@ gangway_isCA = False
+
+--- #@ generate_self_signed_issuer(gangway_self_signed_ca_issuer, gangway_namespace)
+--- #@ certificate_generate_args(get_certificate_with_params, gangway_ca, gangway_namespace, gangway_cert_duration, gangway_cert_renew_before, gangway_secret_name, [gangway_organization], gangway_ca_common_name, gangway_dns_list, gangway_self_signed_ca_issuer, (gangway_isCA, gangway_ipaddress))

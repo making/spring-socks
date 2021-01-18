@@ -1,0 +1,20 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+
+#@ kind = kind_overlays
+
+#@overlay/match by=kind.serviceaccount
+---
+metadata:
+  namespace: #@ values.logging.namespace
+
+#@overlay/match by=kind.cluster_role_binding
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.logging.namespace
+
+
+

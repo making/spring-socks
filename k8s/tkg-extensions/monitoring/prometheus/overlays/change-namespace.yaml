@@ -1,0 +1,152 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+
+#@ kind = kind_overlays
+#@ prometheus_server_metadata = overlay.subset({"metadata": {"name" : "prometheus-server"}})
+#@ alertmanager_metadata = overlay.subset({"metadata": {"name": "prometheus-alertmanager"}})
+#@ kube_state_metrics_metadata = overlay.subset({"metadata": {"name": "prometheus-kube-state-metrics"}})
+#@ node_exporter_metadata = overlay.subset({"metadata": {"name": "prometheus-node-exporter"}})
+#@ pushgateway_metadata = overlay.subset({"metadata": {"name": "prometheus-pushgateway"}})
+#@ cadvisor_metadata = overlay.subset({"metadata": {"name": "prometheus-cadvisor"}})
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, prometheus_server_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, prometheus_server_metadata)
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, prometheus_server_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.service, prometheus_server_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, prometheus_server_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.persistent_volume_claim, prometheus_server_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, alertmanager_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, alertmanager_metadata)
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.configmap, alertmanager_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.service, alertmanager_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, alertmanager_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.persistent_volume_claim, alertmanager_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, kube_state_metrics_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, kube_state_metrics_metadata)
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.service, kube_state_metrics_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, kube_state_metrics_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, node_exporter_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.service, node_exporter_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.daemonset, node_exporter_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, pushgateway_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, pushgateway_metadata)
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.service, pushgateway_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, pushgateway_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.serviceaccount, cadvisor_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.cluster_role_binding, cadvisor_metadata)
+---
+subjects:
+  #@overlay/match by=kind.serviceaccount
+  - kind: ServiceAccount
+    namespace: #@ values.monitoring.namespace
+
+#@overlay/match by=overlay.and_op(kind.daemonset, cadvisor_metadata)
+---
+metadata:
+  namespace: #@ values.monitoring.namespace
+

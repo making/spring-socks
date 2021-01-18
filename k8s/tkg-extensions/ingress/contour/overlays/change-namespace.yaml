@@ -1,0 +1,41 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/kinds.lib.yaml", "kind_overlays")
+#@ load("/globals.star", "get_kapp_annotations")
+
+#@ kind = kind_overlays
+#@ project_contour_metadata = overlay.subset({"metadata": {"name" : "projectcontour"}})
+#@ contour_metadata = overlay.subset({"metadata": {"name": "contour"}})
+#@ envoy_metadata = overlay.subset({"metadata": {"name": "envoy"}})
+
+#@overlay/match by=overlay.and_op(kind.namespace, project_contour_metadata)
+---
+metadata:
+  name: #@ values.contour.namespace
+  #@ annotations = get_kapp_annotations("Namespace")
+  #@ if annotations:
+  #@overlay/match missing_ok=True
+  annotations: #@ annotations
+  #@ end
+
+#@overlay/match by=overlay.or_op(kind.serviceaccount, kind.configmap, kind.role, kind.role_binding, kind.job, kind.daemonset),expects="0+"
+---
+metadata:
+  namespace: #@ values.contour.namespace
+
+#@overlay/match by=overlay.or_op(overlay.and_op(kind.service, contour_metadata), overlay.and_op(kind.service, envoy_metadata)),expects="0+"
+---
+metadata:
+  namespace: #@ values.contour.namespace
+
+#@overlay/match by=overlay.and_op(kind.deployment, contour_metadata),expects="0+"
+---
+metadata:
+  namespace: #@ values.contour.namespace
+
+#@overlay/match by=overlay.or_op(kind.cluster_role_binding, kind.role_binding),expects="0+"
+---
+subjects:
+#@overlay/match by=kind.serviceaccount
+- kind: ServiceAccount
+  namespace: #@ values.contour.namespace

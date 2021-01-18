@@ -1,0 +1,98 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+dex:
+  app: dex
+  namespace: tanzu-system-auth
+  organization: vmware
+  commonname: tkg-dex
+  config:
+    frontend:
+      theme: tkg
+    web:
+      https: 0.0.0.0:5556
+      tlsCert: /etc/dex/tls/tls.crt
+      tlsKey: /etc/dex/tls/tls.key
+    expiry:
+      signingKeys: 10m
+      idTokens: 5m
+    logger:
+      level: debug
+      format: json
+    staticClients: []
+    connector: null  #! dex config should be either oidc or ldap
+    issuerPort: "30167" #! requred only for MGMT_CLUSTER_VIP if provider is vsphere. Default is "30167"
+    oidc:
+      CLIENT_ID: null #! required if oidc enabled
+      CLIENT_SECRET: null #! required if oidc enabled
+      issuer: null #! <OIDC_IDP_URL> is required if oidc enabled
+      clientID: $OIDC_CLIENT_ID  #! do not change this
+      clientSecret: $OIDC_CLIENT_SECRET #! do not change this
+      basicAuthUnsupported: null
+      hostedDomains: []
+      scopes: []
+      insecureEnableGroups: null
+      insecureSkipEmailVerified: true
+      getUserInfo: null
+      userIDKey: null
+      userNameKey: null
+    ldap:
+      host: null #! <LDAP_HOST> is required if ldap enabed
+      insecureNoSSL: null
+      startTLS: null
+      rootCA: null
+      rootCAData: null
+      bindDN: null
+      bindPW: null
+      usernamePrompt: LDAP Username
+      insecureSkipVerify: False
+      userSearch:
+        baseDN: null #! required if ldap userSearch enabled
+        filter: "(objectClass=posixAccount)"
+        username: uid
+        idAttr: uid
+        emailAttr: mail
+        nameAttr: givenName
+      groupSearch:
+        baseDN: null  #! required if ldap groupSearch enabled
+        filter: "(objectClass=posixGroup)"
+        userAttr: uid
+        groupAttr: memberUid
+        nameAttr: cn
+    oauth2:
+      skipApprovalScreen: true
+      responseTypes:
+      - "code"
+      - "token"
+      - "id_token"
+    storage:
+     type: kubernetes
+     config:
+       inCluster: true     
+    enablePasswordDB: false
+  service:
+    name: dexsvc
+    type: null
+  deployment:
+    replicas: 1
+  certificate: 
+    duration: 2160h
+    renewBefore: 360h
+  image:
+    name: dex
+    tag: v2.22.0_vmware.2
+    repository: registry.tkg.vmware.run
+    pullPolicy: IfNotPresent
+dns:
+  aws:
+    dnsNames: 
+    - tkg-dex.com
+    DEX_SVC_LB_HOSTNAME: example.com #! <DEX_SVC_LB_HOSTNAME> is required for AWS
+  vsphere:
+    dnsNames:
+    - tkg-dex
+    ipAddresses: [] #! at least one MGMT_CLUSTER_VIP is required for vsphere provider
+  azure:
+    dnsNames:
+    - tkg-dex.com
+    DEX_SVC_LB_HOSTNAME: dex.example.com #! <DEX_SVC_LB_HOSTNAME> is required for azure

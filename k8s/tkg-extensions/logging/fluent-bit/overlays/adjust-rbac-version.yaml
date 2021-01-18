@@ -1,0 +1,7 @@
+#@ load("/values.star", "values")
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"apiVersion":"rbac.authorization.k8s.io/v1beta1"}),expects="1+"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+

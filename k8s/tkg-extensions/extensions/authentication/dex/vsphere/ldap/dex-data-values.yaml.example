@@ -1,0 +1,36 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+dex:
+  image:
+    repository: registry.tkg.vmware.run
+  config:
+    connector: ldap
+    ldap:
+      host: <LDAP_HOST>
+      userSearch:
+        baseDN: 'ou=people,dc=vmware,dc=com'
+        filter: '(objectClass=posixAccount)'
+        username: uid
+        idAttr: uid
+        emailAttr: mail
+        nameAttr: 'givenName'
+      groupSearch:
+        baseDN: 'ou=group,dc=vmware,dc=com'
+        filter: '(objectClass=posixGroup)'
+        userAttr: uid
+        groupAttr: memberUid
+        nameAttr: cn
+    #! Deploy dex first with dummy staticClients. Once gangway is installed in workload cluster, update static clients with gangway information
+    #@overlay/replace
+    staticClients:
+    - id: WORKLOAD_CLUSTER_NAME
+      redirectURIs:
+      - 'https://WORKLOAD_CLUSTER_IP:30166/callback'
+      name: WORKLOAD_CLUSTER_NAME
+      secret: CLIENT_SECRET
+dns:
+  vsphere:
+    #@overlay/replace
+    ipAddresses: [<MANAGEMENT_CLUSTER_VIP>]

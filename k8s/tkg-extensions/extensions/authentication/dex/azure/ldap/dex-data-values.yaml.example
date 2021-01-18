@@ -1,0 +1,37 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "azure"
+dex:
+  image:
+    repository: registry.tkg.vmware.run
+  config:
+    connector: ldap
+    ldap:
+      host: <LDAP_HOST>
+      userSearch:
+        baseDN: 'ou=people,dc=vmware,dc=com'
+        filter: '(objectClass=person)'
+        username: userPrincipalName
+        idAttr: DN
+        emailAttr: userPrincipalName
+        nameAttr: 'cn'
+      groupSearch:
+        baseDN: 'ou=group,dc=vmware,dc=com'
+        filter: '(objectClass=group)'
+        userAttr: DN
+        groupAttr: "member:1.2.840.113556.1.4.1941:"
+        nameAttr: cn
+    #! Deploy dex first with dummy staticClients. Once gangway is installed in workload cluster, update static clients with gangway information
+    #@overlay/replace
+    staticClients:
+    - id: WORKLOAD_CLUSTER_NAME
+      redirectURIs:
+      - 'https://WORKLOAD_CLUSTER_IP:30166/callback'
+      name: WORKLOAD_CLUSTER_NAME
+      secret: CLIENT_SECRET
+#! Deploy dex first and update sample-lb with real name once dex service loadbalancer is created, dnsNames is optional.
+dns:
+  azure:
+    DEX_SVC_LB_HOSTNAME: sample-lb
+    dnsNames: []
