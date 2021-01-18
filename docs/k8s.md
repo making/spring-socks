@@ -408,6 +408,9 @@ Go to `${YTT_wavefront_uri}/dashboards/integration-spring-boot` and set filter `
 
 ![image](https://user-images.githubusercontent.com/106908/104901392-ae6e7700-59c0-11eb-88ea-0a64eb307ce4.png)
 
+Go to `${YTT_wavefront_uri}/tracing/appmap` and set filter `application = ${YTT_wavefront_application_name}` (default: `spring-socks`)
+
+![image](https://user-images.githubusercontent.com/106908/104929512-54cd7300-59e7-11eb-9635-4d8ca22b007e.png)
 
 ## Delete Spring Socks
 
