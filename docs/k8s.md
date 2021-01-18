@@ -18,7 +18,14 @@
 First of all, deploy User API
 
 ```
-./k8s/deploy.sh user-api
+kapp deploy -a user-api -f <(ytt \
+  -f user-api/k8s/values.yml \
+  -f user-api/k8s/app.yml \
+  -f user-api/k8s/mysql.yml \
+  -f user-api/k8s/mysql-secret.yml \
+  -f user-api/k8s/redis.yml \
+  | kbld -f -) \
+  -c
 ```
 
 Check `sock-user`'s External IP.
@@ -39,31 +46,59 @@ $ curl http://192.168.11.161:8080/oauth/token -u sock:sock -d grant_type=client_
 ### Deploy Catalog API
 
 ```
-./k8s/deploy.sh catalog-api
+kapp deploy -a catalog-api -f <(ytt \
+  -f catalog-api/k8s/values.yml \
+  -f catalog-api/k8s/app.yml \
+  -f catalog-api/k8s/mysql.yml \
+  -f catalog-api/k8s/mysql-secret.yml \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Cart API
 
 ```
-./k8s/deploy.sh cart-api
+kapp deploy -a cart-api -f <(ytt \
+  -f cart-api/k8s/values.yml \
+  -f cart-api/k8s/app.yml \
+  -f cart-api/k8s/mysql.yml \
+  -f cart-api/k8s/mysql-secret.yml \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Payment API
 
 ```
-./k8s/deploy.sh payment-api
+kapp deploy -a payment-api -f <(ytt \
+  -f payment-api/k8s/values.yml \
+  -f payment-api/k8s/app.yml \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Shipping API
 
 ```
-./k8s/deploy.sh shipping-api
+kapp deploy -a shipping-api -f <(ytt \
+  -f shipping-api/k8s/values.yml \
+  -f shipping-api/k8s/app.yml \
+  -f shipping-api/k8s/mysql.yml \
+  -f shipping-api/k8s/mysql-secret.yml \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Order API
 
 ```
-./k8s/deploy.sh order-api
+kapp deploy -a order-api -f <(ytt \
+  -f order-api/k8s/values.yml \
+  -f order-api/k8s/app.yml \
+  -f order-api/k8s/mysql.yml \
+  -f order-api/k8s/mysql-secret.yml \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Shop UI
@@ -73,8 +108,13 @@ Configure `http://<sock-user's External IP>:8080` to `YTT_sock_user_external_url
 In the case above,
 
 ```
-YTT_sock_user_external_url=http://192.168.11.161:8080 \
-./k8s/deploy.sh shop-ui
+kapp deploy -a shop-ui -f <(ytt \
+  -f shop-ui/k8s/values.yml \
+  -f shop-ui/k8s/app.yml \
+  -f shop-ui/k8s/redis.yml \
+  -v sock_user_external_url=http://192.168.11.161:8080 \
+  | kbld -f -) \
+  -c
 ```
 
 Check `sock-ui`'s External IP.
@@ -88,8 +128,15 @@ sock-ui   LoadBalancer   100.65.149.233   192.168.11.162   8080:31863/TCP   43s
 Update User API with the `sock-ui`'s External IP like following.
 
 ```
-YTT_sock_ui_external_url=http://192.168.11.162:8080 \
-./k8s/deploy.sh user-api
+kapp deploy -a user-api -f <(ytt \
+  -f user-api/k8s/values.yml \
+  -f user-api/k8s/app.yml \
+  -f user-api/k8s/mysql.yml \
+  -f user-api/k8s/mysql-secret.yml \
+  -f user-api/k8s/redis.yml \
+  -v sock_ui_external_url=http://192.168.11.162:8080 \
+  | kbld -f -) \
+  -c
 ```
 
 Go to `http://<sock-ui's External IP>:8080`
@@ -142,12 +189,19 @@ and `apple.maki.lol` is used as a sample domain.
 First of all, deploy User API
 
 ```
-YTT_sock_ui_external_url=https://spring-socks.apple.maki.lol \
-YTT_sock_user_external_url=https://sock-user.apple.maki.lol \
-YTT_sock_issuer_url=${YTT_sock_user_external_url}/oauth/token \
-YTT_use_ingress=True \
-YTT_cluster_issuer_name=letsencrypt-maki-lol \
-./k8s/deploy.sh user-api
+kapp deploy -a user-api -f <(ytt \
+  -f user-api/k8s/values.yml \
+  -f user-api/k8s/app.yml \
+  -f user-api/k8s/mysql.yml \
+  -f user-api/k8s/mysql-secret.yml \
+  -f user-api/k8s/redis.yml \
+  -f user-api/k8s/ingress.yml \
+  -v sock_ui_external_url=https://spring-socks.apple.maki.lol \
+  -v sock_user_external_url=https://sock-user.apple.maki.lol \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  -v cluster_issuer_name=letsencrypt-maki-lol \
+  | kbld -f -) \
+  -c
 ```
 
 Check if an access token can be issued.
@@ -160,47 +214,80 @@ $ curl https://sock-user.apple.maki.lol/oauth/token -u sock:sock -d grant_type=c
 ### Deploy Catalog API
 
 ```
-YTT_sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
-./k8s/deploy.sh catalog-api
+kapp deploy -a catalog-api -f <(ytt \
+  -f catalog-api/k8s/values.yml \
+  -f catalog-api/k8s/app.yml \
+  -f catalog-api/k8s/mysql.yml \
+  -f catalog-api/k8s/mysql-secret.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Cart API
 
 ```
-YTT_sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
-./k8s/deploy.sh cart-api
+kapp deploy -a cart-api -f <(ytt \
+  -f cart-api/k8s/values.yml \
+  -f cart-api/k8s/app.yml \
+  -f cart-api/k8s/mysql.yml \
+  -f cart-api/k8s/mysql-secret.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Payment API
 
 ```
-YTT_sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
-./k8s/deploy.sh payment-api
+kapp deploy -a payment-api -f <(ytt \
+  -f payment-api/k8s/values.yml \
+  -f payment-api/k8s/app.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Shipping API
 
 ```
-YTT_sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
-./k8s/deploy.sh shipping-api
+kapp deploy -a shipping-api -f <(ytt \
+  -f shipping-api/k8s/values.yml \
+  -f shipping-api/k8s/app.yml \
+  -f shipping-api/k8s/mysql.yml \
+  -f shipping-api/k8s/mysql-secret.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Order API
 
 ```
-YTT_sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
-./k8s/deploy.sh order-api
+kapp deploy -a order-api -f <(ytt \
+  -f order-api/k8s/values.yml \
+  -f order-api/k8s/app.yml \
+  -f order-api/k8s/mysql.yml \
+  -f order-api/k8s/mysql-secret.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
 ```
 
 ### Deploy Shop UI
 
 ```
-YTT_sock_ui_external_url=https://spring-socks.apple.maki.lol \
-YTT_sock_user_external_url=https://sock-user.apple.maki.lol \
-YTT_sock_issuer_url=${YTT_sock_user_external_url}/oauth/token \
-YTT_use_ingress=True \
-YTT_cluster_issuer_name=letsencrypt-maki-lol \
-./k8s/deploy.sh shop-ui
+kapp deploy -a shop-ui -f <(ytt \
+  -f shop-ui/k8s/values.yml \
+  -f shop-ui/k8s/app.yml \
+  -f shop-ui/k8s/redis.yml \
+  -f shop-ui/k8s/ingress.yml \
+  -v sock_ui_external_url=https://spring-socks.apple.maki.lol \
+  -v sock_user_external_url=https://sock-user.apple.maki.lol \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  -v cluster_issuer_name=letsencrypt-maki-lol \
+  | kbld -f -) \
+  -c
 ```
 
 Go to [https://spring-socks.apple.maki.lol](https://spring-socks.apple.maki.lol)
@@ -209,3 +296,14 @@ Go to [https://spring-socks.apple.maki.lol](https://spring-socks.apple.maki.lol)
 
 You can log in as a demo user (username: `jdoe` / password: `demo`).
 
+## Delete Spring Socks
+
+```
+kapp delete -a shop-ui -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+kapp delete -a order-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+kapp delete -a shipping-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+kapp delete -a payment-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+kapp delete -a cart-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+kapp delete -a catalog-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+kapp delete -a user-api -y --filter '{"not":{"resource":{"kinds":["AntreaControllerInfo"]}}}'
+```

@@ -112,4 +112,4 @@ spec:
     targetPort: 8080
   selector:
     app: sock-user
-  type: #@ "LoadBalancer" if str(data.values.use_ingress) == 'False' else "ClusterIP"
+  type: LoadBalancer

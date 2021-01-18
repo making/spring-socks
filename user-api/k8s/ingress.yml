@@ -1,5 +1,5 @@
 #@ load("@ytt:data", "data")
-#@ if str(data.values.use_ingress) != 'False':
+#@ load("@ytt:overlay", "overlay")
 #@ domain_name = data.values.sock_user_external_url.replace("http://", "").replace("https://", "")
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -26,4 +26,8 @@ spec:
             name: sock-user
             port:
               number: 8080
-#@ end
+
+#@overlay/match by=overlay.subset({"kind":"Service", "metadata": {"name": "sock-user"}})
+---
+spec:
+  type: ClusterIP

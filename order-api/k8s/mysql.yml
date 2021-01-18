@@ -1,5 +1,4 @@
 #@ load("@ytt:data", "data")
-#@ if str(data.values.use_external_mysql) == 'False':
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -107,4 +106,3 @@ spec:
           items:
           - key: charset.cnf
             path: charset.cnf
-#@ end

@@ -1,7 +1,6 @@
 #@ load("@ytt:data", "data")
 #@ load("@ytt:overlay", "overlay")
 
-#@ if str(data.values.use_external_redis) == 'False':
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,4 +63,3 @@ spec:
         #@overlay/match by="name", missing_ok=True
         - name: SPRING_REDIS_PORT
           value: "6379"
-#@ end
