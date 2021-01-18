@@ -2,6 +2,7 @@ package lol.maki.socks.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lol.maki.socks.config.LoggingExchangeFilterFunction;
 import lol.maki.socks.config.SockProps;
 import lol.maki.socks.user.client.CustomerAddressCreateRequest;
@@ -51,6 +52,7 @@ public class UserClient {
 	}
 
 	@CircuitBreaker(name = "user")
+	@Retry(name = "user")
 	public Mono<CustomerResponse> getMe() {
 		return this.webClient.get()
 				.uri(props.getUserUrl(), b -> b.path("me").build())
