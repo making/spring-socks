@@ -6,3 +6,6 @@ mysql_username: sockshop
 mysql_password: sockshop
 mysql_database: sock_cart
 sock_issuer_url:
+wavefront_uri: https://wavefront.surf
+wavefront_api_token:
+wavefront_application_name: spring-socks

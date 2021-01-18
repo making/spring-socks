@@ -1,0 +1,45 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:assert", "assert")
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata": {"name": "sock-cart"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: sock-cart
+        #@overlay/match missing_ok=True
+        env:
+        #@overlay/match by="name", missing_ok=True
+        - name: MANAGEMENT_METRICS_EXPORT_WAVEFRONT_ENABLED
+          value: "true"
+        #@overlay/match by="name", missing_ok=True
+        - name: MANAGEMENT_METRICS_EXPORT_WAVEFRONT_APITOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sock-cart-wavefront-secret
+              key: api-token
+        #@overlay/match by="name", missing_ok=True
+        - name: MANAGEMENT_METRICS_EXPORT_WAVEFRONT_URI
+          value: #@ data.values.wavefront_uri
+        #@overlay/match by="name", missing_ok=True
+        - name: WAVEFRONT_APPLICATION_NAME
+          value: #@ data.values.wavefront_application_name
+        #@overlay/match by="name", missing_ok=True
+        - name: WAVEFRONT_APPLICATION_SERVICE
+          value: "${spring.application.name}"
+        #@overlay/match by="name", missing_ok=True
+        - name: WAVEFRONT_APPLICATION_SHARD
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sock-cart-wavefront-secret
+  namespace: sock-cart
+stringData:
+  api-token: #@ data.values.wavefront_api_token or assert.fail("'wavefront_api_token' is required!")

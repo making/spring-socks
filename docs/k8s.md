@@ -18,7 +18,7 @@
 First of all, deploy User API
 
 ```
-kapp deploy -a user-api -f <(ytt \
+kapp deploy -a user-api -f <(ytt --data-values-env YTT \
   -f user-api/k8s/values.yml \
   -f user-api/k8s/app.yml \
   -f user-api/k8s/mysql.yml \
@@ -46,7 +46,7 @@ $ curl http://192.168.11.161:8080/oauth/token -u sock:sock -d grant_type=client_
 ### Deploy Catalog API
 
 ```
-kapp deploy -a catalog-api -f <(ytt \
+kapp deploy -a catalog-api -f <(ytt --data-values-env YTT \
   -f catalog-api/k8s/values.yml \
   -f catalog-api/k8s/app.yml \
   -f catalog-api/k8s/mysql.yml \
@@ -58,7 +58,7 @@ kapp deploy -a catalog-api -f <(ytt \
 ### Deploy Cart API
 
 ```
-kapp deploy -a cart-api -f <(ytt \
+kapp deploy -a cart-api -f <(ytt --data-values-env YTT \
   -f cart-api/k8s/values.yml \
   -f cart-api/k8s/app.yml \
   -f cart-api/k8s/mysql.yml \
@@ -70,7 +70,7 @@ kapp deploy -a cart-api -f <(ytt \
 ### Deploy Payment API
 
 ```
-kapp deploy -a payment-api -f <(ytt \
+kapp deploy -a payment-api -f <(ytt --data-values-env YTT \
   -f payment-api/k8s/values.yml \
   -f payment-api/k8s/app.yml \
   | kbld -f -) \
@@ -80,7 +80,7 @@ kapp deploy -a payment-api -f <(ytt \
 ### Deploy Shipping API
 
 ```
-kapp deploy -a shipping-api -f <(ytt \
+kapp deploy -a shipping-api -f <(ytt --data-values-env YTT \
   -f shipping-api/k8s/values.yml \
   -f shipping-api/k8s/app.yml \
   -f shipping-api/k8s/mysql.yml \
@@ -92,7 +92,7 @@ kapp deploy -a shipping-api -f <(ytt \
 ### Deploy Order API
 
 ```
-kapp deploy -a order-api -f <(ytt \
+kapp deploy -a order-api -f <(ytt --data-values-env YTT \
   -f order-api/k8s/values.yml \
   -f order-api/k8s/app.yml \
   -f order-api/k8s/mysql.yml \
@@ -108,7 +108,7 @@ Configure `http://<sock-user's External IP>:8080` to `YTT_sock_user_external_url
 In the case above,
 
 ```
-kapp deploy -a shop-ui -f <(ytt \
+kapp deploy -a shop-ui -f <(ytt --data-values-env YTT \
   -f shop-ui/k8s/values.yml \
   -f shop-ui/k8s/app.yml \
   -f shop-ui/k8s/redis.yml \
@@ -128,7 +128,7 @@ sock-ui   LoadBalancer   100.65.149.233   192.168.11.162   8080:31863/TCP   43s
 Update User API with the `sock-ui`'s External IP like following.
 
 ```
-kapp deploy -a user-api -f <(ytt \
+kapp deploy -a user-api -f <(ytt --data-values-env YTT \
   -f user-api/k8s/values.yml \
   -f user-api/k8s/app.yml \
   -f user-api/k8s/mysql.yml \
@@ -189,7 +189,7 @@ and `apple.maki.lol` is used as a sample domain.
 First of all, deploy User API
 
 ```
-kapp deploy -a user-api -f <(ytt \
+kapp deploy -a user-api -f <(ytt --data-values-env YTT \
   -f user-api/k8s/values.yml \
   -f user-api/k8s/app.yml \
   -f user-api/k8s/mysql.yml \
@@ -214,7 +214,7 @@ $ curl https://sock-user.apple.maki.lol/oauth/token -u sock:sock -d grant_type=c
 ### Deploy Catalog API
 
 ```
-kapp deploy -a catalog-api -f <(ytt \
+kapp deploy -a catalog-api -f <(ytt --data-values-env YTT \
   -f catalog-api/k8s/values.yml \
   -f catalog-api/k8s/app.yml \
   -f catalog-api/k8s/mysql.yml \
@@ -227,7 +227,7 @@ kapp deploy -a catalog-api -f <(ytt \
 ### Deploy Cart API
 
 ```
-kapp deploy -a cart-api -f <(ytt \
+kapp deploy -a cart-api -f <(ytt --data-values-env YTT \
   -f cart-api/k8s/values.yml \
   -f cart-api/k8s/app.yml \
   -f cart-api/k8s/mysql.yml \
@@ -240,7 +240,7 @@ kapp deploy -a cart-api -f <(ytt \
 ### Deploy Payment API
 
 ```
-kapp deploy -a payment-api -f <(ytt \
+kapp deploy -a payment-api -f <(ytt --data-values-env YTT \
   -f payment-api/k8s/values.yml \
   -f payment-api/k8s/app.yml \
   -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
@@ -251,7 +251,7 @@ kapp deploy -a payment-api -f <(ytt \
 ### Deploy Shipping API
 
 ```
-kapp deploy -a shipping-api -f <(ytt \
+kapp deploy -a shipping-api -f <(ytt --data-values-env YTT \
   -f shipping-api/k8s/values.yml \
   -f shipping-api/k8s/app.yml \
   -f shipping-api/k8s/mysql.yml \
@@ -264,7 +264,7 @@ kapp deploy -a shipping-api -f <(ytt \
 ### Deploy Order API
 
 ```
-kapp deploy -a order-api -f <(ytt \
+kapp deploy -a order-api -f <(ytt --data-values-env YTT \
   -f order-api/k8s/values.yml \
   -f order-api/k8s/app.yml \
   -f order-api/k8s/mysql.yml \
@@ -277,7 +277,7 @@ kapp deploy -a order-api -f <(ytt \
 ### Deploy Shop UI
 
 ```
-kapp deploy -a shop-ui -f <(ytt \
+kapp deploy -a shop-ui -f <(ytt --data-values-env YTT \
   -f shop-ui/k8s/values.yml \
   -f shop-ui/k8s/app.yml \
   -f shop-ui/k8s/redis.yml \
@@ -295,6 +295,119 @@ Go to [https://spring-socks.apple.maki.lol](https://spring-socks.apple.maki.lol)
 ![image](https://user-images.githubusercontent.com/106908/104606170-c7c2ab00-56c2-11eb-8bad-fcaf55b66285.png)
 
 You can log in as a demo user (username: `jdoe` / password: `demo`).
+
+## Enable Wavefront Integration
+
+Configure
+
+`YTT_wavefront_api_token`, `YTT_wavefront_uri` (default: https://wavefront.surf) and `YTT_wavefront_application_name` (default: `spring-socks`) in environment variables
+
+And add
+
+```
+  -f <dir>/k8s/wavefront.yml \
+```
+
+for each deployment.
+
+For example:
+
+```
+export YTT_wavefront_api_token=xyzxyzxyz
+export YTT_wavefront_uri=https://wavefront.surf
+
+# User API
+kapp deploy -a user-api -f <(ytt --data-values-env YTT \
+  -f user-api/k8s/values.yml \
+  -f user-api/k8s/app.yml \
+  -f user-api/k8s/mysql.yml \
+  -f user-api/k8s/mysql-secret.yml \
+  -f user-api/k8s/redis.yml \
+  -f user-api/k8s/ingress.yml \
+  -f user-api/k8s/wavefront.yml \
+  -v sock_ui_external_url=https://spring-socks.apple.maki.lol \
+  -v sock_user_external_url=https://sock-user.apple.maki.lol \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  -v cluster_issuer_name=letsencrypt-maki-lol \
+  | kbld -f -) \
+  -c
+
+# Catalog API
+kapp deploy -a catalog-api -f <(ytt --data-values-env YTT \
+  -f catalog-api/k8s/values.yml \
+  -f catalog-api/k8s/app.yml \
+  -f catalog-api/k8s/mysql.yml \
+  -f catalog-api/k8s/mysql-secret.yml \
+  -f catalog-api/k8s/wavefront.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
+
+# Cart API
+kapp deploy -a cart-api -f <(ytt --data-values-env YTT \
+  -f cart-api/k8s/values.yml \
+  -f cart-api/k8s/app.yml \
+  -f cart-api/k8s/mysql.yml \
+  -f cart-api/k8s/mysql-secret.yml \
+  -f cart-api/k8s/wavefront.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
+
+# Payment API
+kapp deploy -a payment-api -f <(ytt --data-values-env YTT \
+  -f payment-api/k8s/values.yml \
+  -f payment-api/k8s/app.yml \
+  -f payment-api/k8s/wavefront.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
+
+# Shipping API
+kapp deploy -a shipping-api -f <(ytt --data-values-env YTT \
+  -f shipping-api/k8s/values.yml \
+  -f shipping-api/k8s/app.yml \
+  -f shipping-api/k8s/mysql.yml \
+  -f shipping-api/k8s/mysql-secret.yml \
+  -f shipping-api/k8s/wavefront.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
+
+# Order API
+kapp deploy -a order-api -f <(ytt --data-values-env YTT \
+  -f order-api/k8s/values.yml \
+  -f order-api/k8s/app.yml \
+  -f order-api/k8s/mysql.yml \
+  -f order-api/k8s/mysql-secret.yml \
+  -f order-api/k8s/wavefront.yml \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  | kbld -f -) \
+  -c
+
+# Deploy Shop UI
+kapp deploy -a shop-ui -f <(ytt --data-values-env YTT \
+  -f shop-ui/k8s/values.yml \
+  -f shop-ui/k8s/app.yml \
+  -f shop-ui/k8s/redis.yml \
+  -f shop-ui/k8s/ingress.yml \
+  -f shop-ui/k8s/wavefront.yml \
+  -v sock_ui_external_url=https://spring-socks.apple.maki.lol \
+  -v sock_user_external_url=https://sock-user.apple.maki.lol \
+  -v sock_issuer_url=https://sock-user.apple.maki.lol/oauth/token \
+  -v cluster_issuer_name=letsencrypt-maki-lol \
+  | kbld -f -) \
+  -c
+```
+
+Go to `${YTT_wavefront_uri}/dashboards/integration-spring-boot-inventory` and set filter `application = ${YTT_wavefront_application_name}` (default: `spring-socks`)
+
+![image](https://user-images.githubusercontent.com/106908/104901047-34d68900-59c0-11eb-8580-4ef10f8b795c.png)
+
+Go to `${YTT_wavefront_uri}/dashboards/integration-spring-boot` and set filter `application = ${YTT_wavefront_application_name}` (default: `spring-socks`)
+
+![image](https://user-images.githubusercontent.com/106908/104901392-ae6e7700-59c0-11eb-88ea-0a64eb307ce4.png)
+
 
 ## Delete Spring Socks
 

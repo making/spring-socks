@@ -9,3 +9,6 @@ sock_ui_external_url: http://spring-socks.example.com
 sock_user_external_url: http://sock-user.example.com
 sock_issuer_url:
 cluster_issuer_name: letsencrypt
+wavefront_uri: https://wavefront.surf
+wavefront_api_token:
+wavefront_application_name: spring-socks
