@@ -4,6 +4,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -44,9 +45,9 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 		final ClientRequest request;
 		if (log.isDebugEnabled()) {
 			log.debug("--> {} {}", clientRequest.method(), clientRequest.url());
-			clientRequest.headers().forEach((k, v) -> {
-				log.debug("{}: {}", k, String.join(",", v));
-			});
+			log.debug("{}", clientRequest.headers().entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().stream()
+					.collect(Collectors.joining(",")))
+					.collect(Collectors.joining(System.lineSeparator())));
 			final BodyInserter<?, ? super ClientHttpRequest> bodyInserter = clientRequest.body();
 			if (this.includeBody) {
 				request = ClientRequest.from(clientRequest)
@@ -74,9 +75,9 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 					if (log.isDebugEnabled()) {
 						final long elapsed = System.currentTimeMillis() - begin.get();
 						log.debug("<-- {} {} ({}ms)", clientResponse.statusCode(), clientRequest.url(), elapsed);
-						clientResponse.headers().asHttpHeaders().forEach((k, v) -> {
-							log.debug("{}: {}", k, String.join(",", v));
-						});
+						log.debug("{}", clientResponse.headers().asHttpHeaders().entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().stream()
+								.collect(Collectors.joining(",")))
+								.collect(Collectors.joining(System.lineSeparator())));
 					}
 				})
 				.doOnCancel(() -> {
