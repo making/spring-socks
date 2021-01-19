@@ -448,6 +448,7 @@ kapp deploy -a fluent-bit -f <(ytt --data-values-env YTT \
   -f k8s/tkg-extensions/common \
   -f k8s/tkg-extensions/logging/fluent-bit \
   -f k8s/tkg-extensions/overlays/logging/fluent-bit/filter-transform.yaml \
+  -f k8s/tkg-extensions/overlays/logging/fluent-bit/modify-tail-input.yaml \
   -v tkg.instance_name=carrot \
   -v tkg.cluster_name=apple \
   -v fluent_bit.output_plugin=elasticsearch \
