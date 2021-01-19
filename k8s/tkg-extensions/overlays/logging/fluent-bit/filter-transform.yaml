@@ -28,10 +28,6 @@ data:
        if string.sub(namespace, 1, 4) ~= 'sock' then
          return -1, timestamp, record
        end
-       if record['message'] ~= nil then
-         record['message'] = record['message']:gsub('@n@', '\n')
-       end
-       return 2, timestamp, record
     end
 #@overlay/match by=overlay.subset({"kind":"DaemonSet", "metadata": {"name": "fluent-bit"}})
 ---

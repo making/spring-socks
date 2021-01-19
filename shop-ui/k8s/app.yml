@@ -58,9 +58,9 @@ spec:
         - name: INFO_JAVA_VENDOR
           value: ${java.vm.vendor}
         - name: LOGGING_EXCEPTIONCONVERSIONWORD
-          value: "\t%replace(%replace(%xEx){'\n','@n@'}){'\t','    '}%nopex"
+          value: "\t%replace(%replace(%xEx){'\n','\r'}){'\t','    '}%nopex"
         - name: LOGGING_PATTERN_CONSOLE
-          value: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','@n@'}${logging.exception-conversion-word:%wEx}%n"
+          value: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${logging.pattern.level:%5p}) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'\n','\r'}${logging.exception-conversion-word:%wEx}%n"
         resources:
           limits:
             memory: 384Mi
