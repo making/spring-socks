@@ -21,8 +21,15 @@ metadata:
 data:
   transform.lua: |
     function cb_transform(tag, timestamp, record)
+       if record['kubernetes'] == nil then
+         return -1, timestamp, record
+       end
+       local namespace = record['kubernetes']['namespace_name']
+       if string.sub(namespace, 1, 4) ~= 'sock' then
+         return -1, timestamp, record
+       end
        record['message'] = record['message']:gsub('@n@', '\n')
-       return 1, timestamp, record
+       return 2, timestamp, record
     end
 #@overlay/match by=overlay.subset({"kind":"DaemonSet", "metadata": {"name": "fluent-bit"}})
 ---
