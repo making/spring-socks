@@ -44,10 +44,14 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 		final AtomicLong begin = new AtomicLong();
 		final ClientRequest request;
 		if (log.isDebugEnabled()) {
-			log.debug("--> {} {}", clientRequest.method(), clientRequest.url());
-			log.debug("{}", clientRequest.headers().entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().stream()
-					.collect(Collectors.joining(",")))
-					.collect(Collectors.joining(System.lineSeparator())));
+			final StringBuilder builder = new StringBuilder(clientRequest.method().toString())
+					.append(" ")
+					.append(clientRequest.url())
+					.append(System.lineSeparator())
+					.append(clientRequest.headers().entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().stream()
+							.collect(Collectors.joining(",")))
+							.collect(Collectors.joining(System.lineSeparator())));
+			log.debug("--> {}", builder);
 			final BodyInserter<?, ? super ClientHttpRequest> bodyInserter = clientRequest.body();
 			if (this.includeBody) {
 				request = ClientRequest.from(clientRequest)
@@ -74,10 +78,17 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 				.doOnNext(clientResponse -> {
 					if (log.isDebugEnabled()) {
 						final long elapsed = System.currentTimeMillis() - begin.get();
-						log.debug("<-- {} {} ({}ms)", clientResponse.statusCode(), clientRequest.url(), elapsed);
-						log.debug("{}", clientResponse.headers().asHttpHeaders().entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().stream()
-								.collect(Collectors.joining(",")))
-								.collect(Collectors.joining(System.lineSeparator())));
+						final StringBuilder builder = new StringBuilder(clientResponse.statusCode().toString())
+								.append(" ")
+								.append(clientRequest.url())
+								.append(" (")
+								.append(elapsed)
+								.append("ms)")
+								.append(System.lineSeparator())
+								.append(clientResponse.headers().asHttpHeaders().entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue().stream()
+										.collect(Collectors.joining(",")))
+										.collect(Collectors.joining(System.lineSeparator())));
+						log.debug("<-- {}", builder);
 					}
 				})
 				.doOnCancel(() -> {
