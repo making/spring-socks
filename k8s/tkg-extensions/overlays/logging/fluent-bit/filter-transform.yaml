@@ -1,0 +1,43 @@
+#@ load("@ytt:overlay", "overlay")
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "fluent-bit-config"}})
+---
+data:
+  #@overlay/replace via=lambda a, b: a + b
+  filter-record.conf: |
+
+    [FILTER]
+        Name    lua
+        Match   *
+        script  /fluent-bit/scripts/transform.lua
+        call    cb_transform
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-scripts
+  namespace: tanzu-system-logging
+  labels:
+    k8s-app: fluent-bit
+data:
+  transform.lua: |
+    function cb_transform(tag, timestamp, record)
+       record['message'] = record['message']:gsub('@n@', '\n')
+       return 1, timestamp, record
+    end
+#@overlay/match by=overlay.subset({"kind":"DaemonSet", "metadata": {"name": "fluent-bit"}})
+---
+spec:
+  template:
+    spec:
+      containers:
+      #@overlay/match by="name"
+      - name: fluent-bit
+        volumeMounts:
+        #@overlay/match by="name", missing_ok=True
+        - name: fluent-bit-scripts
+          mountPath: /fluent-bit/scripts/
+      volumes:
+      #@overlay/match by="name", missing_ok=True
+      - name: fluent-bit-scripts
+        configMap:
+          name: fluent-bit-scripts
