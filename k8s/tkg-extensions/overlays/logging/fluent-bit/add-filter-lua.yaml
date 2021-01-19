@@ -7,9 +7,9 @@ data:
 
     [FILTER]
         Name    lua
-        Match   *
-        script  /fluent-bit/scripts/transform.lua
-        call    cb_transform
+        Match   kube.*
+        script  /fluent-bit/scripts/filter.lua
+        call    cb_filter
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -19,13 +19,14 @@ metadata:
   labels:
     k8s-app: fluent-bit
 data:
-  transform.lua: |
-    function cb_transform(tag, timestamp, record)
+  filter.lua: |
+    function cb_filter(tag, timestamp, record)
        if record['kubernetes'] == nil then
          return -1, timestamp, record
        end
        local namespace = record['kubernetes']['namespace_name']
-       if string.sub(namespace, 1, 4) ~= 'sock' then
+       local container = record['kubernetes']['container_name']
+       if (string.sub(namespace, 1, 4) ~= 'sock') and (container ~= 'envoy') then
          return -1, timestamp, record
        end
     end

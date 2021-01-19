@@ -1,9 +1,0 @@
-#@ load("@ytt:overlay", "overlay")
-#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata": {"name": "fluent-bit-config"}})
----
-data:
-  #@overlay/replace via=lambda a, b: a.replace("Name              tail", b.replace("\n", "\n    "))
-  input-kubernetes.conf: |
-        Name              tail
-        Buffer_Chunk_Size 256K
-        Buffer_Max_Size   256K

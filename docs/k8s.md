@@ -431,7 +431,7 @@ kapp delete -a user-api -y --filter '{"not":{"resource":{"kinds":["AntreaControl
 ### Deploy Elasticsearch and Kibana
 
 ```
-kapp deploy -a elasticsearch-kibana -f <(ytt --data-values-env YTT \
+kapp deploy -a elasticsearch-kibana -f <(ytt \
   -f k8s/elastic/values.yml \
   -f k8s/elastic/namespace.yml \
   -f k8s/elastic/elasticsearch.yml \
@@ -444,10 +444,13 @@ kapp deploy -a elasticsearch-kibana -f <(ytt --data-values-env YTT \
 ### Deploy Fluent Bit
 
 ```
-kapp deploy -a fluent-bit -f <(ytt --data-values-env YTT \
+kapp deploy -a fluent-bit -f <(ytt \
   -f k8s/tkg-extensions/common \
   -f k8s/tkg-extensions/logging/fluent-bit \
-  -f k8s/tkg-extensions/overlays/logging/fluent-bit/filter-transform.yaml \
+  -f k8s/tkg-extensions/overlays/logging/fluent-bit/add-filter-lua.yaml \
+  -f k8s/tkg-extensions/overlays/logging/fluent-bit/modify-input.yaml \
+  -f k8s/tkg-extensions/overlays/logging/fluent-bit/modify-parser.yaml \
+  -f k8s/tkg-extensions/overlays/logging/fluent-bit/modify-filter.yaml \
   -v tkg.instance_name=carrot \
   -v tkg.cluster_name=apple \
   -v fluent_bit.output_plugin=elasticsearch \
