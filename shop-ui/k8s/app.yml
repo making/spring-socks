@@ -49,6 +49,8 @@ spec:
           value: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
         - name: BPL_JVM_THREAD_COUNT
           value: "20"
+        - name: BPL_JVM_HEAD_ROOM
+          value: "5"
         - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UI_AUTHORIZATIONURI
           value: #@ "{}/oauth/authorize".format(data.values.sock_user_external_url)
         - name: INFO_JAVA_VERSION

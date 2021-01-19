@@ -40,6 +40,8 @@ spec:
           value: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
         - name: BPL_JVM_THREAD_COUNT
           value: "20"
+        - name: BPL_JVM_HEAD_ROOM
+          value: "5"
         - name: SPRING_DATASOURCE_URL
           value: jdbc:mysql://${MYSQL_HOSTNAME}:${MYSQL_PORT}/${MYSQL_DATABASE}
         - name: SPRING_DATASOURCE_USERNAME

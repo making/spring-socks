@@ -45,6 +45,8 @@ spec:
           value: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo
         - name: BPL_JVM_THREAD_COUNT
           value: "20"
+        - name: BPL_JVM_HEAD_ROOM
+          value: "5"
         - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI
           value: #@ data.values.sock_issuer_url or "http://sock-user.sock-user.svc.cluster.local:8080/oauth/token"
         - name: SPRING_DATASOURCE_URL
