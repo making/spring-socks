@@ -55,19 +55,11 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 			final BodyInserter<?, ? super ClientHttpRequest> bodyInserter = clientRequest.body();
 			if (this.includeBody) {
 				request = ClientRequest.from(clientRequest)
-						.body((outputMessage, context) -> bodyInserter.insert(new LoggingClientHttpRequest(outputMessage), context)
-								.doOnTerminate(() -> {
-									if (log.isDebugEnabled()) {
-										log.debug("--> END {}", clientRequest.method());
-									}
-								}))
+						.body((outputMessage, context) -> bodyInserter.insert(new LoggingClientHttpRequest(outputMessage), context))
 						.build();
 			}
 			else {
 				request = clientRequest;
-				if (log.isDebugEnabled()) {
-					log.debug("--> END {}", clientRequest.method());
-				}
 			}
 			begin.set(System.currentTimeMillis());
 		}
@@ -121,8 +113,7 @@ public class LoggingExchangeFilterFunction implements ExchangeFilterFunction {
 								}
 							})
 							.map(body -> clientResponse.mutate().body(body).build());
-				})
-				.doOnTerminate(() -> log.debug("<-- END HTTP"));
+				});
 	}
 
 	class LoggingClientHttpRequest implements ClientHttpRequest {
