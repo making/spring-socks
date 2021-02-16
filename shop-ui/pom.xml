@@ -19,7 +19,7 @@
 		<java.version>11</java.version>
 		<spring-cloud.version>2020.0.0</spring-cloud.version>
 		<wavefront.version>2.1.0-RC1</wavefront.version>
-		<frontend-maven-plugin.version>1.11.0</frontend-maven-plugin.version>
+		<frontend-maven-plugin.version>1.11.2</frontend-maven-plugin.version>
 	</properties>
 
 	<dependencies>
